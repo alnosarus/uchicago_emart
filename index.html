@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UChicago Marketplace</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+<div id="navbar-mount"></div>
+<div id="modal-mount"></div>
+
+<main>
+
+  <!-- ── Hero ───────────────────────────────────────────────── -->
+  <section class="hero">
+    <h1>UChicago Marketplace</h1>
+    <div class="search-bar">
+      <span style="font-size:18px;color:var(--gray-400);">🔍</span>
+      <input type="text" placeholder="Search listings, rides, storage…" id="heroSearch"
+             onkeydown="if(event.key==='Enter')location.href='browse.html?q='+encodeURIComponent(this.value)" />
+      <select onchange="if(this.value)location.href='browse.html?type='+this.value">
+        <option value="">All Features</option>
+        <option value="marketplace">Marketplace</option>
+        <option value="rideshare">Ride Share</option>
+        <option value="storage">Storage Match</option>
+      </select>
+      <button class="btn btn-primary" onclick="location.href='browse.html'">Browse</button>
+    </div>
+  </section>
+
+  <!-- ── Feature Tabs Bar ───────────────────────────────────── -->
+  <div class="feature-tabs-bar">
+    <button class="feature-tab active-marketplace" id="ftab-marketplace" onclick="switchFeatureTab('marketplace')">
+      Marketplace
+    </button>
+    <button class="feature-tab" id="ftab-rideshare" onclick="switchFeatureTab('rideshare')">
+      Ride Share
+    </button>
+    <button class="feature-tab" id="ftab-storage" onclick="switchFeatureTab('storage')">
+      Storage Match
+    </button>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════
+       MARKETPLACE PANEL
+  ═══════════════════════════════════════════════════════════ -->
+  <div id="fpanel-marketplace">
+    <div class="tabs-container">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Marketplace</div>
+          <div style="font-size:14px;color:var(--gray-500);margin-top:2px;">Buy and sell items with fellow Maroons</div>
+        </div>
+        <a href="create.html?type=marketplace" class="btn btn-primary">+ Post Item</a>
+      </div>
+      <div class="tabs-header">
+        <button class="tab-btn active" onclick="switchTab('mp-sell',this)">
+          🏷️ Sell Posts <span style="background:var(--maroon-100);color:var(--maroon-700);font-size:11px;padding:2px 8px;border-radius:9999px;margin-left:6px;font-weight:700;">24</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('mp-buy',this)">
+          🛍️ Buy Posts <span style="background:var(--blue-100);color:var(--blue-500);font-size:11px;padding:2px 8px;border-radius:9999px;margin-left:6px;font-weight:700;">12</span>
+        </button>
+      </div>
+
+      <div class="tab-panel active" id="mp-sell">
+        <div class="cards-grid">
+          <a href="post.html?type=marketplace" class="post-card">
+            <div class="card-img-placeholder">📖</div>
+            <div class="card-body">
+              <div class="card-badges"><span class="badge badge-sell">Selling</span><span class="badge badge-tag">Textbooks</span></div>
+              <div class="card-title">Organic Chemistry 8th Ed.</div>
+              <div class="card-price">$35</div>
+              <div class="card-meta"><span class="card-condition-dot"></span>Like New · 1h ago</div>
+            </div>
+          </a>
+          <a href="post.html?type=marketplace" class="post-card">
+            <div class="card-img-placeholder">🎧</div>
+            <div class="card-body">
+              <div class="card-badges"><span class="badge badge-sell">Selling</span><span class="badge badge-tag">Electronics</span></div>
+              <div class="card-title">Sony WH-1000XM4 Headphones</div>
+              <div class="card-price">$180</div>
+              <div class="card-meta"><span class="card-condition-dot"></span>Good · 3h ago</div>
+            </div>
+          </a>
+          <a href="post.html?type=marketplace" class="post-card">
+            <div class="card-img-placeholder">🛋️</div>
+            <div class="card-body">
+              <div class="card-badges"><span class="badge badge-sell">Selling</span><span class="badge badge-tag">Furniture</span></div>
+              <div class="card-title">Mini Fridge — Perfect for Dorms</div>
+              <div class="card-price">$55</div>
+              <div class="card-meta"><span class="card-condition-dot" style="background:var(--amber-500);"></span>Good · 6h ago</div>
+            </div>
+          </a>
+          <a href="post.html?type=marketplace" class="post-card">
+            <div class="card-img-placeholder">👕</div>
+            <div class="card-body">
+              <div class="card-badges"><span class="badge badge-sell">Selling</span><span class="badge badge-tag">Clothing</span></div>
+              <div class="card-title">UChicago Hoodie (XL) — Maroon</div>
+              <div class="card-price">$20</div>
+              <div class="card-meta"><span class="card-condition-dot"></span>Like New · 1d ago</div>
+            </div>
+          </a>
+          <a href="post.html?type=marketplace" class="post-card">
+            <div class="card-img-placeholder">🖥️</div>
+            <div class="card-body">
+              <div class="card-badges"><span class="badge badge-sell">Selling</span><span class="badge badge-tag">Electronics</span></div>
+              <div class="card-title">24" Monitor — HDMI &amp; DP</div>
+              <div class="card-price trade">Trade</div>
+              <div class="card-meta"><span class="card-condition-dot"></span>Like New · 2d ago</div>
+            </div>
+          </a>
+          <a href="post.html?type=marketplace" class="post-card">
+            <div class="card-img-placeholder">🎒</div>
+            <div class="card-body">
+              <div class="card-badges"><span class="badge badge-sell">Selling</span><span class="badge badge-tag">Accessories</span></div>
+              <div class="card-title">North Face Backpack — 30L</div>
+              <div class="card-price free">Free</div>
+              <div class="card-meta"><span class="card-condition-dot" style="background:var(--amber-500);"></span>Fair · 3d ago</div>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="mp-buy">
+        <div class="cards-grid">
+          <a href="post.html?type=marketplace" class="post-card">
+            <div class="card-img-placeholder">📚</div>
+            <div class="card-body">
+              <div class="card-badges"><span class="badge badge-buy">Buying</span><span class="badge badge-tag">Textbooks</span></div>
+              <div class="card-title">Looking for Calc III Textbook</div>
+              <div class="card-price">Up to $40</div>
+              <div class="card-meta"><span class="card-condition-dot" style="background:var(--blue-500);"></span>Any condition · 2h ago</div>
+            </div>
+          </a>
+          <a href="post.html?type=marketplace" class="post-card">
+            <div class="card-img-placeholder">💻</div>
+            <div class="card-body">
+              <div class="card-badges"><span class="badge badge-buy">Buying</span><span class="badge badge-tag">Electronics</span></div>
+              <div class="card-title">Need a Laptop Charger (USB-C)</div>
+              <div class="card-price">Up to $25</div>
+              <div class="card-meta"><span class="card-condition-dot" style="background:var(--blue-500);"></span>Good+ · 5h ago</div>
+            </div>
+          </a>
+          <a href="post.html?type=marketplace" class="post-card">
+            <div class="card-img-placeholder">🪑</div>
+            <div class="card-body">
+              <div class="card-badges"><span class="badge badge-buy">Buying</span><span class="badge badge-tag">Furniture</span></div>
+              <div class="card-title">Wanted: Desk Chair for Dorm</div>
+              <div class="card-price trade">Trade</div>
+              <div class="card-meta"><span class="card-condition-dot" style="background:var(--amber-500);"></span>Any · 1d ago</div>
+            </div>
+          </a>
+          <a href="post.html?type=marketplace" class="post-card">
+            <div class="card-img-placeholder">🎸</div>
+            <div class="card-body">
+              <div class="card-badges"><span class="badge badge-buy">Buying</span><span class="badge badge-tag">Music</span></div>
+              <div class="card-title">Looking for Acoustic Guitar</div>
+              <div class="card-price">Up to $120</div>
+              <div class="card-meta"><span class="card-condition-dot" style="background:var(--blue-500);"></span>Good+ · 2d ago</div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════
+       RIDE SHARE PANEL
+  ═══════════════════════════════════════════════════════════ -->
+  <div id="fpanel-rideshare" style="display:none;">
+    <div class="tabs-container">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Ride Share</div>
+          <div style="font-size:14px;color:var(--gray-500);margin-top:2px;">Connect with Maroons for airport rides during breaks</div>
+        </div>
+        <a href="create.html?type=rideshare" class="btn btn-teal">+ Post Ride</a>
+      </div>
+      <div class="tabs-header">
+        <button class="tab-btn active" onclick="switchTab('rs-offer',this)">
+          🚗 Offering Rides <span style="background:var(--teal-100);color:var(--teal-700);font-size:11px;padding:2px 8px;border-radius:9999px;margin-left:6px;font-weight:700;">8</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('rs-need',this)">
+          🙋 Need a Ride <span style="background:var(--blue-100);color:var(--blue-500);font-size:11px;padding:2px 8px;border-radius:9999px;margin-left:6px;font-weight:700;">11</span>
+        </button>
+      </div>
+
+      <div class="tab-panel active" id="rs-offer">
+        <div class="cards-grid">
+          <a href="post.html?type=rideshare" class="post-card rideshare">
+            <div class="card-img-placeholder teal-bg">🚗</div>
+            <div class="card-body">
+              <div class="card-badges">
+                <span class="badge badge-offer-ride">Offering</span>
+                <span class="airport-badge">ORD</span>
+              </div>
+              <div class="card-title">Ride to O'Hare — Winter Break</div>
+              <div class="card-route">
+                <div class="card-route-row"><span class="icon">📅</span> Dec 14 · 6:00 AM</div>
+                <div class="card-route-row"><span class="icon">✈️</span> To O'Hare (ORD)</div>
+                <div class="card-route-row"><span class="icon">💺</span> 2 seats available</div>
+              </div>
+              <div class="card-price teal">$25/seat</div>
+              <div class="card-meta">Posted 1h ago</div>
+            </div>
+          </a>
+          <a href="post.html?type=rideshare" class="post-card rideshare">
+            <div class="card-img-placeholder teal-bg">🚙</div>
+            <div class="card-body">
+              <div class="card-badges">
+                <span class="badge badge-offer-ride">Offering</span>
+                <span class="airport-badge">MDW</span>
+              </div>
+              <div class="card-title">Midway Airport — Spring Break</div>
+              <div class="card-route">
+                <div class="card-route-row"><span class="icon">📅</span> Mar 22 · 8:30 AM</div>
+                <div class="card-route-row"><span class="icon">✈️</span> To Midway (MDW)</div>
+                <div class="card-route-row"><span class="icon">💺</span> 3 seats available</div>
+              </div>
+              <div class="card-price teal">$18/seat</div>
+              <div class="card-meta">Posted 3h ago</div>
+            </div>
+          </a>
+          <a href="post.html?type=rideshare" class="post-card rideshare">
+            <div class="card-img-placeholder teal-bg">🚕</div>
+            <div class="card-body">
+              <div class="card-badges">
+                <span class="badge badge-offer-ride">Offering</span>
+                <span class="airport-badge">ORD</span>
+              </div>
+              <div class="card-title">O'Hare from Campus — Dec 21</div>
+              <div class="card-route">
+                <div class="card-route-row"><span class="icon">📅</span> Dec 21 · 4:00 PM</div>
+                <div class="card-route-row"><span class="icon">✈️</span> To O'Hare (ORD)</div>
+                <div class="card-route-row"><span class="icon">💺</span> 1 seat available</div>
+              </div>
+              <div class="card-price free">Free</div>
+              <div class="card-meta">Posted 5h ago</div>
+            </div>
+          </a>
+          <a href="post.html?type=rideshare" class="post-card rideshare">
+            <div class="card-img-placeholder teal-bg">🚗</div>
+            <div class="card-body">
+              <div class="card-badges">
+                <span class="badge badge-offer-ride">Offering</span>
+                <span class="airport-badge">MDW</span>
+              </div>
+              <div class="card-title">From Midway after Thanksgiving</div>
+              <div class="card-route">
+                <div class="card-route-row"><span class="icon">📅</span> Nov 30 · 3:00 PM</div>
+                <div class="card-route-row"><span class="icon">✈️</span> From Midway (MDW)</div>
+                <div class="card-route-row"><span class="icon">💺</span> 2 seats available</div>
+              </div>
+              <div class="card-price teal">$20/seat</div>
+              <div class="card-meta">Posted 1d ago</div>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="rs-need">
+        <div class="cards-grid">
+          <a href="post.html?type=rideshare" class="post-card rideshare">
+            <div class="card-img-placeholder teal-bg">🙋</div>
+            <div class="card-body">
+              <div class="card-badges">
+                <span class="badge badge-need-ride">Need Ride</span>
+                <span class="airport-badge">ORD</span>
+              </div>
+              <div class="card-title">Need Ride to O'Hare Dec 15</div>
+              <div class="card-route">
+                <div class="card-route-row"><span class="icon">📅</span> Dec 15 · 7:00 AM</div>
+                <div class="card-route-row"><span class="icon">✈️</span> To O'Hare (ORD)</div>
+                <div class="card-route-row"><span class="icon">👤</span> 1 person</div>
+              </div>
+              <div class="card-price teal">Up to $30</div>
+              <div class="card-meta">Posted 2h ago</div>
+            </div>
+          </a>
+          <a href="post.html?type=rideshare" class="post-card rideshare">
+            <div class="card-img-placeholder teal-bg">🙋</div>
+            <div class="card-body">
+              <div class="card-badges">
+                <span class="badge badge-need-ride">Need Ride</span>
+                <span class="airport-badge">MDW</span>
+              </div>
+              <div class="card-title">Midway Airport — Mar 22 morning</div>
+              <div class="card-route">
+                <div class="card-route-row"><span class="icon">📅</span> Mar 22 · 9:00 AM</div>
+                <div class="card-route-row"><span class="icon">✈️</span> To Midway (MDW)</div>
+                <div class="card-route-row"><span class="icon">👤</span> 2 people</div>
+              </div>
+              <div class="card-price teal">Up to $20/seat</div>
+              <div class="card-meta">Posted 4h ago</div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════
+       STORAGE MATCH PANEL
+  ═══════════════════════════════════════════════════════════ -->
+  <div id="fpanel-storage" style="display:none;">
+    <div class="tabs-container">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Storage Match</div>
+          <div style="font-size:14px;color:var(--gray-500);margin-top:2px;">Find or offer summer storage space near campus</div>
+        </div>
+        <a href="create.html?type=storage" class="btn btn-amber">+ Post Storage</a>
+      </div>
+      <div class="tabs-header">
+        <button class="tab-btn active" onclick="switchTab('st-has',this)">
+          🏠 Has Space <span style="background:var(--amber-100);color:var(--amber-700);font-size:11px;padding:2px 8px;border-radius:9999px;margin-left:6px;font-weight:700;">7</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('st-need',this)">
+          📦 Need Storage <span style="background:var(--blue-100);color:var(--blue-500);font-size:11px;padding:2px 8px;border-radius:9999px;margin-left:6px;font-weight:700;">9</span>
+        </button>
+      </div>
+
+      <div class="tab-panel active" id="st-has">
+        <div class="cards-grid">
+          <a href="post.html?type=storage" class="post-card storage">
+            <div class="card-img-placeholder amber-bg">🏠</div>
+            <div class="card-body">
+              <div class="card-badges"><span class="badge badge-has-space">Has Space</span><span class="badge badge-tag">Hyde Park</span></div>
+              <div class="card-title">Studio with extra closet space</div>
+              <div class="card-storage-info">
+                <div class="card-storage-row"><span>📅</span> Jun 1 – Aug 31</div>
+                <div class="card-storage-row"><span>📦</span> Half a room</div>
+                <div class="card-storage-row"><span>📍</span> Hyde Park (off-campus)</div>
+              </div>
+              <div class="card-price" style="color:var(--amber-700);">$80/mo</div>
+              <div class="card-meta">Posted 2h ago</div>
+            </div>
+          </a>
+          <a href="post.html?type=storage" class="post-card storage">
+            <div class="card-img-placeholder amber-bg">🏡</div>
+            <div class="card-body">
+              <div class="card-badges"><span class="badge badge-has-space">Has Space</span><span class="badge badge-tag">Woodlawn</span></div>
+              <div class="card-title">2BR apartment — spare bedroom</div>
+              <div class="card-storage-info">
+                <div class="card-storage-row"><span>📅</span> May 25 – Sep 1</div>
+                <div class="card-storage-row"><span>📦</span> Full room</div>
+                <div class="card-storage-row"><span>📍</span> Woodlawn (off-campus)</div>
+              </div>
+              <div class="card-price" style="color:var(--amber-700);">$120/mo</div>
+              <div class="card-meta">Posted 5h ago</div>
+            </div>
+          </a>
+          <a href="post.html?type=storage" class="post-card storage">
+            <div class="card-img-placeholder amber-bg">🏢</div>
+            <div class="card-body">
+              <div class="card-badges"><span class="badge badge-has-space">Has Space</span><span class="badge badge-tag">On-campus</span></div>
+              <div class="card-title">Dorm room available summer</div>
+              <div class="card-storage-info">
+                <div class="card-storage-row"><span>📅</span> Jun 10 – Aug 20</div>
+                <div class="card-storage-row"><span>📦</span> A few boxes</div>
+                <div class="card-storage-row"><span>📍</span> Burton-Judson Courts</div>
+              </div>
+              <div class="card-price free">Free</div>
+              <div class="card-meta">Posted 1d ago</div>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="st-need">
+        <div class="cards-grid">
+          <a href="post.html?type=storage" class="post-card storage">
+            <div class="card-img-placeholder amber-bg">📦</div>
+            <div class="card-body">
+              <div class="card-badges"><span class="badge badge-need-storage">Need Storage</span></div>
+              <div class="card-title">Need storage for 4 boxes + bike</div>
+              <div class="card-storage-info">
+                <div class="card-storage-row"><span>📅</span> Jun 1 – Aug 25</div>
+                <div class="card-storage-row"><span>📦</span> A few boxes</div>
+                <div class="card-storage-row"><span>📍</span> Near campus preferred</div>
+              </div>
+              <div class="card-price" style="color:var(--amber-700);">Up to $60/mo</div>
+              <div class="card-meta">Posted 3h ago</div>
+            </div>
+          </a>
+          <a href="post.html?type=storage" class="post-card storage">
+            <div class="card-img-placeholder amber-bg">📦</div>
+            <div class="card-body">
+              <div class="card-badges"><span class="badge badge-need-storage">Need Storage</span></div>
+              <div class="card-title">Half-room storage for summer</div>
+              <div class="card-storage-info">
+                <div class="card-storage-row"><span>📅</span> May 30 – Sep 15</div>
+                <div class="card-storage-row"><span>📦</span> Half a room</div>
+                <div class="card-storage-row"><span>📍</span> Hyde Park or Woodlawn</div>
+              </div>
+              <div class="card-price free">Free preferred</div>
+              <div class="card-meta">Posted 1d ago</div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer class="footer">
+  © 2026 UChicago Marketplace · Made for Maroons, by Maroons &nbsp;·&nbsp; <a href="#">Privacy</a> · <a href="#">Terms</a>
+</footer>
+
+<script src="js/main.js"></script>
+<script>
+  // Read URL param to open a specific feature tab on load
+  const urlParams = new URLSearchParams(window.location.search);
+  const ft = urlParams.get('feature');
+  if (ft) switchFeatureTab(ft);
+</script>
+</body>
+</html>

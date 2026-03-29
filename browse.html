@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Browse — UChicago Marketplace</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+<div id="navbar-mount"></div>
+<div id="modal-mount"></div>
+
+<main>
+  <!-- Page Hero -->
+  <div class="page-hero">
+    <h2>Browse All Posts</h2>
+    <p>Marketplace · Ride Share · Storage Match</p>
+    <div class="search-small">
+      <span style="font-size:16px;color:var(--gray-400);">🔍</span>
+      <input type="text" placeholder="Search posts…" id="browseSearch" />
+      <button class="btn btn-primary" style="border-radius:var(--radius-full);padding:8px 20px;font-size:14px;">Search</button>
+    </div>
+  </div>
+
+  <div class="search-results-layout">
+
+    <!-- ── Filter Sidebar ─────────────────────────────────────── -->
+    <aside class="filter-sidebar">
+
+      <div class="filter-card">
+        <div class="filter-title">Feature</div>
+        <div class="filter-option" onclick="toggleCheck(this);filterResults()">
+          <div class="filter-checkbox checked">✓</div>
+          <span>🏪 Marketplace</span>
+        </div>
+        <div class="filter-option" onclick="toggleCheck(this);filterResults()">
+          <div class="filter-checkbox checked">✓</div>
+          <span>🚗 Ride Share</span>
+        </div>
+        <div class="filter-option" onclick="toggleCheck(this);filterResults()">
+          <div class="filter-checkbox checked">✓</div>
+          <span>📦 Storage Match</span>
+        </div>
+      </div>
+
+      <div class="filter-card">
+        <div class="filter-title">Post Side</div>
+        <div class="filter-option" onclick="toggleCheck(this)">
+          <div class="filter-checkbox checked">✓</div>
+          <span>Sell / Offer / Has Space</span>
+        </div>
+        <div class="filter-option" onclick="toggleCheck(this)">
+          <div class="filter-checkbox checked">✓</div>
+          <span>Buy / Need / Need Storage</span>
+        </div>
+      </div>
+
+      <!-- Marketplace filters -->
+      <div class="filter-card" id="filter-marketplace">
+        <div class="filter-title">Category</div>
+        <div class="filter-option" onclick="toggleCheck(this)">
+          <div class="filter-checkbox checked">✓</div>
+          <span>Textbooks</span><span style="margin-left:auto;font-size:12px;color:var(--gray-400);">18</span>
+        </div>
+        <div class="filter-option" onclick="toggleCheck(this)">
+          <div class="filter-checkbox">·</div>
+          <span>Electronics</span><span style="margin-left:auto;font-size:12px;color:var(--gray-400);">11</span>
+        </div>
+        <div class="filter-option" onclick="toggleCheck(this)">
+          <div class="filter-checkbox">·</div>
+          <span>Furniture</span><span style="margin-left:auto;font-size:12px;color:var(--gray-400);">7</span>
+        </div>
+        <div class="filter-option" onclick="toggleCheck(this)">
+          <div class="filter-checkbox">·</div>
+          <span>Clothing</span><span style="margin-left:auto;font-size:12px;color:var(--gray-400);">5</span>
+        </div>
+        <div class="filter-option" onclick="toggleCheck(this)">
+          <div class="filter-checkbox">·</div>
+          <span>Other</span><span style="margin-left:auto;font-size:12px;color:var(--gray-400);">6</span>
+        </div>
+      </div>
+
+      <!-- Ride Share filters -->
+      <div class="filter-card" id="filter-rideshare">
+        <div class="filter-title">Airport</div>
+        <div class="filter-option" onclick="toggleCheck(this)">
+          <div class="filter-checkbox checked">✓</div>
+          <span>ORD — O'Hare</span>
+        </div>
+        <div class="filter-option" onclick="toggleCheck(this)">
+          <div class="filter-checkbox checked">✓</div>
+          <span>MDW — Midway</span>
+        </div>
+        <div class="filter-title" style="margin-top:14px;">Direction</div>
+        <div class="filter-option" onclick="toggleCheck(this)">
+          <div class="filter-checkbox checked">✓</div>
+          <span>To Airport</span>
+        </div>
+        <div class="filter-option" onclick="toggleCheck(this)">
+          <div class="filter-checkbox checked">✓</div>
+          <span>From Airport</span>
+        </div>
+      </div>
+
+      <!-- Storage filters -->
+      <div class="filter-card" id="filter-storage">
+        <div class="filter-title">Size</div>
+        <div class="filter-option" onclick="toggleCheck(this)">
+          <div class="filter-checkbox checked">✓</div>
+          <span>A few boxes</span>
+        </div>
+        <div class="filter-option" onclick="toggleCheck(this)">
+          <div class="filter-checkbox checked">✓</div>
+          <span>Half a room</span>
+        </div>
+        <div class="filter-option" onclick="toggleCheck(this)">
+          <div class="filter-checkbox checked">✓</div>
+          <span>Full room</span>
+        </div>
+        <div class="filter-title" style="margin-top:14px;">Location</div>
+        <div class="filter-option" onclick="toggleCheck(this)">
+          <div class="filter-checkbox checked">✓</div>
+          <span>On-campus</span>
+        </div>
+        <div class="filter-option" onclick="toggleCheck(this)">
+          <div class="filter-checkbox checked">✓</div>
+          <span>Off-campus</span>
+        </div>
+      </div>
+
+      <div class="filter-card">
+        <div class="filter-title">Price Type</div>
+        <div class="filter-option" onclick="toggleCheck(this)">
+          <div class="filter-checkbox checked">✓</div>
+          <span>Numerical ($)</span>
+        </div>
+        <div class="filter-option" onclick="toggleCheck(this)">
+          <div class="filter-checkbox checked">✓</div>
+          <span>Free</span>
+        </div>
+        <div class="filter-option" onclick="toggleCheck(this)">
+          <div class="filter-checkbox">·</div>
+          <span>Trade (Marketplace)</span>
+        </div>
+      </div>
+
+      <div class="filter-card" id="filter-condition">
+        <div class="filter-title">Condition</div>
+        <div class="filter-option" onclick="toggleCheck(this)">
+          <div class="filter-checkbox checked">✓</div><span>New</span>
+        </div>
+        <div class="filter-option" onclick="toggleCheck(this)">
+          <div class="filter-checkbox checked">✓</div><span>Like New</span>
+        </div>
+        <div class="filter-option" onclick="toggleCheck(this)">
+          <div class="filter-checkbox checked">✓</div><span>Good</span>
+        </div>
+        <div class="filter-option" onclick="toggleCheck(this)">
+          <div class="filter-checkbox">·</div><span>Fair</span>
+        </div>
+        <div class="filter-option" onclick="toggleCheck(this)">
+          <div class="filter-checkbox">·</div><span>Poor</span>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" style="width:100%;margin-top:16px;padding:11px;border-radius:var(--radius-md);justify-content:center;">Apply Filters</button>
+      <button class="btn btn-ghost" style="width:100%;margin-top:8px;padding:11px;border-radius:var(--radius-md);justify-content:center;font-size:13px;">Clear All</button>
+    </aside>
+
+    <!-- ── Results Area ───────────────────────────────────────── -->
+    <main class="results-area">
+      <div class="results-topbar">
+        <div class="results-count"><strong>38 results</strong> across all features</div>
+        <select class="sort-select">
+          <option>Sort: Most Recent</option>
+          <option>Price: Low to High</option>
+          <option>Price: High to Low</option>
+          <option>Best Match</option>
+        </select>
+      </div>
+      <div class="active-filters">
+        <span class="filter-chip">Marketplace ✕</span>
+        <span class="filter-chip">Ride Share ✕</span>
+        <span class="filter-chip">Storage ✕</span>
+      </div>
+
+      <div class="cards-grid" id="results-grid">
+
+        <!-- Marketplace cards -->
+        <a href="post.html?type=marketplace" class="post-card" data-feature="marketplace">
+          <div class="card-img-placeholder">📖</div>
+          <div class="card-body">
+            <div class="card-badges">
+              <span class="badge badge-feature-marketplace">Marketplace</span>
+              <span class="badge badge-sell">Selling</span>
+            </div>
+            <div class="card-title">Organic Chemistry 8th Ed.</div>
+            <div class="card-price">$35</div>
+            <div class="card-meta"><span class="card-condition-dot"></span>Like New · 1h ago</div>
+          </div>
+        </a>
+
+        <a href="post.html?type=rideshare" class="post-card rideshare" data-feature="rideshare">
+          <div class="card-img-placeholder teal-bg">🚗</div>
+          <div class="card-body">
+            <div class="card-badges">
+              <span class="badge badge-feature-rideshare">Ride Share</span>
+              <span class="badge badge-offer-ride">Offering</span>
+              <span class="airport-badge">ORD</span>
+            </div>
+            <div class="card-title">Ride to O'Hare — Dec 14</div>
+            <div class="card-route">
+              <div class="card-route-row"><span class="icon">📅</span> Dec 14 · 6:00 AM</div>
+              <div class="card-route-row"><span class="icon">💺</span> 2 seats · To ORD</div>
+            </div>
+            <div class="card-price teal">$25/seat</div>
+            <div class="card-meta">1h ago</div>
+          </div>
+        </a>
+
+        <a href="post.html?type=storage" class="post-card storage" data-feature="storage">
+          <div class="card-img-placeholder amber-bg">🏠</div>
+          <div class="card-body">
+            <div class="card-badges">
+              <span class="badge badge-feature-storage">Storage</span>
+              <span class="badge badge-has-space">Has Space</span>
+            </div>
+            <div class="card-title">Studio with extra closet space</div>
+            <div class="card-storage-info">
+              <div class="card-storage-row"><span>📅</span> Jun 1 – Aug 31</div>
+              <div class="card-storage-row"><span>📦</span> Half a room · Hyde Park</div>
+            </div>
+            <div class="card-price" style="color:var(--amber-700);">$80/mo</div>
+            <div class="card-meta">2h ago</div>
+          </div>
+        </a>
+
+        <a href="post.html?type=marketplace" class="post-card" data-feature="marketplace">
+          <div class="card-img-placeholder">🎧</div>
+          <div class="card-body">
+            <div class="card-badges">
+              <span class="badge badge-feature-marketplace">Marketplace</span>
+              <span class="badge badge-sell">Selling</span>
+            </div>
+            <div class="card-title">Sony WH-1000XM4 Headphones</div>
+            <div class="card-price">$180</div>
+            <div class="card-meta"><span class="card-condition-dot"></span>Good · 3h ago</div>
+          </div>
+        </a>
+
+        <a href="post.html?type=rideshare" class="post-card rideshare" data-feature="rideshare">
+          <div class="card-img-placeholder teal-bg">🙋</div>
+          <div class="card-body">
+            <div class="card-badges">
+              <span class="badge badge-feature-rideshare">Ride Share</span>
+              <span class="badge badge-need-ride">Need Ride</span>
+              <span class="airport-badge">MDW</span>
+            </div>
+            <div class="card-title">Need Ride to Midway Mar 22</div>
+            <div class="card-route">
+              <div class="card-route-row"><span class="icon">📅</span> Mar 22 · 9:00 AM</div>
+              <div class="card-route-row"><span class="icon">👤</span> 2 people · To MDW</div>
+            </div>
+            <div class="card-price teal">Up to $20/seat</div>
+            <div class="card-meta">4h ago</div>
+          </div>
+        </a>
+
+        <a href="post.html?type=marketplace" class="post-card" data-feature="marketplace">
+          <div class="card-img-placeholder">🛋️</div>
+          <div class="card-body">
+            <div class="card-badges">
+              <span class="badge badge-feature-marketplace">Marketplace</span>
+              <span class="badge badge-sell">Selling</span>
+            </div>
+            <div class="card-title">Mini Fridge — Perfect for Dorms</div>
+            <div class="card-price">$55</div>
+            <div class="card-meta"><span class="card-condition-dot" style="background:var(--amber-500);"></span>Good · 6h ago</div>
+          </div>
+        </a>
+
+        <a href="post.html?type=storage" class="post-card storage" data-feature="storage">
+          <div class="card-img-placeholder amber-bg">📦</div>
+          <div class="card-body">
+            <div class="card-badges">
+              <span class="badge badge-feature-storage">Storage</span>
+              <span class="badge badge-need-storage">Need Storage</span>
+            </div>
+            <div class="card-title">Need storage for 4 boxes + bike</div>
+            <div class="card-storage-info">
+              <div class="card-storage-row"><span>📅</span> Jun 1 – Aug 25</div>
+              <div class="card-storage-row"><span>📦</span> A few boxes · Near campus</div>
+            </div>
+            <div class="card-price" style="color:var(--amber-700);">Up to $60/mo</div>
+            <div class="card-meta">3h ago</div>
+          </div>
+        </a>
+
+        <a href="post.html?type=marketplace" class="post-card" data-feature="marketplace">
+          <div class="card-img-placeholder">📚</div>
+          <div class="card-body">
+            <div class="card-badges">
+              <span class="badge badge-feature-marketplace">Marketplace</span>
+              <span class="badge badge-buy">Buying</span>
+            </div>
+            <div class="card-title">Looking for Calc III Textbook</div>
+            <div class="card-price">Up to $40</div>
+            <div class="card-meta"><span class="card-condition-dot" style="background:var(--blue-500);"></span>Any · 2h ago</div>
+          </div>
+        </a>
+
+        <a href="post.html?type=rideshare" class="post-card rideshare" data-feature="rideshare">
+          <div class="card-img-placeholder teal-bg">🚙</div>
+          <div class="card-body">
+            <div class="card-badges">
+              <span class="badge badge-feature-rideshare">Ride Share</span>
+              <span class="badge badge-offer-ride">Offering</span>
+              <span class="airport-badge">MDW</span>
+            </div>
+            <div class="card-title">Midway Airport — Spring Break</div>
+            <div class="card-route">
+              <div class="card-route-row"><span class="icon">📅</span> Mar 22 · 8:30 AM</div>
+              <div class="card-route-row"><span class="icon">💺</span> 3 seats · To MDW</div>
+            </div>
+            <div class="card-price teal">$18/seat</div>
+            <div class="card-meta">3h ago</div>
+          </div>
+        </a>
+
+        <a href="post.html?type=storage" class="post-card storage" data-feature="storage">
+          <div class="card-img-placeholder amber-bg">🏡</div>
+          <div class="card-body">
+            <div class="card-badges">
+              <span class="badge badge-feature-storage">Storage</span>
+              <span class="badge badge-has-space">Has Space</span>
+            </div>
+            <div class="card-title">2BR apartment — spare bedroom</div>
+            <div class="card-storage-info">
+              <div class="card-storage-row"><span>📅</span> May 25 – Sep 1</div>
+              <div class="card-storage-row"><span>📦</span> Full room · Woodlawn</div>
+            </div>
+            <div class="card-price" style="color:var(--amber-700);">$120/mo</div>
+            <div class="card-meta">5h ago</div>
+          </div>
+        </a>
+
+        <a href="post.html?type=marketplace" class="post-card" data-feature="marketplace">
+          <div class="card-img-placeholder">🖥️</div>
+          <div class="card-body">
+            <div class="card-badges">
+              <span class="badge badge-feature-marketplace">Marketplace</span>
+              <span class="badge badge-sell">Selling</span>
+            </div>
+            <div class="card-title">24" Monitor — HDMI &amp; DP</div>
+            <div class="card-price trade">Trade</div>
+            <div class="card-meta"><span class="card-condition-dot"></span>Like New · 2d ago</div>
+          </div>
+        </a>
+
+        <a href="post.html?type=marketplace" class="post-card" data-feature="marketplace">
+          <div class="card-img-placeholder">🪑</div>
+          <div class="card-body">
+            <div class="card-badges">
+              <span class="badge badge-feature-marketplace">Marketplace</span>
+              <span class="badge badge-buy">Buying</span>
+            </div>
+            <div class="card-title">Wanted: Desk Chair for Dorm</div>
+            <div class="card-price trade">Trade</div>
+            <div class="card-meta"><span class="card-condition-dot" style="background:var(--amber-500);"></span>Any · 1d ago</div>
+          </div>
+        </a>
+
+      </div><!-- /results-grid -->
+    </main>
+  </div><!-- /search-results-layout -->
+
+</main>
+
+<footer class="footer">
+  © 2026 UChicago Marketplace · Made for Maroons, by Maroons
+</footer>
+
+<script src="js/main.js"></script>
+<script>
+  // Read URL param to pre-filter by feature type
+  const params = new URLSearchParams(window.location.search);
+  const ft = params.get('type');
+
+  function filterResults() {
+    // Simple client-side filter based on checked feature checkboxes
+    const checks = document.querySelectorAll('#filter-marketplace, #filter-rideshare, #filter-storage');
+    // For demo purposes, all results remain visible
+  }
+
+  if (ft) {
+    // Pre-tick only the matching feature filter, dim the others
+    document.querySelector('.results-count strong').textContent =
+      ft === 'marketplace' ? '24 results' :
+      ft === 'rideshare'   ? '8 results'  :
+      ft === 'storage'     ? '6 results'  : '38 results';
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notifications — UChicago Marketplace</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+<div id="navbar-mount"></div>
+<div id="modal-mount"></div>
+
+<main>
+<div class="notifications-layout">
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+    <div>
+      <div class="page-heading">Notifications</div>
+      <div class="page-subheading" style="margin-bottom:0;">Stay up to date across all features</div>
+    </div>
+    <span style="background:var(--maroon-600);color:white;font-size:13px;font-weight:700;padding:4px 12px;border-radius:var(--radius-full);">6 New</span>
+  </div>
+
+  <div class="notif-card">
+
+    <!-- ── Today ──────────────────────────────────────────────── -->
+    <div class="notif-section-header">
+      <div class="notif-section-title">Today</div>
+      <button class="mark-all-btn" onclick="markAllRead()">Mark all as read</button>
+    </div>
+
+    <!-- Marketplace: message -->
+    <div class="notif-item unread" onclick="markRead(this);location.href='post.html?type=marketplace'">
+      <div class="notif-icon notif-icon-maroon">💬</div>
+      <div class="notif-body">
+        <div class="notif-title">New message from Maya Kim</div>
+        <div class="notif-desc">
+          <span class="badge badge-feature-marketplace" style="font-size:10px;margin-right:4px;">Marketplace</span>
+          Re: Sony WH-1000XM4 — "Hi! Is this still available? I can meet today at 3pm."
+        </div>
+        <div class="notif-time">2 minutes ago</div>
+      </div>
+      <div class="notif-unread-dot"></div>
+    </div>
+
+    <!-- Ride Share: someone responded to offer -->
+    <div class="notif-item unread" onclick="markRead(this);location.href='post.html?type=rideshare'">
+      <div class="notif-icon notif-icon-teal">🚗</div>
+      <div class="notif-body">
+        <div class="notif-title">Tyler Rodriguez wants a seat</div>
+        <div class="notif-desc">
+          <span class="badge badge-feature-rideshare" style="font-size:10px;margin-right:4px;">Ride Share</span>
+          Tyler requested 1 seat on your ride to O'Hare (ORD) on Dec 14.
+        </div>
+        <div class="notif-time">45 minutes ago</div>
+      </div>
+      <div class="notif-unread-dot"></div>
+    </div>
+
+    <!-- Marketplace: new review -->
+    <div class="notif-item unread" onclick="markRead(this);location.href='profile.html'">
+      <div class="notif-icon notif-icon-amber">⭐</div>
+      <div class="notif-body">
+        <div class="notif-title">New review from Tyler Rodriguez</div>
+        <div class="notif-desc">
+          <span class="badge badge-feature-rideshare" style="font-size:10px;margin-right:4px;">Ride Share</span>
+          Tyler left you a 5-star review: "Smooth ride to O'Hare, left on time…"
+        </div>
+        <div class="notif-time">1 hour ago</div>
+      </div>
+      <div class="notif-unread-dot"></div>
+    </div>
+
+    <!-- Storage: someone interested -->
+    <div class="notif-item unread" onclick="markRead(this);location.href='post.html?type=storage'">
+      <div class="notif-icon notif-icon-amber">📦</div>
+      <div class="notif-body">
+        <div class="notif-title">New inquiry on your storage post</div>
+        <div class="notif-desc">
+          <span class="badge badge-feature-storage" style="font-size:10px;margin-right:4px;">Storage Match</span>
+          Sophia Park is interested in your studio closet space (Jun–Aug). She sent a message.
+        </div>
+        <div class="notif-time">3 hours ago</div>
+      </div>
+      <div class="notif-unread-dot"></div>
+    </div>
+
+    <!-- Marketplace: listing saved -->
+    <div class="notif-item unread" onclick="markRead(this);location.href='post.html?type=marketplace'">
+      <div class="notif-icon notif-icon-green">❤️</div>
+      <div class="notif-body">
+        <div class="notif-title">3 people saved your listing</div>
+        <div class="notif-desc">
+          <span class="badge badge-feature-marketplace" style="font-size:10px;margin-right:4px;">Marketplace</span>
+          "Organic Chemistry 8th Ed." has been saved by 3 new people today.
+        </div>
+        <div class="notif-time">5 hours ago</div>
+      </div>
+      <div class="notif-unread-dot"></div>
+    </div>
+
+    <!-- Ride Share: match found -->
+    <div class="notif-item unread" onclick="markRead(this);location.href='browse.html?type=rideshare'">
+      <div class="notif-icon notif-icon-teal">🔔</div>
+      <div class="notif-body">
+        <div class="notif-title">New ride match found</div>
+        <div class="notif-desc">
+          <span class="badge badge-feature-rideshare" style="font-size:10px;margin-right:4px;">Ride Share</span>
+          A new offering matches your request: "Ride to ORD Dec 15 · 2 seats available · $22/seat"
+        </div>
+        <div class="notif-time">8 hours ago</div>
+      </div>
+      <div class="notif-unread-dot"></div>
+    </div>
+
+    <!-- ── Earlier ────────────────────────────────────────────── -->
+    <div class="notif-section-header">
+      <div class="notif-section-title">Earlier</div>
+    </div>
+
+    <!-- Marketplace: sale confirmed -->
+    <div class="notif-item" onclick="location.href='profile.html'">
+      <div class="notif-icon notif-icon-maroon">🎉</div>
+      <div class="notif-body">
+        <div class="notif-title">Sale confirmed!</div>
+        <div class="notif-desc">
+          <span class="badge badge-feature-marketplace" style="font-size:10px;margin-right:4px;">Marketplace</span>
+          "North Face Backpack" has been marked as sold. Ask your buyer for a review!
+        </div>
+        <div class="notif-time">Feb 28, 2026</div>
+      </div>
+    </div>
+
+    <!-- Review from Sophia -->
+    <div class="notif-item" onclick="location.href='profile.html'">
+      <div class="notif-icon notif-icon-amber">⭐</div>
+      <div class="notif-body">
+        <div class="notif-title">New review from Sophia Park</div>
+        <div class="notif-desc">
+          <span class="badge badge-feature-marketplace" style="font-size:10px;margin-right:4px;">Marketplace</span>
+          Sophia left you a 4-star review: "Good transaction overall…"
+        </div>
+        <div class="notif-time">Feb 10, 2026</div>
+      </div>
+    </div>
+
+    <!-- Storage: match found -->
+    <div class="notif-item" onclick="location.href='browse.html?type=storage'">
+      <div class="notif-icon notif-icon-amber">🔔</div>
+      <div class="notif-body">
+        <div class="notif-title">Storage space match found</div>
+        <div class="notif-desc">
+          <span class="badge badge-feature-storage" style="font-size:10px;margin-right:4px;">Storage Match</span>
+          A new space matches your storage request: "Half a room in Hyde Park · Jun–Aug · $75/mo"
+        </div>
+        <div class="notif-time">Feb 5, 2026</div>
+      </div>
+    </div>
+
+    <!-- Listing expiring -->
+    <div class="notif-item" onclick="location.href='post.html?type=marketplace'">
+      <div class="notif-icon notif-icon-red">⚠️</div>
+      <div class="notif-body">
+        <div class="notif-title">Listing expiring soon</div>
+        <div class="notif-desc">
+          <span class="badge badge-feature-marketplace" style="font-size:10px;margin-right:4px;">Marketplace</span>
+          "24" Monitor HDMI" will expire in 3 days. Renew it to keep it visible.
+        </div>
+        <div class="notif-time">Feb 2, 2026</div>
+      </div>
+    </div>
+
+    <!-- Account verified -->
+    <div class="notif-item" onclick="location.href='profile.html'">
+      <div class="notif-icon notif-icon-green">✅</div>
+      <div class="notif-body">
+        <div class="notif-title">Account verified!</div>
+        <div class="notif-desc">Your @uchicago.edu address has been verified. You now have the Verified Student badge.</div>
+        <div class="notif-time">Sep 4, 2024</div>
+      </div>
+    </div>
+
+  </div><!-- /notif-card -->
+</div><!-- /notifications-layout -->
+</main>
+
+<footer class="footer">
+  © 2026 UChicago Marketplace · Made for Maroons, by Maroons
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>
