@@ -2,6 +2,12 @@ import { prisma } from "../config/database";
 import { HttpError } from "../utils/errors";
 import type { Prisma } from "@prisma/client";
 
+// Prisma enum uses "new_item" but the API/schema uses "new"
+function mapCondition(condition: string): string {
+  if (condition === "new") return "new_item";
+  return condition;
+}
+
 // ── Create ──────────────────────────────────────
 
 interface CreatePostInput {
@@ -46,7 +52,7 @@ export async function createPost(input: CreatePostInput) {
           create: {
             priceType: marketplace.priceType as any,
             priceAmount: marketplace.priceAmount ?? null,
-            condition: marketplace.condition as any,
+            condition: mapCondition(marketplace.condition) as any,
             category: marketplace.category,
             tradeDescription: marketplace.tradeDescription ?? null,
             tags: marketplace.tags || [],
@@ -119,7 +125,7 @@ export async function listPosts(input: ListPostsInput) {
       ],
     }),
     ...(category && { marketplace: { category } }),
-    ...(condition && { marketplace: { condition: condition as any } }),
+    ...(condition && { marketplace: { condition: mapCondition(condition) as any } }),
     ...(size && { storage: { size: size as any } }),
     ...(locationType && { storage: { locationType: locationType as any } }),
     ...((priceMin !== undefined || priceMax !== undefined) && {
@@ -240,7 +246,7 @@ export async function updatePost(postId: string, userId: string, input: UpdatePo
           update: {
             ...(input.marketplace.priceType && { priceType: input.marketplace.priceType as any }),
             ...(input.marketplace.priceAmount !== undefined && { priceAmount: input.marketplace.priceAmount }),
-            ...(input.marketplace.condition && { condition: input.marketplace.condition as any }),
+            ...(input.marketplace.condition && { condition: mapCondition(input.marketplace.condition) as any }),
             ...(input.marketplace.category && { category: input.marketplace.category }),
             ...(input.marketplace.tradeDescription !== undefined && { tradeDescription: input.marketplace.tradeDescription }),
             ...(input.marketplace.tags && { tags: input.marketplace.tags }),
