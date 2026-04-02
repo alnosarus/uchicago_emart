@@ -1,8 +1,8 @@
 import { z } from "zod";
 
-const postTypeEnum = z.enum(["marketplace", "storage"]);
+const postTypeEnum = z.enum(["marketplace", "storage", "housing"]);
 const postSideEnum = z.enum([
-  "sell", "buy", "has_space", "need_storage",
+  "sell", "buy", "has_space", "need_storage", "offering", "looking",
 ]);
 const priceTypeEnum = z.enum(["fixed", "free", "trade"]);
 const conditionEnum = z.enum(["new", "like_new", "good", "fair", "for_parts", "unknown"]);
@@ -29,6 +29,28 @@ export const storageDetailsSchema = z.object({
   restrictions: z.string().nullable().optional(),
 });
 
+const housingSubtypeEnum = z.enum(["sublet", "passdown"]);
+const housingSideEnum = z.enum(["offering", "looking"]);
+const bedroomsEnum = z.enum(["studio", "1", "2", "3_plus"]);
+const bathroomsEnum = z.enum(["1", "1.5", "2_plus"]);
+const roommateTypeEnum = z.enum(["solo", "shared"]);
+
+export const housingDetailsSchema = z.object({
+  subtype: housingSubtypeEnum,
+  side: housingSideEnum,
+  monthlyRent: z.number().min(0),
+  bedrooms: bedroomsEnum,
+  bathrooms: bathroomsEnum,
+  neighborhood: z.string().nullable().optional(),
+  amenities: z.array(z.string()).default([]),
+  roommates: roommateTypeEnum,
+  roommateCount: z.number().int().min(1).nullable().optional(),
+  moveInDate: z.string().nullable().optional(),
+  moveOutDate: z.string().nullable().optional(),
+  leaseStartDate: z.string().nullable().optional(),
+  leaseDurationMonths: z.number().int().min(1).nullable().optional(),
+});
+
 export const createPostSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("marketplace"),
@@ -44,6 +66,13 @@ export const createPostSchema = z.discriminatedUnion("type", [
     description: z.string().nullable().optional(),
     storage: storageDetailsSchema,
   }),
+  z.object({
+    type: z.literal("housing"),
+    side: z.enum(["offering", "looking"]),
+    title: z.string().min(1).max(80),
+    description: z.string().nullable().optional(),
+    housing: housingDetailsSchema,
+  }),
 ]);
 
 export const postQuerySchema = z.object({
@@ -56,6 +85,9 @@ export const postQuerySchema = z.object({
   priceMin: z.coerce.number().min(0).optional(),
   priceMax: z.coerce.number().min(0).optional(),
   condition: conditionEnum.optional(),
+  subtype: housingSubtypeEnum.optional(),
+  bedrooms: bedroomsEnum.optional(),
+  bathrooms: bathroomsEnum.optional(),
   sort: z.enum(["recent", "price_asc", "price_desc", "relevance"]).default("recent"),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(50).default(20),
