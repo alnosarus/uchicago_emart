@@ -1,7 +1,7 @@
 import type { User } from "../types/user";
 import { ApiClient } from "./client";
 
-interface AuthResponse {
+export interface AuthResponse {
   user: User;
   accessToken: string;
   refreshToken: string;

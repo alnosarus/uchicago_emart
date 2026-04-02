@@ -16,7 +16,10 @@ RUN pnpm install --frozen-lockfile
 COPY packages/shared/ packages/shared/
 COPY apps/web/ apps/web/
 
-# Build
+# Build shared package
+RUN cd packages/shared && npx tsc
+
+# Build web
 RUN cd apps/web && pnpm build
 
 EXPOSE 3001

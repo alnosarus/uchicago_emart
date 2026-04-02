@@ -17,6 +17,9 @@ RUN pnpm install --frozen-lockfile
 COPY packages/shared/ packages/shared/
 COPY apps/api/ apps/api/
 
+# Build shared package
+RUN cd packages/shared && npx tsc
+
 # Generate Prisma client
 RUN cd apps/api && npx prisma generate
 
