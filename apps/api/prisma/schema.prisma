@@ -10,24 +10,24 @@ datasource db {
 // ── Users ──────────────────────────────────────
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  name      String
-  phone     String?
-  avatarUrl String?  @map("avatar_url")
-  isVerified Boolean @default(false) @map("is_verified")
-  googleId  String   @unique @map("google_id")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id         String   @id @default(uuid())
+  email      String   @unique
+  name       String
+  phone      String?
+  avatarUrl  String?  @map("avatar_url")
+  isVerified Boolean  @default(false) @map("is_verified")
+  googleId   String   @unique @map("google_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
-  posts              Post[]
-  reviewsGiven       Review[]       @relation("ReviewerReviews")
-  reviewsReceived    Review[]       @relation("RevieweeReviews")
-  savedPosts         SavedPost[]
-  notifications      Notification[]
-  conversationsAs1   Conversation[] @relation("Participant1")
-  conversationsAs2   Conversation[] @relation("Participant2")
-  messagesSent       Message[]
+  posts            Post[]
+  reviewsGiven     Review[]       @relation("ReviewerReviews")
+  reviewsReceived  Review[]       @relation("RevieweeReviews")
+  savedPosts       SavedPost[]
+  notifications    Notification[]
+  conversationsAs1 Conversation[] @relation("Participant1")
+  conversationsAs2 Conversation[] @relation("Participant2")
+  messagesSent     Message[]
 
   @@map("users")
 }
@@ -37,6 +37,7 @@ model User {
 enum PostType {
   marketplace
   storage
+  housing
 }
 
 enum PostSide {
@@ -44,6 +45,8 @@ enum PostSide {
   buy
   has_space
   need_storage
+  offering
+  looking
 }
 
 enum PostStatus {
@@ -66,12 +69,13 @@ model Post {
   updatedAt   DateTime   @updatedAt @map("updated_at")
   expiresAt   DateTime?  @map("expires_at")
 
-  author      User       @relation(fields: [authorId], references: [id])
-  images      PostImage[]
-  marketplace MarketplaceDetails?
-  storage     StorageDetails?
-  savedBy     SavedPost[]
-  reviews     Review[]
+  author        User                @relation(fields: [authorId], references: [id])
+  images        PostImage[]
+  marketplace   MarketplaceDetails?
+  storage       StorageDetails?
+  housing       HousingDetails?
+  savedBy       SavedPost[]
+  reviews       Review[]
   conversations Conversation[]
 
   @@index([type, status])
@@ -81,10 +85,10 @@ model Post {
 }
 
 model PostImage {
-  id      String @id @default(uuid())
-  postId  String @map("post_id")
-  url     String
-  order   Int    @default(0)
+  id        String   @id @default(uuid())
+  postId    String   @map("post_id")
+  url       String
+  order     Int      @default(0)
   createdAt DateTime @default(now()) @map("created_at")
 
   post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
@@ -101,7 +105,7 @@ enum PriceType {
 }
 
 enum Condition {
-  new_item @map("new")
+  new_item  @map("new")
   like_new
   good
   fair
@@ -136,6 +140,34 @@ enum LocationType {
   off_campus
 }
 
+enum HousingSubtype {
+  sublet
+  passdown
+}
+
+enum HousingSide {
+  offering
+  looking
+}
+
+enum Bedrooms {
+  studio
+  one        @map("1")
+  two        @map("2")
+  three_plus @map("3_plus")
+}
+
+enum Bathrooms {
+  one      @map("1")
+  one_half @map("1.5")
+  two_plus @map("2_plus")
+}
+
+enum RoommateType {
+  solo
+  shared
+}
+
 model StorageDetails {
   postId       String       @id @map("post_id")
   startDate    DateTime     @map("start_date")
@@ -150,6 +182,28 @@ model StorageDetails {
   post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@map("storage_details")
+}
+
+// ── Housing Details ──────────────────────────
+
+model HousingDetails {
+  postId              String         @id @default(uuid()) @db.Uuid
+  post                Post           @relation(fields: [postId], references: [id], onDelete: Cascade)
+  subtype             HousingSubtype
+  side                HousingSide
+  monthlyRent         Float          @map("monthly_rent")
+  bedrooms            Bedrooms
+  bathrooms           Bathrooms
+  neighborhood        String?
+  amenities           String[]       @default([])
+  roommates           RoommateType
+  roommateCount       Int?           @map("roommate_count")
+  moveInDate          DateTime?      @map("move_in_date")
+  moveOutDate         DateTime?      @map("move_out_date")
+  leaseStartDate      DateTime?      @map("lease_start_date")
+  leaseDurationMonths Int?           @map("lease_duration_months")
+
+  @@map("housing_details")
 }
 
 // ── Reviews ───────────────────────────────────
