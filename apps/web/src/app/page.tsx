@@ -2,9 +2,32 @@
 
 import { useAuth } from "@/lib/auth-context";
 import Link from "next/link";
+import { useState, useEffect } from "react";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+
+interface PostCard {
+  id: string;
+  title: string;
+  type: string;
+  side: string;
+  createdAt: string;
+  author: { name: string };
+  marketplace: { priceType: string; priceAmount: number | null; condition: string; category: string } | null;
+  storage: { size: string; priceMonthly: number | null; isFree: boolean } | null;
+  images: { url: string }[];
+}
 
 export default function Home() {
   const { user, isLoading, logout } = useAuth();
+  const [recentPosts, setRecentPosts] = useState<PostCard[]>([]);
+
+  useEffect(() => {
+    fetch(`${API_URL}/api/posts?limit=6`)
+      .then(r => r.ok ? r.json() : { posts: [] })
+      .then(data => setRecentPosts(data.posts || []))
+      .catch(() => {});
+  }, []);
 
   return (
     <>
@@ -96,14 +119,39 @@ export default function Home() {
             + Post Item
           </Link>
         </div>
-        {user ? (
-          <div className="text-center py-16">
-            <p className="text-gray-500 mb-2">Welcome, <strong>{user.name}</strong>!</p>
-            <p className="text-gray-400 text-sm">Posts will load from the API once Phase 2 is complete.</p>
+        {recentPosts.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {recentPosts.map(post => (
+              <Link key={post.id} href={`/posts/${post.id}`} className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+                <div className="h-40 bg-gray-100 flex items-center justify-center">
+                  {post.images[0] ? (
+                    <img src={post.images[0].url} alt={post.title} className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-gray-300 text-4xl">&#128247;</span>
+                  )}
+                </div>
+                <div className="p-3">
+                  <p className="font-semibold text-gray-900 text-sm truncate">{post.title}</p>
+                  <p className="text-xs text-gray-500 mt-1">{post.author.name}</p>
+                  <div className="flex items-center justify-between mt-2">
+                    <span className="text-sm font-bold text-maroon-700">
+                      {post.marketplace?.priceType === "free" || post.storage?.isFree
+                        ? "Free"
+                        : post.marketplace?.priceAmount
+                        ? `$${post.marketplace.priceAmount}`
+                        : post.storage?.priceMonthly
+                        ? `$${post.storage.priceMonthly}/mo`
+                        : "Contact"}
+                    </span>
+                    <span className="text-xs text-gray-400 capitalize">{post.type}</span>
+                  </div>
+                </div>
+              </Link>
+            ))}
           </div>
         ) : (
           <div className="text-center py-16">
-            <p className="text-gray-400">Sign in to start buying and selling with fellow Maroons.</p>
+            <p className="text-gray-400">{user ? "No posts yet. Be the first to list something!" : "Sign in to start buying and selling with fellow Maroons."}</p>
           </div>
         )}
       </main>

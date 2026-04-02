@@ -8,13 +8,19 @@ import { errorHandler } from "./middleware/errorHandler";
 import healthRoutes from "./routes/health";
 import authRoutes from "./routes/auth";
 import userRoutes from "./routes/users";
+import postRoutes from "./routes/posts";
 
 const app = express();
 
 // Middleware
 app.use(helmet());
 app.use(cors({
-  origin: ["http://localhost:3001", "http://localhost:8081"],
+  origin: [
+    "http://localhost:3001",
+    "http://localhost:8081",
+    "https://www.uchicagoemart.com",
+    "https://uchicagoemart.com",
+  ],
   credentials: true,
 }));
 app.use(morgan("dev"));
@@ -25,6 +31,7 @@ app.use(cookieParser());
 app.use("/api", healthRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/posts", postRoutes);
 
 // Error handler (must be last)
 app.use(errorHandler);

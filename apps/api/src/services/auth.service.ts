@@ -3,6 +3,7 @@ import { googleClient, JWT_CONFIG } from "../config/auth";
 import { firebaseAuth } from "../config/firebase";
 import { prisma } from "../config/database";
 import { env } from "../config/env";
+import { HttpError } from "../utils/errors";
 
 interface GoogleUserInfo {
   sub: string;
@@ -116,11 +117,4 @@ function generateRefreshToken(userId: string): string {
   });
 }
 
-export class HttpError extends Error {
-  status: number;
-  constructor(status: number, message: string) {
-    super(message);
-    this.status = status;
-    this.name = "HttpError";
-  }
-}
+export { HttpError } from "../utils/errors";

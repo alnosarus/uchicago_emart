@@ -3,7 +3,7 @@
 import { useGoogleLogin } from "@react-oauth/google";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 
 export default function AuthPage() {
@@ -13,10 +13,9 @@ export default function AuthPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   // If already logged in, redirect
-  if (user) {
-    router.push("/");
-    return null;
-  }
+  useEffect(() => {
+    if (user) router.push("/");
+  }, [user, router]);
 
   const googleLogin = useGoogleLogin({
     flow: "auth-code",
