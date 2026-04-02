@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+@theme inline {
+  /* Maroon — primary brand */
+  --color-maroon-900: #3a0000;
+  --color-maroon-800: #520000;
+  --color-maroon-700: #6b0000;
+  --color-maroon-600: #800000;
+  --color-maroon-500: #9b1212;
+  --color-maroon-400: #b83232;
+  --color-maroon-300: #d47878;
+  --color-maroon-200: #e8b8b8;
+  --color-maroon-100: #f5e0e0;
+  --color-maroon-50: #fdf5f5;
+
+  /* Teal — Ride Share accent */
+  --color-teal-700: #0f766e;
+  --color-teal-600: #0d9488;
+  --color-teal-500: #14b8a6;
+  --color-teal-100: #ccfbf1;
+  --color-teal-50: #f0fdfa;
+
+  /* Amber — Storage accent */
+  --color-amber-700: #92400e;
+  --color-amber-600: #b45309;
+  --color-amber-500: #f59e0b;
+  --color-amber-100: #fef3c7;
+  --color-amber-50: #fffbeb;
+
+  /* Fonts */
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-display: "Oswald", sans-serif;
+}
+
+body {
+  background: #f9fafb;
+  color: #1f2937;
+  font-family: var(--font-sans);
+}

@@ -1,0 +1,244 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── Users ──────────────────────────────────────
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  phone     String?
+  avatarUrl String?  @map("avatar_url")
+  isVerified Boolean @default(false) @map("is_verified")
+  googleId  String   @unique @map("google_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  posts              Post[]
+  reviewsGiven       Review[]       @relation("ReviewerReviews")
+  reviewsReceived    Review[]       @relation("RevieweeReviews")
+  savedPosts         SavedPost[]
+  notifications      Notification[]
+  conversationsAs1   Conversation[] @relation("Participant1")
+  conversationsAs2   Conversation[] @relation("Participant2")
+  messagesSent       Message[]
+
+  @@map("users")
+}
+
+// ── Posts ──────────────────────────────────────
+
+enum PostType {
+  marketplace
+  storage
+}
+
+enum PostSide {
+  sell
+  buy
+  has_space
+  need_storage
+}
+
+enum PostStatus {
+  active
+  sold
+  completed
+  expired
+  deleted
+}
+
+model Post {
+  id          String     @id @default(uuid())
+  authorId    String     @map("author_id")
+  type        PostType
+  side        PostSide
+  status      PostStatus @default(active)
+  title       String
+  description String?
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+  expiresAt   DateTime?  @map("expires_at")
+
+  author      User       @relation(fields: [authorId], references: [id])
+  images      PostImage[]
+  marketplace MarketplaceDetails?
+  storage     StorageDetails?
+  savedBy     SavedPost[]
+  reviews     Review[]
+  conversations Conversation[]
+
+  @@index([type, status])
+  @@index([authorId])
+  @@index([createdAt])
+  @@map("posts")
+}
+
+model PostImage {
+  id      String @id @default(uuid())
+  postId  String @map("post_id")
+  url     String
+  order   Int    @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@map("post_images")
+}
+
+// ── Marketplace Details ────────────────────────
+
+enum PriceType {
+  fixed
+  free
+  trade
+}
+
+enum Condition {
+  new_item @map("new")
+  like_new
+  good
+  fair
+  for_parts
+  unknown
+}
+
+model MarketplaceDetails {
+  postId           String    @id @map("post_id")
+  priceType        PriceType @map("price_type")
+  priceAmount      Float?    @map("price_amount")
+  condition        Condition
+  category         String
+  tradeDescription String?   @map("trade_description")
+  tags             String[]  @default([])
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@map("marketplace_details")
+}
+
+// ── Storage Details ───────────────────────────
+
+enum StorageSize {
+  boxes
+  half_room
+  full_room
+}
+
+enum LocationType {
+  on_campus
+  off_campus
+}
+
+model StorageDetails {
+  postId       String       @id @map("post_id")
+  startDate    DateTime     @map("start_date")
+  endDate      DateTime     @map("end_date")
+  size         StorageSize
+  locationType LocationType @map("location_type")
+  neighborhood String?
+  priceMonthly Float?       @map("price_monthly")
+  isFree       Boolean      @default(false) @map("is_free")
+  restrictions String?
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@map("storage_details")
+}
+
+// ── Reviews ───────────────────────────────────
+
+model Review {
+  id         String   @id @default(uuid())
+  postId     String   @map("post_id")
+  reviewerId String   @map("reviewer_id")
+  revieweeId String   @map("reviewee_id")
+  rating     Int
+  text       String?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  post     Post @relation(fields: [postId], references: [id])
+  reviewer User @relation("ReviewerReviews", fields: [reviewerId], references: [id])
+  reviewee User @relation("RevieweeReviews", fields: [revieweeId], references: [id])
+
+  @@map("reviews")
+}
+
+// ── Saved Posts ───────────────────────────────
+
+model SavedPost {
+  userId    String   @map("user_id")
+  postId    String   @map("post_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+  post Post @relation(fields: [postId], references: [id])
+
+  @@id([userId, postId])
+  @@map("saved_posts")
+}
+
+// ── Conversations & Messages ──────────────────
+
+model Conversation {
+  id             String   @id @default(uuid())
+  postId         String   @map("post_id")
+  participant1Id String   @map("participant_1_id")
+  participant2Id String   @map("participant_2_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  post         Post      @relation(fields: [postId], references: [id])
+  participant1 User      @relation("Participant1", fields: [participant1Id], references: [id])
+  participant2 User      @relation("Participant2", fields: [participant2Id], references: [id])
+  messages     Message[]
+
+  @@unique([postId, participant1Id, participant2Id])
+  @@map("conversations")
+}
+
+model Message {
+  id             String   @id @default(uuid())
+  conversationId String   @map("conversation_id")
+  senderId       String   @map("sender_id")
+  body           String
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+  sender       User         @relation(fields: [senderId], references: [id])
+
+  @@index([conversationId, createdAt])
+  @@map("messages")
+}
+
+// ── Notifications ─────────────────────────────
+
+enum NotificationType {
+  message
+  review
+  save
+  match
+  expiring
+  system
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String           @map("user_id")
+  type      NotificationType
+  title     String
+  body      String
+  link      String?
+  isRead    Boolean          @default(false) @map("is_read")
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, isRead])
+  @@map("notifications")
+}
