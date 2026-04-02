@@ -833,3 +833,14 @@ Questions to resolve before starting:
 3. Do you have a Cloudinary account? (needed for Phase 2)
 4. Railway account? (needed for Phase 0)
 5. Apple Developer account ($99/year) for iOS App Store? (needed for Phase 5)
+
+---
+
+### Future TODOs (from Phase 2 Mobile)
+
+- [ ] **Mobile-specific API layer**: Evaluate building a wrapper on top of the shared `ApiClient` for offline caching, retry on flaky WiFi, and optimistic updates
+- [ ] **Web: migrate to shared ApiClient**: Web app uses raw `fetch` with duplicated `API_URL` + auth header patterns across 6+ files — should use `createApi()` from `@uchicago-marketplace/shared` for consistency
+- [ ] **Date pickers**: Replace plain text date inputs in create wizard with proper native date pickers (`@react-native-community/datetimepicker` or similar)
+- [ ] **Star ratings API**: Build ratings system so AuthorRow can display real ratings instead of being omitted
+- [ ] **Edit/delete from mobile**: Wire up edit form and delete confirmation from the post detail overflow menu
+- [ ] **Housing: web support**: Add housing type support to the web app's browse/create/detail/edit pages
