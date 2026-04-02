@@ -22,7 +22,7 @@ ALTER TYPE "PostSide" ADD VALUE 'looking';
 
 -- CreateTable
 CREATE TABLE "housing_details" (
-    "postId" UUID NOT NULL,
+    "postId" TEXT NOT NULL,
     "subtype" "HousingSubtype" NOT NULL,
     "side" "HousingSide" NOT NULL,
     "monthly_rent" DOUBLE PRECISION NOT NULL,

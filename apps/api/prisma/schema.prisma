@@ -187,7 +187,7 @@ model StorageDetails {
 // ── Housing Details ──────────────────────────
 
 model HousingDetails {
-  postId              String         @id @default(uuid()) @db.Uuid
+  postId              String         @id
   post                Post           @relation(fields: [postId], references: [id], onDelete: Cascade)
   subtype             HousingSubtype
   side                HousingSide
