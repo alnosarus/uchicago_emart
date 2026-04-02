@@ -5,7 +5,7 @@ import { prisma } from "../config/database";
 import { z } from "zod";
 import { validate } from "../middleware/validate";
 
-const router: ReturnType<typeof Router> = Router();
+const router = Router();
 
 // GET /api/users/:id — Public profile
 router.get("/:id", async (req, res: Response, next) => {

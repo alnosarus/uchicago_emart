@@ -11,7 +11,7 @@ import {
 } from "../services/auth.service";
 import { z } from "zod";
 
-const router: ReturnType<typeof Router> = Router();
+const router = Router();
 
 // POST /api/auth/google — Exchange Google auth code for JWT
 router.post("/google", validate(googleAuthSchema), async (req, res: Response, next) => {

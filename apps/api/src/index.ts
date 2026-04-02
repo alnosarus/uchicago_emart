@@ -9,7 +9,7 @@ import healthRoutes from "./routes/health";
 import authRoutes from "./routes/auth";
 import userRoutes from "./routes/users";
 
-const app: ReturnType<typeof express> = express();
+const app = express();
 
 // Middleware
 app.use(helmet());
