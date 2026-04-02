@@ -25,7 +25,7 @@ export default function TabLayout() {
       tabBarLabelStyle: styles.tabLabel,
       headerShown: false,
     }}>
-      <Tabs.Screen name="marketplace" options={{ title: "Market", tabBarIcon: ({ color }) => <TabIcon name="shopping-bag" color={color} /> }} />
+      <Tabs.Screen name="index" options={{ title: "Market", tabBarIcon: ({ color }) => <TabIcon name="shopping-bag" color={color} /> }} />
       <Tabs.Screen name="storage" options={{ title: "Storage", tabBarIcon: ({ color }) => <TabIcon name="archive" color={color} /> }} />
       <Tabs.Screen name="create" options={{ title: "Post", tabBarIcon: () => <CreateTabIcon />, tabBarLabel: () => null }} />
       <Tabs.Screen name="housing" options={{ title: "Housing", tabBarIcon: ({ color }) => <TabIcon name="home" color={color} /> }} />
