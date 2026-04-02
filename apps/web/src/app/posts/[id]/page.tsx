@@ -71,8 +71,8 @@ function formatDate(dateStr: string): string {
 
 function formatPrice(post: Post): string {
   if (post.marketplace) {
-    if (post.marketplace.priceType === "FREE") return "Free";
-    if (post.marketplace.priceType === "TRADE") return "Trade";
+    if (post.marketplace.priceType === "free") return "Free";
+    if (post.marketplace.priceType === "trade") return "Trade";
     if (post.marketplace.priceAmount != null) {
       return `$${post.marketplace.priceAmount.toFixed(2)}`;
     }
@@ -89,30 +89,30 @@ function formatPrice(post: Post): string {
 }
 
 function typeBadgeClasses(type: string): string {
-  if (type === "STORAGE") {
+  if (type === "storage") {
     return "bg-amber-100 text-amber-700";
   }
   return "bg-maroon-100 text-maroon-700";
 }
 
 function typeLabel(type: string): string {
-  if (type === "STORAGE") return "Storage";
+  if (type === "storage") return "Storage";
   return "Marketplace";
 }
 
 function sideLabel(side: string): string {
-  if (side === "BUY" || side === "SEEKING") return "Looking for";
+  if (side === "buy" || side === "need_storage") return "Looking for";
   return "Offering";
 }
 
 function conditionLabel(condition: string | null): string {
   if (!condition) return "";
   const map: Record<string, string> = {
-    NEW: "New",
-    LIKE_NEW: "Like New",
-    GOOD: "Good",
-    FAIR: "Fair",
-    POOR: "Poor",
+    new_item: "New",
+    like_new: "Like New",
+    good: "Good",
+    fair: "Fair",
+    for_parts: "For Parts",
   };
   return map[condition] || condition;
 }
@@ -492,7 +492,7 @@ export default function PostDetailPage() {
   const isOwner = user?.id === post.author.id;
   const priceDisplay = formatPrice(post);
   const isFree =
-    (post.marketplace?.priceType === "FREE") ||
+    (post.marketplace?.priceType === "free") ||
     (post.storage?.isFree === true);
 
   return (

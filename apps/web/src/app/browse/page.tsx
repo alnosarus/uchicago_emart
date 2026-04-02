@@ -9,18 +9,19 @@ import Link from "next/link";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
 const CATEGORIES = [
+  "Textbooks",
   "Electronics",
   "Furniture",
   "Clothing",
-  "Books",
-  "Kitchen",
+  "Lab Supplies",
   "Sports",
-  "Tickets",
+  "Music",
+  "Services & Tutoring",
   "Other",
 ] as const;
 
 const CONDITIONS: { value: string; label: string }[] = [
-  { value: "new", label: "New" },
+  { value: "new_item", label: "New" },
   { value: "like_new", label: "Like New" },
   { value: "good", label: "Good" },
   { value: "fair", label: "Fair" },
@@ -137,6 +138,7 @@ function formatPrice(post: Post): { text: string; isFree: boolean } {
 
 function conditionLabel(condition: string): string {
   const map: Record<string, string> = {
+    new_item: "New",
     new: "New",
     like_new: "Like New",
     good: "Good",

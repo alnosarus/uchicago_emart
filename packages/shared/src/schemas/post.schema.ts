@@ -52,7 +52,7 @@ export const postQuerySchema = z.object({
   q: z.string().optional(),
   category: z.string().optional(),
   size: storageSizeEnum.optional(),
-  location: locationTypeEnum.optional(),
+  locationType: locationTypeEnum.optional(),
   priceMin: z.coerce.number().min(0).optional(),
   priceMax: z.coerce.number().min(0).optional(),
   condition: conditionEnum.optional(),

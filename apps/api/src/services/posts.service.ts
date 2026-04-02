@@ -114,6 +114,28 @@ export async function listPosts(input: ListPostsInput) {
     limit = 20,
   } = input;
 
+  // Build marketplace filter as single object to avoid spread overwrites
+  const marketplaceWhere: Record<string, any> = {};
+  if (category) marketplaceWhere.category = category;
+  if (condition) marketplaceWhere.condition = mapCondition(condition);
+  if (priceMin !== undefined || priceMax !== undefined) {
+    marketplaceWhere.priceAmount = {
+      ...(priceMin !== undefined && { gte: priceMin }),
+      ...(priceMax !== undefined && { lte: priceMax }),
+    };
+  }
+
+  // Build storage filter as single object
+  const storageWhere: Record<string, any> = {};
+  if (size) storageWhere.size = size;
+  if (locationType) storageWhere.locationType = locationType;
+  if (priceMin !== undefined || priceMax !== undefined) {
+    storageWhere.priceMonthly = {
+      ...(priceMin !== undefined && { gte: priceMin }),
+      ...(priceMax !== undefined && { lte: priceMax }),
+    };
+  }
+
   const where: Prisma.PostWhereInput = {
     status: "active",
     ...(type && { type: type as any }),
@@ -124,30 +146,8 @@ export async function listPosts(input: ListPostsInput) {
         { description: { contains: q, mode: "insensitive" } },
       ],
     }),
-    ...(category && { marketplace: { category } }),
-    ...(condition && { marketplace: { condition: mapCondition(condition) as any } }),
-    ...(size && { storage: { size: size as any } }),
-    ...(locationType && { storage: { locationType: locationType as any } }),
-    ...((priceMin !== undefined || priceMax !== undefined) && {
-      OR: [
-        {
-          marketplace: {
-            priceAmount: {
-              ...(priceMin !== undefined && { gte: priceMin }),
-              ...(priceMax !== undefined && { lte: priceMax }),
-            },
-          },
-        },
-        {
-          storage: {
-            priceMonthly: {
-              ...(priceMin !== undefined && { gte: priceMin }),
-              ...(priceMax !== undefined && { lte: priceMax }),
-            },
-          },
-        },
-      ],
-    }),
+    ...(Object.keys(marketplaceWhere).length > 0 && { marketplace: marketplaceWhere }),
+    ...(Object.keys(storageWhere).length > 0 && { storage: storageWhere }),
   };
 
   const orderBy: Prisma.PostOrderByWithRelationInput =
