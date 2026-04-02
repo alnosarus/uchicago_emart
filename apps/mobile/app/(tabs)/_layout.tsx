@@ -1,59 +1,41 @@
-import React from 'react';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { Link, Tabs } from 'expo-router';
-import { Pressable } from 'react-native';
+import React from "react";
+import { Tabs } from "expo-router";
+import { View, StyleSheet, Platform } from "react-native";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { colors } from "@/constants/colors";
 
-import Colors from '@/constants/Colors';
-import { useColorScheme } from '@/components/useColorScheme';
-import { useClientOnlyValue } from '@/components/useClientOnlyValue';
+function TabIcon({ name, color }: { name: React.ComponentProps<typeof FontAwesome>["name"]; color: string }) {
+  return <FontAwesome size={22} name={name} color={color} />;
+}
 
-// You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
-function TabBarIcon(props: {
-  name: React.ComponentProps<typeof FontAwesome>['name'];
-  color: string;
-}) {
-  return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
+function CreateTabIcon() {
+  return (
+    <View style={styles.fab}>
+      <FontAwesome size={20} name="plus" color={colors.white} />
+    </View>
+  );
 }
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        // Disable the static render of the header on web
-        // to prevent a hydration error in React Navigation v6.
-        headerShown: useClientOnlyValue(false, true),
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Tab One',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-          headerRight: () => (
-            <Link href="/modal" asChild>
-              <Pressable>
-                {({ pressed }) => (
-                  <FontAwesome
-                    name="info-circle"
-                    size={25}
-                    color={Colors[colorScheme ?? 'light'].text}
-                    style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
-                  />
-                )}
-              </Pressable>
-            </Link>
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="two"
-        options={{
-          title: 'Tab Two',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-        }}
-      />
+    <Tabs screenOptions={{
+      tabBarActiveTintColor: colors.maroon[600],
+      tabBarInactiveTintColor: colors.gray[400],
+      tabBarStyle: styles.tabBar,
+      tabBarLabelStyle: styles.tabLabel,
+      headerShown: false,
+    }}>
+      <Tabs.Screen name="marketplace" options={{ title: "Market", tabBarIcon: ({ color }) => <TabIcon name="shopping-bag" color={color} /> }} />
+      <Tabs.Screen name="storage" options={{ title: "Storage", tabBarIcon: ({ color }) => <TabIcon name="archive" color={color} /> }} />
+      <Tabs.Screen name="create" options={{ title: "Post", tabBarIcon: () => <CreateTabIcon />, tabBarLabel: () => null }} />
+      <Tabs.Screen name="housing" options={{ title: "Housing", tabBarIcon: ({ color }) => <TabIcon name="home" color={color} /> }} />
+      <Tabs.Screen name="profile" options={{ title: "Profile", tabBarIcon: ({ color }) => <TabIcon name="user" color={color} /> }} />
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  tabBar: { height: Platform.OS === "ios" ? 85 : 65, paddingTop: 6, borderTopWidth: 1, borderTopColor: colors.gray[200], backgroundColor: colors.white },
+  tabLabel: { fontSize: 10, fontWeight: "600" },
+  fab: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.maroon[600], alignItems: "center", justifyContent: "center", marginBottom: 4, shadowColor: colors.maroon[600], shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 4, elevation: 4 },
+});
