@@ -9,6 +9,7 @@ import healthRoutes from "./routes/health";
 import authRoutes from "./routes/auth";
 import userRoutes from "./routes/users";
 import postRoutes from "./routes/posts";
+import transactionRoutes from "./routes/transactions";
 
 const app = express();
 
@@ -32,6 +33,7 @@ app.use("/api", healthRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
+app.use("/api/transactions", transactionRoutes);
 
 // Error handler (must be last)
 app.use(errorHandler);
