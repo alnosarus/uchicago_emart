@@ -1,0 +1,62 @@
+services:
+  # ── Local PostgreSQL ──
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: uchicago
+      POSTGRES_PASSWORD: localdev
+      POSTGRES_DB: uchicago_marketplace
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U uchicago -d uchicago_marketplace"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # ── API (Express) ──
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api.dev
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file: .env
+    environment:
+      # Override DATABASE_URL to point to the docker postgres
+      DATABASE_URL: postgresql://uchicago:localdev@db:5432/uchicago_marketplace
+      NODE_ENV: development
+      PORT: "3000"
+    volumes:
+      - ./apps/api/src:/app/apps/api/src
+      - ./apps/api/prisma:/app/apps/api/prisma
+      - ./packages/shared/src:/app/packages/shared/src
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ── Web (Next.js) ──
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web.dev
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    env_file: .env
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3000
+      NODE_ENV: development
+    volumes:
+      - ./apps/web/src:/app/apps/web/src
+      - ./apps/web/public:/app/apps/web/public
+      - ./packages/shared/src:/app/packages/shared/src
+    depends_on:
+      - api
+
+volumes:
+  pgdata:
