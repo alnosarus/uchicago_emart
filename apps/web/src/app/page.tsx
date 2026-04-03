@@ -22,13 +22,14 @@ interface PostCard {
 export default function Home() {
   const { user, isLoading, logout } = useAuth();
   const [recentPosts, setRecentPosts] = useState<PostCard[]>([]);
+  const [activeTab, setActiveTab] = useState("marketplace");
 
   useEffect(() => {
-    fetch(`${API_URL}/api/posts?limit=6`)
+    fetch(`${API_URL}/api/posts?type=${activeTab}&limit=6`)
       .then(r => r.ok ? r.json() : { posts: [] })
       .then(data => setRecentPosts(data.posts || []))
       .catch(() => {});
-  }, []);
+  }, [activeTab]);
 
   return (
     <>
@@ -100,12 +101,23 @@ export default function Home() {
       {/* Feature tabs */}
       <div className="bg-white border-b-2 border-gray-200 sticky top-16 z-40 shadow-sm">
         <div className="max-w-5xl mx-auto px-8 flex gap-0">
-          <button className="px-6 py-3.5 text-sm font-bold text-maroon-700 border-b-3 border-maroon-600 -mb-0.5">
-            Marketplace
-          </button>
-          <button className="px-6 py-3.5 text-sm font-bold text-gray-500 border-b-3 border-transparent hover:text-amber-700">
-            Storage Match
-          </button>
+          {[
+            { label: "Marketplace", value: "marketplace", activeColor: "text-maroon-700 border-maroon-600", hoverColor: "hover:text-maroon-600" },
+            { label: "Storage Match", value: "storage", activeColor: "text-amber-700 border-amber-600", hoverColor: "hover:text-amber-700" },
+            { label: "Housing", value: "housing", activeColor: "text-indigo-700 border-indigo-600", hoverColor: "hover:text-indigo-700" },
+          ].map((tab) => (
+            <button
+              key={tab.value}
+              onClick={() => setActiveTab(tab.value)}
+              className={`px-6 py-3.5 text-sm font-bold border-b-3 -mb-0.5 transition-colors ${
+                activeTab === tab.value
+                  ? tab.activeColor
+                  : `text-gray-500 border-transparent ${tab.hoverColor}`
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -113,11 +125,15 @@ export default function Home() {
       <main className="flex-1 max-w-5xl mx-auto w-full px-8 py-8">
         <div className="flex items-center justify-between mb-5">
           <div>
-            <h2 className="text-xl font-extrabold text-gray-900">Marketplace</h2>
-            <p className="text-sm text-gray-500 mt-0.5">Buy and sell items with fellow Maroons</p>
+            <h2 className="text-xl font-extrabold text-gray-900">
+              {activeTab === "marketplace" ? "Marketplace" : activeTab === "storage" ? "Storage Match" : "Housing"}
+            </h2>
+            <p className="text-sm text-gray-500 mt-0.5">
+              {activeTab === "marketplace" ? "Buy and sell items with fellow Maroons" : activeTab === "storage" ? "Find or offer storage space" : "Sublets and passdowns for Maroons"}
+            </p>
           </div>
           <Link href="/create" className="bg-gradient-to-br from-maroon-600 to-maroon-700 text-white text-sm font-semibold px-4 py-2 rounded-full shadow-md">
-            + Post Item
+            + Post
           </Link>
         </div>
         {recentPosts.length > 0 ? (
