@@ -29,6 +29,14 @@ export async function loginWithGoogle(code: string, redirectUri?: string) {
       env.GOOGLE_CLIENT_ID_ANDROID,
     ].filter(Boolean) as string[];
 
+    // Debug: log what we're verifying against
+    try {
+      const claims = JSON.parse(Buffer.from(code.split(".")[1], "base64").toString());
+      console.log("[Auth Debug] id_token audience:", claims.aud);
+      console.log("[Auth Debug] Allowed audiences:", allowedAudiences);
+      console.log("[Auth Debug] Audience match:", allowedAudiences.includes(claims.aud));
+    } catch { /* ignore parse errors */ }
+
     const ticket = await googleClient.verifyIdToken({
       idToken: code,
       audience: allowedAudiences,

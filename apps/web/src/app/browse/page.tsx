@@ -572,24 +572,26 @@ function BrowseContent() {
       {/* Filters bar */}
       <div className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-30">
         <div className="max-w-5xl mx-auto px-4 sm:px-8">
-          {/* Type tabs */}
-          <div className="flex items-center gap-0 -mb-px overflow-x-auto">
-            {TYPE_TABS.map((tab) => (
-              <button
-                key={tab.value}
-                onClick={() => setFilter("type", tab.value)}
-                className={`px-4 sm:px-5 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${
-                  activeType === tab.value
-                    ? "border-maroon-600 text-maroon-700"
-                    : "border-transparent text-gray-500 hover:text-gray-700"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+          {/* Type tabs + filters */}
+          <div className="flex flex-wrap items-center gap-0 -mb-px">
+            <div className="flex items-center gap-0 overflow-x-auto">
+              {TYPE_TABS.map((tab) => (
+                <button
+                  key={tab.value}
+                  onClick={() => setFilter("type", tab.value)}
+                  className={`px-3 sm:px-5 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${
+                    activeType === tab.value
+                      ? "border-maroon-600 text-maroon-700"
+                      : "border-transparent text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
 
             {/* Dropdown filters */}
-            <div className="flex items-center gap-2 ml-auto py-2">
+            <div className="flex items-center gap-2 ml-auto py-2 overflow-x-auto">
               {/* Category (marketplace only or all — hidden for storage/housing) */}
               {activeType !== "storage" && activeType !== "housing" && (
                 <select
@@ -660,7 +662,7 @@ function BrowseContent() {
                 ))}
               </select>
             </div>
-          </div>
+          </div> {/* end flex-wrap */}
         </div>
       </div>
 

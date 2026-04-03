@@ -151,11 +151,11 @@ function LoadingSkeleton() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Breadcrumb skeleton */}
-      <div className="max-w-6xl mx-auto px-6 pt-6">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-4 sm:pt-6">
         <div className="h-4 w-48 bg-gray-200 rounded animate-pulse" />
       </div>
 
-      <div className="max-w-6xl mx-auto px-6 py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           {/* Image skeleton */}
           <div className="aspect-square bg-gray-200 rounded-2xl animate-pulse" />
@@ -318,7 +318,7 @@ function MarketplaceDetailsSection({ details }: { details: MarketplaceDetails })
       <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">
         Listing Details
       </h3>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         {details.category && (
           <div>
             <dt className="text-xs font-medium text-gray-500 uppercase tracking-wide">
@@ -385,7 +385,7 @@ function StorageDetailsSection({ details }: { details: StorageDetails }) {
       <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">
         Storage Details
       </h3>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         {details.startDate && (
           <div>
             <dt className="text-xs font-medium text-gray-500 uppercase tracking-wide">
@@ -454,7 +454,7 @@ function HousingDetailsSection({ details }: { details: HousingDetails }) {
       <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">
         Housing Details
       </h3>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         <div>
           <dt className="text-xs font-medium text-gray-500 uppercase tracking-wide">
             Subtype
@@ -650,23 +650,23 @@ export default function PostDetailPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Breadcrumb */}
-      <div className="max-w-6xl mx-auto px-6 pt-6">
-        <nav className="flex items-center gap-2 text-sm text-gray-500">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-4 sm:pt-6">
+        <nav className="flex items-center gap-2 text-sm text-gray-500 min-w-0">
           <Link
             href="/browse"
-            className="hover:text-maroon-600 transition-colors"
+            className="hover:text-maroon-600 transition-colors shrink-0"
           >
             Browse
           </Link>
-          <span className="text-gray-300">/</span>
-          <span className="text-gray-900 font-medium truncate max-w-xs">
+          <span className="text-gray-300 shrink-0">/</span>
+          <span className="text-gray-900 font-medium truncate">
             {post.title}
           </span>
         </nav>
       </div>
 
       {/* Main content */}
-      <div className="max-w-6xl mx-auto px-6 py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           {/* Left: Image gallery */}
           <ImageGallery images={post.images} />
@@ -675,7 +675,7 @@ export default function PostDetailPage() {
           <div className="space-y-6">
             {/* Badges + title + price */}
             <div>
-              <div className="flex items-center gap-2 mb-3">
+              <div className="flex flex-wrap items-center gap-2 mb-3">
                 <span
                   className={`text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wide ${typeBadgeClasses(post.type)}`}
                 >
@@ -807,13 +807,13 @@ export default function PostDetailPage() {
             <div className="flex flex-wrap gap-3">
               <button
                 disabled
-                className="flex-1 min-w-[140px] bg-gradient-to-br from-maroon-600 to-maroon-700 text-white text-sm font-semibold py-3 rounded-lg shadow-md opacity-50 cursor-not-allowed"
+                className="flex-1 min-w-[120px] sm:min-w-[140px] bg-gradient-to-br from-maroon-600 to-maroon-700 text-white text-sm font-semibold py-3 rounded-lg shadow-md opacity-50 cursor-not-allowed"
               >
                 Message Seller
               </button>
               <button
                 disabled
-                className="flex-1 min-w-[140px] border border-gray-300 text-gray-700 text-sm font-semibold py-3 rounded-lg hover:bg-gray-50 transition-colors opacity-50 cursor-not-allowed"
+                className="flex-1 min-w-[120px] sm:min-w-[140px] border border-gray-300 text-gray-700 text-sm font-semibold py-3 rounded-lg hover:bg-gray-50 transition-colors opacity-50 cursor-not-allowed"
               >
                 Save
               </button>

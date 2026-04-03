@@ -34,45 +34,45 @@ export default function Home() {
   return (
     <>
       {/* Navbar */}
-      <nav className="bg-white border-b border-gray-200 px-8 h-16 flex items-center justify-between sticky top-0 z-50 shadow-sm">
-        <Link href="/" className="flex items-center gap-2">
-          <span className="text-2xl font-bold tracking-wide uppercase bg-gradient-to-br from-maroon-700 to-maroon-500 bg-clip-text text-transparent">
+      <nav className="bg-white border-b border-gray-200 px-4 sm:px-8 h-14 sm:h-16 flex items-center justify-between sticky top-0 z-50 shadow-sm">
+        <Link href="/" className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <span className="text-xl sm:text-2xl font-bold tracking-wide uppercase bg-gradient-to-br from-maroon-700 to-maroon-500 bg-clip-text text-transparent">
             UChicago
           </span>
-          <span className="text-sm font-medium text-gray-400 uppercase tracking-wider">
+          <span className="hidden sm:inline text-sm font-medium text-gray-400 uppercase tracking-wider">
             Marketplace
           </span>
         </Link>
-        <div className="flex items-center gap-3">
-          <Link href="/browse" className="text-sm font-medium text-gray-600 hover:text-maroon-600 px-3 py-1.5 rounded-md transition-colors">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <Link href="/browse" className="text-sm font-medium text-gray-600 hover:text-maroon-600 px-2 sm:px-3 py-1.5 rounded-md transition-colors">
             Browse
           </Link>
           {isLoading ? (
-            <div className="w-20 h-8 bg-gray-100 rounded-full animate-pulse" />
+            <div className="w-16 sm:w-20 h-8 bg-gray-100 rounded-full animate-pulse" />
           ) : user ? (
             <>
-              <Link href="/create" className="text-sm font-medium text-gray-600 hover:text-maroon-600 px-3 py-1.5 rounded-md transition-colors">
+              <Link href="/create" className="hidden sm:inline-flex text-sm font-medium text-gray-600 hover:text-maroon-600 px-3 py-1.5 rounded-md transition-colors">
                 + Post
               </Link>
-              <Link href="/notifications" className="text-xl px-2 py-1 rounded-full hover:bg-gray-100 transition-colors">
+              <Link href="/notifications" className="text-lg sm:text-xl px-1.5 sm:px-2 py-1 rounded-full hover:bg-gray-100 transition-colors">
                 🔔
               </Link>
               <button
                 onClick={logout}
-                className="text-sm font-semibold text-gray-700 border border-gray-300 px-4 py-2 rounded-full hover:bg-gray-100 transition-colors"
+                className="hidden sm:inline-flex text-sm font-semibold text-gray-700 border border-gray-300 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full hover:bg-gray-100 transition-colors"
               >
                 Log Out
               </button>
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-maroon-500 to-maroon-700 flex items-center justify-center text-white text-xs font-bold">
+              <Link href="/profile" className="w-8 h-8 rounded-full bg-gradient-to-br from-maroon-500 to-maroon-700 flex items-center justify-center text-white text-xs font-bold shrink-0">
                 {user.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
-              </div>
+              </Link>
             </>
           ) : (
             <>
-              <Link href="/auth" className="text-sm font-semibold text-gray-700 border border-gray-300 px-4 py-2 rounded-full hover:bg-gray-100 transition-colors">
+              <Link href="/auth" className="hidden sm:inline-flex text-sm font-semibold text-gray-700 border border-gray-300 px-4 py-2 rounded-full hover:bg-gray-100 transition-colors">
                 Log In
               </Link>
-              <Link href="/auth" className="text-sm font-semibold text-white bg-gradient-to-br from-maroon-600 to-maroon-700 px-4 py-2 rounded-full shadow-md hover:from-maroon-700 hover:to-maroon-800 transition-all">
+              <Link href="/auth" className="text-sm font-semibold text-white bg-gradient-to-br from-maroon-600 to-maroon-700 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full shadow-md hover:from-maroon-700 hover:to-maroon-800 transition-all">
                 Sign Up
               </Link>
             </>
@@ -81,35 +81,35 @@ export default function Home() {
       </nav>
 
       {/* Hero */}
-      <section className="bg-gradient-to-br from-maroon-900 via-maroon-700 to-maroon-500 px-8 py-24 text-center relative overflow-hidden">
-        <h1 className="text-5xl font-black text-white mb-9 relative z-10">
+      <section className="bg-gradient-to-br from-maroon-900 via-maroon-700 to-maroon-500 px-4 sm:px-8 py-14 sm:py-24 text-center relative overflow-hidden">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-6 sm:mb-9 relative z-10">
           UChicago Marketplace
         </h1>
-        <div className="max-w-xl mx-auto flex bg-white rounded-full shadow-2xl overflow-hidden p-1.5 pl-6 gap-2 items-center relative z-10">
-          <span className="text-gray-400 text-lg">&#128269;</span>
+        <div className="max-w-xl mx-auto flex bg-white rounded-full shadow-2xl overflow-hidden p-1 sm:p-1.5 pl-4 sm:pl-6 gap-1.5 sm:gap-2 items-center relative z-10">
+          <span className="text-gray-400 text-base sm:text-lg">&#128269;</span>
           <input
             type="text"
             placeholder="Search listings, storage..."
-            className="flex-1 border-none text-base text-gray-800 bg-transparent outline-none"
+            className="flex-1 border-none text-sm sm:text-base text-gray-800 bg-transparent outline-none min-w-0"
           />
-          <button className="bg-gradient-to-br from-maroon-600 to-maroon-700 text-white text-sm font-semibold px-6 py-2.5 rounded-full shadow-md">
+          <button className="bg-gradient-to-br from-maroon-600 to-maroon-700 text-white text-xs sm:text-sm font-semibold px-4 sm:px-6 py-2 sm:py-2.5 rounded-full shadow-md shrink-0">
             Browse
           </button>
         </div>
       </section>
 
       {/* Feature tabs */}
-      <div className="bg-white border-b-2 border-gray-200 sticky top-16 z-40 shadow-sm">
-        <div className="max-w-5xl mx-auto px-8 flex gap-0">
+      <div className="bg-white border-b-2 border-gray-200 sticky top-14 sm:top-16 z-40 shadow-sm overflow-x-auto">
+        <div className="max-w-5xl mx-auto px-4 sm:px-8 flex gap-0 min-w-max sm:min-w-0">
           {[
             { label: "Marketplace", value: "marketplace", activeColor: "text-maroon-700 border-maroon-600", hoverColor: "hover:text-maroon-600" },
-            { label: "Storage Match", value: "storage", activeColor: "text-amber-700 border-amber-600", hoverColor: "hover:text-amber-700" },
+            { label: "Storage", value: "storage", activeColor: "text-amber-700 border-amber-600", hoverColor: "hover:text-amber-700" },
             { label: "Housing", value: "housing", activeColor: "text-indigo-700 border-indigo-600", hoverColor: "hover:text-indigo-700" },
           ].map((tab) => (
             <button
               key={tab.value}
               onClick={() => setActiveTab(tab.value)}
-              className={`px-6 py-3.5 text-sm font-bold border-b-3 -mb-0.5 transition-colors ${
+              className={`px-4 sm:px-6 py-3 sm:py-3.5 text-sm font-bold border-b-3 -mb-0.5 transition-colors whitespace-nowrap ${
                 activeTab === tab.value
                   ? tab.activeColor
                   : `text-gray-500 border-transparent ${tab.hoverColor}`
@@ -122,8 +122,8 @@ export default function Home() {
       </div>
 
       {/* Content */}
-      <main className="flex-1 max-w-5xl mx-auto w-full px-8 py-8">
-        <div className="flex items-center justify-between mb-5">
+      <main className="flex-1 max-w-5xl mx-auto w-full px-4 sm:px-8 py-6 sm:py-8">
+        <div className="flex items-center justify-between gap-3 mb-5">
           <div>
             <h2 className="text-xl font-extrabold text-gray-900">
               {activeTab === "marketplace" ? "Marketplace" : activeTab === "storage" ? "Storage Match" : "Housing"}

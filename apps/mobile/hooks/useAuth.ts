@@ -144,11 +144,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Handle the OAuth response when it arrives
   useEffect(() => {
-    if (response?.type === "success" && response.authentication?.idToken) {
-      handleIdToken(response.authentication.idToken);
-    } else if (response?.type === "success" && response.authentication?.accessToken) {
-      // Fallback: use Google access token to get user info, then send to our API
-      handleGoogleAccessToken(response.authentication.accessToken);
+    if (response?.type === "success") {
+      console.log("Google auth response keys:", Object.keys(response.authentication || {}));
+      console.log("Has idToken:", !!response.authentication?.idToken);
+      console.log("Has accessToken:", !!response.authentication?.accessToken);
+      if (response.authentication?.idToken) {
+        // Log the audience (2nd segment of JWT)
+        try {
+          const claims = JSON.parse(atob(response.authentication.idToken.split(".")[1]));
+          console.log("idToken audience:", claims.aud);
+          console.log("idToken email:", claims.email);
+        } catch { /* ignore */ }
+        handleIdToken(response.authentication.idToken);
+      } else if (response.authentication?.accessToken) {
+        handleGoogleAccessToken(response.authentication.accessToken);
+      }
     }
   }, [response]);
 

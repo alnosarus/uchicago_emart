@@ -173,7 +173,7 @@ interface HousingFormState {
 function LoadingSkeleton() {
   return (
     <>
-      <nav className="bg-white border-b border-gray-200 px-8 h-16 flex items-center justify-between sticky top-0 z-50 shadow-sm">
+      <nav className="bg-white border-b border-gray-200 px-4 sm:px-8 h-14 sm:h-16 flex items-center justify-between sticky top-0 z-50 shadow-sm">
         <div className="flex items-center gap-2">
           <div className="h-6 w-24 bg-gray-200 rounded animate-pulse" />
           <div className="h-4 w-20 bg-gray-200 rounded animate-pulse" />
@@ -622,7 +622,7 @@ export default function EditPostPage() {
         {/* Price type */}
         <div>
           <label className={labelClass}>Pricing</label>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
             {(["fixed", "free", "trade"] as const).map((pt) => (
               <button
                 key={pt}
@@ -694,7 +694,7 @@ export default function EditPostPage() {
         </h3>
 
         {/* Dates */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label htmlFor="startDate" className={labelClass}>
               Start Date
@@ -899,7 +899,7 @@ export default function EditPostPage() {
         </div>
 
         {/* Bedrooms & Bathrooms */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label htmlFor="bedrooms" className={labelClass}>
               Bedrooms
@@ -940,7 +940,7 @@ export default function EditPostPage() {
 
         {/* Date fields: sublet vs passdown */}
         {housing.subtype === "sublet" ? (
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label htmlFor="moveInDate" className={labelClass}>
                 Move-in Date
@@ -967,7 +967,7 @@ export default function EditPostPage() {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label htmlFor="leaseStartDate" className={labelClass}>
                 Lease Start Date
@@ -1091,7 +1091,7 @@ export default function EditPostPage() {
   return (
     <>
       {/* Navbar */}
-      <nav className="bg-white border-b border-gray-200 px-8 h-16 flex items-center justify-between sticky top-0 z-50 shadow-sm">
+      <nav className="bg-white border-b border-gray-200 px-4 sm:px-8 h-14 sm:h-16 flex items-center justify-between sticky top-0 z-50 shadow-sm">
         <Link href="/" className="flex items-center gap-2">
           <span className="text-2xl font-bold tracking-wide uppercase bg-gradient-to-br from-maroon-700 to-maroon-500 bg-clip-text text-transparent">
             UChicago
