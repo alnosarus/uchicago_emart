@@ -37,12 +37,12 @@ interface CreatePostInput {
   housing?: {
     subtype: string;
     side: string;
-    monthlyRent?: number | null;
-    bedrooms: number;
-    bathrooms: number;
+    monthlyRent: number;
+    bedrooms: string;
+    bathrooms: string;
     neighborhood?: string | null;
     amenities?: string[];
-    roommates: boolean;
+    roommates: string;
     roommateCount?: number | null;
     moveInDate?: string | null;
     moveOutDate?: string | null;
@@ -91,14 +91,14 @@ export async function createPost(input: CreatePostInput) {
       ...(housing && {
         housing: {
           create: {
-            subtype: housing.subtype,
-            side: housing.side,
+            subtype: housing.subtype as any,
+            side: housing.side as any,
             monthlyRent: housing.monthlyRent ?? null,
-            bedrooms: housing.bedrooms,
-            bathrooms: housing.bathrooms,
+            bedrooms: housing.bedrooms as any,
+            bathrooms: housing.bathrooms as any,
             neighborhood: housing.neighborhood ?? null,
             amenities: housing.amenities ?? [],
-            roommates: housing.roommates,
+            roommates: housing.roommates as any,
             roommateCount: housing.roommateCount ?? null,
             moveInDate: housing.moveInDate ? new Date(housing.moveInDate) : null,
             moveOutDate: housing.moveOutDate ? new Date(housing.moveOutDate) : null,
@@ -343,11 +343,20 @@ export async function updatePost(postId: string, userId: string, input: UpdatePo
       ...(input.housing && {
         housing: {
           update: {
-            ...input.housing,
+            ...(input.housing.subtype && { subtype: input.housing.subtype }),
+            ...(input.housing.side && { side: input.housing.side }),
+            ...(input.housing.monthlyRent !== undefined && { monthlyRent: input.housing.monthlyRent }),
+            ...(input.housing.bedrooms && { bedrooms: input.housing.bedrooms }),
+            ...(input.housing.bathrooms && { bathrooms: input.housing.bathrooms }),
+            ...(input.housing.neighborhood !== undefined && { neighborhood: input.housing.neighborhood }),
+            ...(input.housing.amenities && { amenities: input.housing.amenities }),
+            ...(input.housing.roommates !== undefined && { roommates: input.housing.roommates }),
+            ...(input.housing.roommateCount !== undefined && { roommateCount: input.housing.roommateCount }),
             ...(input.housing.moveInDate && { moveInDate: new Date(input.housing.moveInDate) }),
             ...(input.housing.moveOutDate && { moveOutDate: new Date(input.housing.moveOutDate) }),
             ...(input.housing.leaseStartDate && { leaseStartDate: new Date(input.housing.leaseStartDate) }),
-          },
+            ...(input.housing.leaseDurationMonths !== undefined && { leaseDurationMonths: input.housing.leaseDurationMonths }),
+          } as any,
         },
       }),
     },
