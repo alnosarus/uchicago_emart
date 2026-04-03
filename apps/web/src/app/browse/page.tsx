@@ -38,6 +38,7 @@ const TYPE_TABS = [
   { value: "", label: "All" },
   { value: "marketplace", label: "Marketplace" },
   { value: "storage", label: "Storage" },
+  { value: "housing", label: "Housing" },
 ] as const;
 
 // ── Types ────────────────────────────────────────
@@ -65,6 +66,17 @@ interface StorageDetails {
   isFree: boolean;
 }
 
+interface HousingDetails {
+  subtype: "sublet" | "passdown";
+  monthlyRent: number | null;
+  bedrooms: string;
+  bathrooms: string;
+  moveInDate: string | null;
+  moveOutDate: string | null;
+  leaseStartDate: string | null;
+  leaseDurationMonths: number | null;
+}
+
 interface PostImage {
   url: string;
 }
@@ -73,13 +85,14 @@ interface Post {
   id: string;
   title: string;
   description: string | null;
-  type: "marketplace" | "storage";
+  type: "marketplace" | "storage" | "housing";
   side: string;
   status: string;
   createdAt: string;
   author: PostAuthor;
   marketplace: MarketplaceDetails | null;
   storage: StorageDetails | null;
+  housing: HousingDetails | null;
   images: PostImage[];
   _count: { savedBy: number };
 }
@@ -130,6 +143,12 @@ function formatPrice(post: Post): { text: string; isFree: boolean } {
     if (post.storage.isFree) return { text: "Free", isFree: true };
     if (post.storage.priceMonthly != null) {
       return { text: `$${post.storage.priceMonthly.toFixed(2)}/mo`, isFree: false };
+    }
+    return { text: "Price TBD", isFree: false };
+  }
+  if (post.type === "housing" && post.housing) {
+    if (post.housing.monthlyRent != null) {
+      return { text: `$${post.housing.monthlyRent.toFixed(2)}/mo`, isFree: false };
     }
     return { text: "Price TBD", isFree: false };
   }
@@ -186,10 +205,12 @@ function PostCard({ post }: { post: Post }) {
           className={`absolute top-2 left-2 text-xs font-semibold px-2 py-0.5 rounded-full ${
             post.type === "storage"
               ? "bg-amber-100 text-amber-700"
-              : "bg-maroon-100 text-maroon-700"
+              : post.type === "housing"
+                ? "bg-indigo-100 text-indigo-700"
+                : "bg-maroon-100 text-maroon-700"
           }`}
         >
-          {post.type === "storage" ? "Storage" : "Marketplace"}
+          {post.type === "storage" ? "Storage" : post.type === "housing" ? "Housing" : "Marketplace"}
         </span>
 
         {/* Save count */}
@@ -237,6 +258,25 @@ function PostCard({ post }: { post: Post }) {
             {" / "}
             {post.storage.locationType === "on_campus" ? "On Campus" : "Off Campus"}
           </p>
+        )}
+
+        {/* Housing info (housing only) */}
+        {post.housing && (
+          <div className="mt-1 flex flex-wrap items-center gap-1.5">
+            <span className="text-xs font-medium bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded">
+              {post.housing.subtype === "sublet" ? "Sublet" : "Passdown"}
+            </span>
+            <span className="text-xs text-gray-500">
+              {post.housing.bedrooms === "studio" ? "Studio" : post.housing.bedrooms === "3_plus" ? "3+ BR" : `${post.housing.bedrooms} BR`}
+            </span>
+            {post.housing.subtype === "sublet" && post.housing.moveInDate && post.housing.moveOutDate && (
+              <span className="text-xs text-gray-400">
+                {new Date(post.housing.moveInDate).toLocaleDateString("en-US", { month: "short" })}
+                {" - "}
+                {new Date(post.housing.moveOutDate).toLocaleDateString("en-US", { month: "short", year: "2-digit" })}
+              </span>
+            )}
+          </div>
         )}
 
         {/* Author + time */}
@@ -392,6 +432,7 @@ function BrowseContent() {
   const activeType = searchParams.get("type") || "";
   const activeCategory = searchParams.get("category") || "";
   const activeCondition = searchParams.get("condition") || "";
+  const activeSubtype = searchParams.get("subtype") || "";
   const activeSort = searchParams.get("sort") || "recent";
   const activeQ = searchParams.get("q") || "";
   const activePage = parseInt(searchParams.get("page") || "1", 10);
@@ -441,6 +482,7 @@ function BrowseContent() {
       if (activeType) params.set("type", activeType);
       if (activeCategory) params.set("category", activeCategory);
       if (activeCondition) params.set("condition", activeCondition);
+      if (activeSubtype) params.set("subtype", activeSubtype);
       if (activeSort && activeSort !== "recent") params.set("sort", activeSort);
       if (activeQ) params.set("q", activeQ);
       if (activePage > 1) params.set("page", String(activePage));
@@ -467,7 +509,7 @@ function BrowseContent() {
     return () => {
       cancelled = true;
     };
-  }, [activeType, activeCategory, activeCondition, activeSort, activeQ, activePage]);
+  }, [activeType, activeCategory, activeCondition, activeSubtype, activeSort, activeQ, activePage]);
 
   // Sync local search input when URL changes externally
   useEffect(() => {
@@ -479,7 +521,7 @@ function BrowseContent() {
     setFilter("q", searchInput.trim());
   };
 
-  const hasFilters = !!(activeType || activeCategory || activeCondition || activeQ);
+  const hasFilters = !!(activeType || activeCategory || activeCondition || activeSubtype || activeQ);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -548,8 +590,8 @@ function BrowseContent() {
 
             {/* Dropdown filters */}
             <div className="flex items-center gap-2 ml-auto py-2">
-              {/* Category (marketplace only or all) */}
-              {activeType !== "storage" && (
+              {/* Category (marketplace only or all — hidden for storage/housing) */}
+              {activeType !== "storage" && activeType !== "housing" && (
                 <select
                   value={activeCategory}
                   onChange={(e) => setFilter("category", e.target.value)}
@@ -568,8 +610,8 @@ function BrowseContent() {
                 </select>
               )}
 
-              {/* Condition (marketplace only) */}
-              {activeType !== "storage" && (
+              {/* Condition (marketplace only — hidden for storage/housing) */}
+              {activeType !== "storage" && activeType !== "housing" && (
                 <select
                   value={activeCondition}
                   onChange={(e) => setFilter("condition", e.target.value)}
@@ -585,6 +627,23 @@ function BrowseContent() {
                       {c.label}
                     </option>
                   ))}
+                </select>
+              )}
+
+              {/* Subtype (housing only) */}
+              {activeType === "housing" && (
+                <select
+                  value={activeSubtype}
+                  onChange={(e) => setFilter("subtype", e.target.value)}
+                  className={`text-sm border rounded-lg px-2.5 py-1.5 outline-none transition-colors cursor-pointer ${
+                    activeSubtype
+                      ? "border-indigo-300 bg-indigo-50 text-indigo-700"
+                      : "border-gray-200 text-gray-600 hover:border-gray-300"
+                  }`}
+                >
+                  <option value="">All Housing</option>
+                  <option value="sublet">Sublets</option>
+                  <option value="passdown">Passdowns</option>
                 </select>
               )}
 
@@ -629,7 +688,18 @@ function BrowseContent() {
                 onClick={() => setFilter("type", "")}
                 className="inline-flex items-center gap-1 text-xs font-medium bg-maroon-50 text-maroon-700 px-2.5 py-1 rounded-full hover:bg-maroon-100 transition-colors"
               >
-                {activeType === "marketplace" ? "Marketplace" : "Storage"}
+                {activeType === "marketplace" ? "Marketplace" : activeType === "housing" ? "Housing" : "Storage"}
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+            {activeSubtype && (
+              <button
+                onClick={() => setFilter("subtype", "")}
+                className="inline-flex items-center gap-1 text-xs font-medium bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full hover:bg-indigo-100 transition-colors"
+              >
+                {activeSubtype === "sublet" ? "Sublets" : "Passdowns"}
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>

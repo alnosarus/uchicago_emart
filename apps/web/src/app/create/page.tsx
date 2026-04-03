@@ -4,6 +4,12 @@ import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import {
+  HOUSING_AMENITIES,
+  BEDROOM_OPTIONS,
+  BATHROOM_OPTIONS,
+  LEASE_DURATION_OPTIONS,
+} from "@uchicago-marketplace/shared";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
@@ -33,7 +39,7 @@ const SIZES: { value: string; label: string }[] = [
   { value: "full_room", label: "Full room" },
 ];
 
-type PostType = "marketplace" | "storage";
+type PostType = "marketplace" | "storage" | "housing";
 
 interface MarketplaceFields {
   side: "sell" | "buy";
@@ -53,6 +59,22 @@ interface StorageFields {
   neighborhood: string;
   priceMonthly: string;
   isFree: boolean;
+}
+
+interface HousingFields {
+  subtype: "sublet" | "passdown";
+  side: "offering" | "looking";
+  monthlyRent: string;
+  bedrooms: string;
+  bathrooms: string;
+  moveInDate: string;
+  moveOutDate: string;
+  leaseStartDate: string;
+  leaseDurationMonths: string;
+  neighborhood: string;
+  amenities: string[];
+  roommates: "solo" | "shared";
+  roommateCount: string;
 }
 
 export default function CreatePostPage() {
@@ -84,6 +106,22 @@ export default function CreatePostPage() {
     neighborhood: "",
     priceMonthly: "",
     isFree: false,
+  });
+
+  const [housing, setHousing] = useState<HousingFields>({
+    subtype: "sublet",
+    side: "offering",
+    monthlyRent: "",
+    bedrooms: "",
+    bathrooms: "",
+    moveInDate: "",
+    moveOutDate: "",
+    leaseStartDate: "",
+    leaseDurationMonths: "",
+    neighborhood: "",
+    amenities: [],
+    roommates: "solo",
+    roommateCount: "",
   });
 
   // Redirect to auth if not logged in
@@ -123,6 +161,12 @@ export default function CreatePostPage() {
       if (!storage.startDate || !storage.endDate || !storage.size) return false;
       return true;
     }
+    if (postType === "housing") {
+      if (!housing.side || !housing.monthlyRent || !housing.bedrooms || !housing.bathrooms || !housing.roommates) return false;
+      if (housing.subtype === "sublet" && (!housing.moveInDate || !housing.moveOutDate)) return false;
+      if (housing.subtype === "passdown" && (!housing.leaseStartDate || !housing.leaseDurationMonths)) return false;
+      return true;
+    }
     return false;
   }
 
@@ -148,6 +192,34 @@ export default function CreatePostPage() {
             .split(",")
             .map((t) => t.trim())
             .filter(Boolean),
+        },
+      };
+    }
+    if (postType === "housing") {
+      return {
+        type: "housing" as const,
+        side: housing.side,
+        title: title.trim(),
+        description: description.trim() || null,
+        housing: {
+          subtype: housing.subtype,
+          monthlyRent: parseFloat(housing.monthlyRent) || 0,
+          bedrooms: housing.bedrooms,
+          bathrooms: housing.bathrooms,
+          neighborhood: housing.neighborhood.trim() || null,
+          amenities: housing.amenities,
+          roommates: housing.roommates,
+          roommateCount:
+            housing.roommates === "shared"
+              ? parseInt(housing.roommateCount, 10) || null
+              : null,
+          moveInDate: housing.subtype === "sublet" ? housing.moveInDate : null,
+          moveOutDate: housing.subtype === "sublet" ? housing.moveOutDate : null,
+          leaseStartDate: housing.subtype === "passdown" ? housing.leaseStartDate : null,
+          leaseDurationMonths:
+            housing.subtype === "passdown"
+              ? parseInt(housing.leaseDurationMonths, 10) || null
+              : null,
         },
       };
     }
@@ -210,7 +282,7 @@ export default function CreatePostPage() {
   // --- Step renderers ---
 
   function renderStepIndicator() {
-    const steps = ["Type", "Details", postType === "storage" ? "Storage" : "Listing", "Review"];
+    const steps = ["Type", "Details", postType === "storage" ? "Storage" : postType === "housing" ? "Housing" : "Listing", "Review"];
     return (
       <div className="flex items-center justify-center gap-1 mb-8">
         {steps.map((label, i) => {
@@ -263,7 +335,7 @@ export default function CreatePostPage() {
       <div>
         <h2 className="text-lg font-extrabold text-gray-900 mb-1">What would you like to post?</h2>
         <p className="text-sm text-gray-500 mb-6">Choose the type of listing you want to create.</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <button
             type="button"
             onClick={() => setPostType("marketplace")}
@@ -290,6 +362,19 @@ export default function CreatePostPage() {
             <h3 className="text-base font-bold text-gray-900">Storage</h3>
             <p className="text-sm text-gray-500 mt-1">Find or offer storage space on/off campus</p>
           </button>
+          <button
+            type="button"
+            onClick={() => setPostType("housing")}
+            className={`p-6 rounded-xl border-2 text-left transition-all ${
+              postType === "housing"
+                ? "border-indigo-500 bg-indigo-50 shadow-md"
+                : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm"
+            }`}
+          >
+            <div className="text-2xl mb-2">🏠</div>
+            <h3 className="text-base font-bold text-gray-900">Housing</h3>
+            <p className="text-sm text-gray-500 mt-1">Sublets & passdowns</p>
+          </button>
         </div>
       </div>
     );
@@ -314,7 +399,9 @@ export default function CreatePostPage() {
               placeholder={
                 postType === "marketplace"
                   ? 'e.g. "Organic Chemistry Textbook 4th Edition"'
-                  : 'e.g. "Storage space near campus for summer"'
+                  : postType === "housing"
+                    ? 'e.g. "Sunny 1BR sublet near campus, Jun-Aug"'
+                    : 'e.g. "Storage space near campus for summer"'
               }
               className={inputClass}
             />
@@ -623,6 +710,265 @@ export default function CreatePostPage() {
     );
   }
 
+  function renderStep3Housing() {
+    return (
+      <div>
+        <h2 className="text-lg font-extrabold text-gray-900 mb-1">Housing Details</h2>
+        <p className="text-sm text-gray-500 mb-6">Configure your housing listing.</p>
+        <div className="space-y-5">
+          {/* Subtype */}
+          <div>
+            <label className={labelClass}>Type</label>
+            <div className="grid grid-cols-2 gap-3">
+              {(["sublet", "passdown"] as const).map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setHousing((p) => ({ ...p, subtype: s }))}
+                  className={`py-2.5 rounded-lg text-sm font-semibold border-2 transition-all ${
+                    housing.subtype === s
+                      ? "border-indigo-500 bg-indigo-50 text-indigo-700"
+                      : "border-gray-200 text-gray-600 hover:border-gray-300"
+                  }`}
+                >
+                  {s === "sublet" ? "Sublet" : "Passdown"}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Side */}
+          <div>
+            <label className={labelClass}>I am... <span className="text-maroon-500">*</span></label>
+            <div className="grid grid-cols-2 gap-3">
+              {(
+                [
+                  { value: "offering", label: "Offering" },
+                  { value: "looking", label: "Looking for" },
+                ] as const
+              ).map((s) => (
+                <button
+                  key={s.value}
+                  type="button"
+                  onClick={() => setHousing((p) => ({ ...p, side: s.value }))}
+                  className={`py-2.5 rounded-lg text-sm font-semibold border-2 transition-all ${
+                    housing.side === s.value
+                      ? "border-indigo-500 bg-indigo-50 text-indigo-700"
+                      : "border-gray-200 text-gray-600 hover:border-gray-300"
+                  }`}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Monthly rent */}
+          <div>
+            <label htmlFor="monthlyRent" className={labelClass}>
+              Monthly Rent ($) <span className="text-maroon-500">*</span>
+            </label>
+            <input
+              id="monthlyRent"
+              type="number"
+              min="0"
+              step="1"
+              value={housing.monthlyRent}
+              onChange={(e) => setHousing((p) => ({ ...p, monthlyRent: e.target.value }))}
+              placeholder="0"
+              className={inputClass}
+            />
+          </div>
+
+          {/* Bedrooms & Bathrooms */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="bedrooms" className={labelClass}>
+                Bedrooms <span className="text-maroon-500">*</span>
+              </label>
+              <select
+                id="bedrooms"
+                value={housing.bedrooms}
+                onChange={(e) => setHousing((p) => ({ ...p, bedrooms: e.target.value }))}
+                className={selectClass}
+              >
+                <option value="">Select</option>
+                {BEDROOM_OPTIONS.map((b) => (
+                  <option key={b.value} value={b.value}>
+                    {b.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label htmlFor="bathrooms" className={labelClass}>
+                Bathrooms <span className="text-maroon-500">*</span>
+              </label>
+              <select
+                id="bathrooms"
+                value={housing.bathrooms}
+                onChange={(e) => setHousing((p) => ({ ...p, bathrooms: e.target.value }))}
+                className={selectClass}
+              >
+                <option value="">Select</option>
+                {BATHROOM_OPTIONS.map((b) => (
+                  <option key={b.value} value={b.value}>
+                    {b.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Date fields: sublet vs passdown */}
+          {housing.subtype === "sublet" ? (
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="moveInDate" className={labelClass}>
+                  Move-in Date <span className="text-maroon-500">*</span>
+                </label>
+                <input
+                  id="moveInDate"
+                  type="date"
+                  value={housing.moveInDate}
+                  onChange={(e) => setHousing((p) => ({ ...p, moveInDate: e.target.value }))}
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label htmlFor="moveOutDate" className={labelClass}>
+                  Move-out Date <span className="text-maroon-500">*</span>
+                </label>
+                <input
+                  id="moveOutDate"
+                  type="date"
+                  value={housing.moveOutDate}
+                  onChange={(e) => setHousing((p) => ({ ...p, moveOutDate: e.target.value }))}
+                  className={inputClass}
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="leaseStartDate" className={labelClass}>
+                  Lease Start Date <span className="text-maroon-500">*</span>
+                </label>
+                <input
+                  id="leaseStartDate"
+                  type="date"
+                  value={housing.leaseStartDate}
+                  onChange={(e) => setHousing((p) => ({ ...p, leaseStartDate: e.target.value }))}
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label htmlFor="leaseDuration" className={labelClass}>
+                  Lease Duration <span className="text-maroon-500">*</span>
+                </label>
+                <select
+                  id="leaseDuration"
+                  value={housing.leaseDurationMonths}
+                  onChange={(e) => setHousing((p) => ({ ...p, leaseDurationMonths: e.target.value }))}
+                  className={selectClass}
+                >
+                  <option value="">Select</option>
+                  {LEASE_DURATION_OPTIONS.map((d) => (
+                    <option key={d.value} value={d.value}>
+                      {d.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
+
+          {/* Neighborhood */}
+          <div>
+            <label htmlFor="housingNeighborhood" className={labelClass}>
+              Neighborhood
+            </label>
+            <input
+              id="housingNeighborhood"
+              type="text"
+              value={housing.neighborhood}
+              onChange={(e) => setHousing((p) => ({ ...p, neighborhood: e.target.value }))}
+              placeholder="e.g. Hyde Park, South Loop"
+              className={inputClass}
+            />
+          </div>
+
+          {/* Amenities */}
+          <div>
+            <label className={labelClass}>Amenities</label>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {HOUSING_AMENITIES.map((a) => (
+                <label key={a.value} className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={housing.amenities.includes(a.value)}
+                    onChange={(e) => {
+                      setHousing((p) => ({
+                        ...p,
+                        amenities: e.target.checked
+                          ? [...p.amenities, a.value]
+                          : p.amenities.filter((v) => v !== a.value),
+                      }));
+                    }}
+                    className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                  />
+                  <span className="text-sm text-gray-700">{a.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Roommates */}
+          <div>
+            <label className={labelClass}>Roommates <span className="text-maroon-500">*</span></label>
+            <div className="grid grid-cols-2 gap-3">
+              {(
+                [
+                  { value: "solo", label: "Solo" },
+                  { value: "shared", label: "Shared" },
+                ] as const
+              ).map((r) => (
+                <button
+                  key={r.value}
+                  type="button"
+                  onClick={() => setHousing((p) => ({ ...p, roommates: r.value }))}
+                  className={`py-2.5 rounded-lg text-sm font-semibold border-2 transition-all ${
+                    housing.roommates === r.value
+                      ? "border-indigo-500 bg-indigo-50 text-indigo-700"
+                      : "border-gray-200 text-gray-600 hover:border-gray-300"
+                  }`}
+                >
+                  {r.label}
+                </button>
+              ))}
+            </div>
+            {housing.roommates === "shared" && (
+              <div className="mt-3">
+                <label htmlFor="roommateCount" className={labelClass}>
+                  Number of Roommates
+                </label>
+                <input
+                  id="roommateCount"
+                  type="number"
+                  min="1"
+                  value={housing.roommateCount}
+                  onChange={(e) => setHousing((p) => ({ ...p, roommateCount: e.target.value }))}
+                  placeholder="e.g. 2"
+                  className={inputClass}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   function renderStep4() {
     const payload = buildPayload();
     return (
@@ -637,7 +983,9 @@ export default function CreatePostPage() {
               className={`inline-block px-2.5 py-1 rounded-full text-xs font-bold uppercase ${
                 postType === "marketplace"
                   ? "bg-maroon-100 text-maroon-700"
-                  : "bg-amber-100 text-amber-700"
+                  : postType === "housing"
+                    ? "bg-indigo-100 text-indigo-700"
+                    : "bg-amber-100 text-amber-700"
               }`}
             >
               {postType}
@@ -708,6 +1056,42 @@ export default function CreatePostPage() {
                 />
               </>
             )}
+            {postType === "housing" && payload.type === "housing" && (
+              <>
+                <DetailRow label="Subtype" value={payload.housing.subtype === "sublet" ? "Sublet" : "Passdown"} />
+                <DetailRow label="Side" value={payload.housing.subtype === "sublet" ? (housing.side === "offering" ? "Offering" : "Looking for") : (housing.side === "offering" ? "Offering" : "Looking for")} />
+                <DetailRow label="Monthly Rent" value={`$${payload.housing.monthlyRent.toFixed(2)}/mo`} />
+                <DetailRow
+                  label="Bedrooms"
+                  value={BEDROOM_OPTIONS.find((b) => b.value === payload.housing.bedrooms)?.label || payload.housing.bedrooms}
+                />
+                <DetailRow
+                  label="Bathrooms"
+                  value={BATHROOM_OPTIONS.find((b) => b.value === payload.housing.bathrooms)?.label || payload.housing.bathrooms}
+                />
+                {payload.housing.subtype === "sublet" && payload.housing.moveInDate && payload.housing.moveOutDate && (
+                  <DetailRow label="Dates" value={`${payload.housing.moveInDate} to ${payload.housing.moveOutDate}`} />
+                )}
+                {payload.housing.subtype === "passdown" && payload.housing.leaseStartDate && (
+                  <DetailRow
+                    label="Lease"
+                    value={`Starts ${payload.housing.leaseStartDate}${payload.housing.leaseDurationMonths ? ` (${payload.housing.leaseDurationMonths} months)` : ""}`}
+                  />
+                )}
+                {payload.housing.neighborhood && (
+                  <DetailRow label="Neighborhood" value={payload.housing.neighborhood} />
+                )}
+                <DetailRow label="Roommates" value={payload.housing.roommates === "solo" ? "Solo" : `Shared${payload.housing.roommateCount ? ` (${payload.housing.roommateCount})` : ""}`} />
+                {payload.housing.amenities.length > 0 && (
+                  <DetailRow
+                    label="Amenities"
+                    value={payload.housing.amenities
+                      .map((a) => HOUSING_AMENITIES.find((h) => h.value === a)?.label || a)
+                      .join(", ")}
+                  />
+                )}
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -755,6 +1139,7 @@ export default function CreatePostPage() {
           {step === 2 && renderStep2()}
           {step === 3 && postType === "marketplace" && renderStep3Marketplace()}
           {step === 3 && postType === "storage" && renderStep3Storage()}
+          {step === 3 && postType === "housing" && renderStep3Housing()}
           {step === 4 && renderStep4()}
 
           {/* Navigation */}

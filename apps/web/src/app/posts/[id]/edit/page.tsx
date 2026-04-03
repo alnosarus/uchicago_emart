@@ -4,6 +4,12 @@ import { useAuth } from "@/lib/auth-context";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useState, useEffect, useCallback } from "react";
+import {
+  HOUSING_AMENITIES,
+  BEDROOM_OPTIONS,
+  BATHROOM_OPTIONS,
+  LEASE_DURATION_OPTIONS,
+} from "@uchicago-marketplace/shared";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
@@ -70,6 +76,21 @@ interface StorageDetails {
   restrictions: string | null;
 }
 
+interface HousingDetails {
+  subtype: "sublet" | "passdown";
+  monthlyRent: number | null;
+  bedrooms: string;
+  bathrooms: string;
+  neighborhood: string | null;
+  amenities: string[];
+  roommates: "solo" | "shared";
+  roommateCount: number | null;
+  moveInDate: string | null;
+  moveOutDate: string | null;
+  leaseStartDate: string | null;
+  leaseDurationMonths: number | null;
+}
+
 interface Post {
   id: string;
   title: string;
@@ -81,6 +102,7 @@ interface Post {
   author: PostAuthor;
   marketplace: MarketplaceDetails | null;
   storage: StorageDetails | null;
+  housing: HousingDetails | null;
   images: PostImage[];
 }
 
@@ -129,6 +151,21 @@ interface StorageFormState {
   priceMonthly: string;
   isFree: boolean;
   restrictions: string;
+}
+
+interface HousingFormState {
+  subtype: "sublet" | "passdown";
+  monthlyRent: string;
+  bedrooms: string;
+  bathrooms: string;
+  neighborhood: string;
+  amenities: string[];
+  roommates: "solo" | "shared";
+  roommateCount: string;
+  moveInDate: string;
+  moveOutDate: string;
+  leaseStartDate: string;
+  leaseDurationMonths: string;
 }
 
 // ---------- Loading skeleton ----------
@@ -207,6 +244,21 @@ export default function EditPostPage() {
     restrictions: "",
   });
 
+  const [housing, setHousing] = useState<HousingFormState>({
+    subtype: "sublet",
+    monthlyRent: "",
+    bedrooms: "",
+    bathrooms: "",
+    neighborhood: "",
+    amenities: [],
+    roommates: "solo",
+    roommateCount: "",
+    moveInDate: "",
+    moveOutDate: "",
+    leaseStartDate: "",
+    leaseDurationMonths: "",
+  });
+
   // ---------- Fetch post ----------
 
   const fetchPost = useCallback(async () => {
@@ -247,6 +299,23 @@ export default function EditPostPage() {
           priceMonthly: s.priceMonthly != null ? String(s.priceMonthly) : "",
           isFree: s.isFree,
           restrictions: s.restrictions ?? "",
+        });
+      }
+      if (data.housing) {
+        const h = data.housing;
+        setHousing({
+          subtype: h.subtype,
+          monthlyRent: h.monthlyRent != null ? String(h.monthlyRent) : "",
+          bedrooms: h.bedrooms,
+          bathrooms: h.bathrooms,
+          neighborhood: h.neighborhood ?? "",
+          amenities: h.amenities ?? [],
+          roommates: h.roommates,
+          roommateCount: h.roommateCount != null ? String(h.roommateCount) : "",
+          moveInDate: formatDateForInput(h.moveInDate),
+          moveOutDate: formatDateForInput(h.moveOutDate),
+          leaseStartDate: formatDateForInput(h.leaseStartDate),
+          leaseDurationMonths: h.leaseDurationMonths != null ? String(h.leaseDurationMonths) : "",
         });
       }
     } catch {
@@ -363,6 +432,59 @@ export default function EditPostPage() {
       }
     }
 
+    // Housing fields
+    if (post.housing) {
+      const h = post.housing;
+      const hp: Record<string, unknown> = {};
+
+      if (housing.subtype !== h.subtype) {
+        hp.subtype = housing.subtype;
+      }
+      const newRent = parseFloat(housing.monthlyRent) || 0;
+      if (newRent !== (h.monthlyRent ?? 0)) {
+        hp.monthlyRent = newRent;
+      }
+      if (housing.bedrooms !== h.bedrooms) {
+        hp.bedrooms = housing.bedrooms;
+      }
+      if (housing.bathrooms !== h.bathrooms) {
+        hp.bathrooms = housing.bathrooms;
+      }
+      if ((housing.neighborhood.trim() || null) !== (h.neighborhood ?? null)) {
+        hp.neighborhood = housing.neighborhood.trim() || null;
+      }
+      if (JSON.stringify(housing.amenities) !== JSON.stringify(h.amenities ?? [])) {
+        hp.amenities = housing.amenities;
+      }
+      if (housing.roommates !== h.roommates) {
+        hp.roommates = housing.roommates;
+      }
+      const newRoommateCount =
+        housing.roommates === "shared"
+          ? parseInt(housing.roommateCount, 10) || null
+          : null;
+      if (newRoommateCount !== (h.roommateCount ?? null)) {
+        hp.roommateCount = newRoommateCount;
+      }
+      if (housing.moveInDate !== formatDateForInput(h.moveInDate)) {
+        hp.moveInDate = housing.moveInDate || null;
+      }
+      if (housing.moveOutDate !== formatDateForInput(h.moveOutDate)) {
+        hp.moveOutDate = housing.moveOutDate || null;
+      }
+      if (housing.leaseStartDate !== formatDateForInput(h.leaseStartDate)) {
+        hp.leaseStartDate = housing.leaseStartDate || null;
+      }
+      const newDuration = parseInt(housing.leaseDurationMonths, 10) || null;
+      if (newDuration !== (h.leaseDurationMonths ?? null)) {
+        hp.leaseDurationMonths = newDuration;
+      }
+
+      if (Object.keys(hp).length > 0) {
+        payload.housing = hp;
+      }
+    }
+
     return payload;
   }
 
@@ -424,11 +546,13 @@ export default function EditPostPage() {
 
   // ---------- Type / side labels ----------
 
-  const typeLabel = post.type === "storage" ? "Storage" : "Marketplace";
+  const typeLabel = post.type === "storage" ? "Storage" : post.type === "housing" ? "Housing" : "Marketplace";
   const typeBadgeClasses =
     post.type === "storage"
       ? "bg-amber-100 text-amber-700"
-      : "bg-maroon-100 text-maroon-700";
+      : post.type === "housing"
+        ? "bg-indigo-100 text-indigo-700"
+        : "bg-maroon-100 text-maroon-700";
 
   function sideLabel(side: string): string {
     const map: Record<string, string> = {
@@ -436,6 +560,8 @@ export default function EditPostPage() {
       buy: "Buying",
       has_space: "Has Space",
       need_storage: "Needs Storage",
+      offering: "Offering",
+      looking: "Looking for",
     };
     return map[side] || side;
   }
@@ -725,6 +851,241 @@ export default function EditPostPage() {
     );
   }
 
+  // ---------- Housing form ----------
+
+  function renderHousingFields() {
+    return (
+      <div className="space-y-5">
+        <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">
+          Housing Details
+        </h3>
+
+        {/* Subtype */}
+        <div>
+          <label className={labelClass}>Type</label>
+          <div className="grid grid-cols-2 gap-3">
+            {(["sublet", "passdown"] as const).map((s) => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => setHousing((p) => ({ ...p, subtype: s }))}
+                className={`py-2.5 rounded-lg text-sm font-semibold border-2 transition-all ${
+                  housing.subtype === s
+                    ? "border-indigo-500 bg-indigo-50 text-indigo-700"
+                    : "border-gray-200 text-gray-600 hover:border-gray-300"
+                }`}
+              >
+                {s === "sublet" ? "Sublet" : "Passdown"}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Monthly rent */}
+        <div>
+          <label htmlFor="monthlyRent" className={labelClass}>
+            Monthly Rent ($)
+          </label>
+          <input
+            id="monthlyRent"
+            type="number"
+            min="0"
+            step="1"
+            value={housing.monthlyRent}
+            onChange={(e) => setHousing((p) => ({ ...p, monthlyRent: e.target.value }))}
+            placeholder="0"
+            className={inputClass}
+          />
+        </div>
+
+        {/* Bedrooms & Bathrooms */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="bedrooms" className={labelClass}>
+              Bedrooms
+            </label>
+            <select
+              id="bedrooms"
+              value={housing.bedrooms}
+              onChange={(e) => setHousing((p) => ({ ...p, bedrooms: e.target.value }))}
+              className={selectClass}
+            >
+              <option value="">Select</option>
+              {BEDROOM_OPTIONS.map((b) => (
+                <option key={b.value} value={b.value}>
+                  {b.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="bathrooms" className={labelClass}>
+              Bathrooms
+            </label>
+            <select
+              id="bathrooms"
+              value={housing.bathrooms}
+              onChange={(e) => setHousing((p) => ({ ...p, bathrooms: e.target.value }))}
+              className={selectClass}
+            >
+              <option value="">Select</option>
+              {BATHROOM_OPTIONS.map((b) => (
+                <option key={b.value} value={b.value}>
+                  {b.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Date fields: sublet vs passdown */}
+        {housing.subtype === "sublet" ? (
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="moveInDate" className={labelClass}>
+                Move-in Date
+              </label>
+              <input
+                id="moveInDate"
+                type="date"
+                value={housing.moveInDate}
+                onChange={(e) => setHousing((p) => ({ ...p, moveInDate: e.target.value }))}
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label htmlFor="moveOutDate" className={labelClass}>
+                Move-out Date
+              </label>
+              <input
+                id="moveOutDate"
+                type="date"
+                value={housing.moveOutDate}
+                onChange={(e) => setHousing((p) => ({ ...p, moveOutDate: e.target.value }))}
+                className={inputClass}
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="leaseStartDate" className={labelClass}>
+                Lease Start Date
+              </label>
+              <input
+                id="leaseStartDate"
+                type="date"
+                value={housing.leaseStartDate}
+                onChange={(e) => setHousing((p) => ({ ...p, leaseStartDate: e.target.value }))}
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label htmlFor="leaseDuration" className={labelClass}>
+                Lease Duration
+              </label>
+              <select
+                id="leaseDuration"
+                value={housing.leaseDurationMonths}
+                onChange={(e) => setHousing((p) => ({ ...p, leaseDurationMonths: e.target.value }))}
+                className={selectClass}
+              >
+                <option value="">Select</option>
+                {LEASE_DURATION_OPTIONS.map((d) => (
+                  <option key={d.value} value={d.value}>
+                    {d.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
+
+        {/* Neighborhood */}
+        <div>
+          <label htmlFor="housingNeighborhood" className={labelClass}>
+            Neighborhood
+          </label>
+          <input
+            id="housingNeighborhood"
+            type="text"
+            value={housing.neighborhood}
+            onChange={(e) => setHousing((p) => ({ ...p, neighborhood: e.target.value }))}
+            placeholder="e.g. Hyde Park, South Loop"
+            className={inputClass}
+          />
+        </div>
+
+        {/* Amenities */}
+        <div>
+          <label className={labelClass}>Amenities</label>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {HOUSING_AMENITIES.map((a) => (
+              <label key={a.value} className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={housing.amenities.includes(a.value)}
+                  onChange={(e) => {
+                    setHousing((p) => ({
+                      ...p,
+                      amenities: e.target.checked
+                        ? [...p.amenities, a.value]
+                        : p.amenities.filter((v) => v !== a.value),
+                    }));
+                  }}
+                  className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                />
+                <span className="text-sm text-gray-700">{a.label}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* Roommates */}
+        <div>
+          <label className={labelClass}>Roommates</label>
+          <div className="grid grid-cols-2 gap-3">
+            {(
+              [
+                { value: "solo", label: "Solo" },
+                { value: "shared", label: "Shared" },
+              ] as const
+            ).map((r) => (
+              <button
+                key={r.value}
+                type="button"
+                onClick={() => setHousing((p) => ({ ...p, roommates: r.value }))}
+                className={`py-2.5 rounded-lg text-sm font-semibold border-2 transition-all ${
+                  housing.roommates === r.value
+                    ? "border-indigo-500 bg-indigo-50 text-indigo-700"
+                    : "border-gray-200 text-gray-600 hover:border-gray-300"
+                }`}
+              >
+                {r.label}
+              </button>
+            ))}
+          </div>
+          {housing.roommates === "shared" && (
+            <div className="mt-3">
+              <label htmlFor="roommateCount" className={labelClass}>
+                Number of Roommates
+              </label>
+              <input
+                id="roommateCount"
+                type="number"
+                min="1"
+                value={housing.roommateCount}
+                onChange={(e) => setHousing((p) => ({ ...p, roommateCount: e.target.value }))}
+                placeholder="e.g. 2"
+                className={inputClass}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   // ---------- Main render ----------
 
   return (
@@ -816,6 +1177,7 @@ export default function EditPostPage() {
           {/* Type-specific fields */}
           {post.marketplace && renderMarketplaceFields()}
           {post.storage && renderStorageFields()}
+          {post.housing && renderHousingFields()}
 
           {/* Submit */}
           <div className="mt-8 pt-6 border-t border-gray-200 flex items-center justify-between">

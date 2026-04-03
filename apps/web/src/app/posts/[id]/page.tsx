@@ -4,6 +4,12 @@ import { useAuth } from "@/lib/auth-context";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useState, useEffect, useCallback } from "react";
+import {
+  HOUSING_AMENITIES,
+  BEDROOM_OPTIONS,
+  BATHROOM_OPTIONS,
+  LEASE_DURATION_OPTIONS,
+} from "@uchicago-marketplace/shared";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
@@ -42,6 +48,21 @@ interface StorageDetails {
   restrictions: string | null;
 }
 
+interface HousingDetails {
+  subtype: "sublet" | "passdown";
+  monthlyRent: number | null;
+  bedrooms: string;
+  bathrooms: string;
+  neighborhood: string | null;
+  amenities: string[];
+  roommates: "solo" | "shared";
+  roommateCount: number | null;
+  moveInDate: string | null;
+  moveOutDate: string | null;
+  leaseStartDate: string | null;
+  leaseDurationMonths: number | null;
+}
+
 interface Post {
   id: string;
   title: string;
@@ -54,6 +75,7 @@ interface Post {
   author: PostAuthor;
   marketplace: MarketplaceDetails | null;
   storage: StorageDetails | null;
+  housing: HousingDetails | null;
   images: PostImage[];
   _count: { savedBy: number };
 }
@@ -85,23 +107,29 @@ function formatPrice(post: Post): string {
     }
     return "Contact for price";
   }
+  if (post.housing) {
+    if (post.housing.monthlyRent != null) {
+      return `$${post.housing.monthlyRent.toFixed(2)}/mo`;
+    }
+    return "Contact for price";
+  }
   return "";
 }
 
 function typeBadgeClasses(type: string): string {
-  if (type === "storage") {
-    return "bg-amber-100 text-amber-700";
-  }
+  if (type === "storage") return "bg-amber-100 text-amber-700";
+  if (type === "housing") return "bg-indigo-100 text-indigo-700";
   return "bg-maroon-100 text-maroon-700";
 }
 
 function typeLabel(type: string): string {
   if (type === "storage") return "Storage";
+  if (type === "housing") return "Housing";
   return "Marketplace";
 }
 
 function sideLabel(side: string): string {
-  if (side === "buy" || side === "need_storage") return "Looking for";
+  if (side === "buy" || side === "need_storage" || side === "looking") return "Looking for";
   return "Offering";
 }
 
@@ -420,6 +448,129 @@ function StorageDetailsSection({ details }: { details: StorageDetails }) {
   );
 }
 
+function HousingDetailsSection({ details }: { details: HousingDetails }) {
+  return (
+    <div className="space-y-4">
+      <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">
+        Housing Details
+      </h3>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <dt className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+            Subtype
+          </dt>
+          <dd className="mt-1 text-sm text-gray-900">
+            {details.subtype === "sublet" ? "Sublet" : "Passdown"}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+            Bedrooms
+          </dt>
+          <dd className="mt-1 text-sm text-gray-900">
+            {BEDROOM_OPTIONS.find((b) => b.value === details.bedrooms)?.label || details.bedrooms}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+            Bathrooms
+          </dt>
+          <dd className="mt-1 text-sm text-gray-900">
+            {BATHROOM_OPTIONS.find((b) => b.value === details.bathrooms)?.label || details.bathrooms}
+          </dd>
+        </div>
+        {details.monthlyRent != null && (
+          <div>
+            <dt className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+              Rent
+            </dt>
+            <dd className="mt-1 text-sm text-gray-900">
+              ${details.monthlyRent.toFixed(2)}/mo
+            </dd>
+          </div>
+        )}
+        <div>
+          <dt className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+            Roommates
+          </dt>
+          <dd className="mt-1 text-sm text-gray-900">
+            {details.roommates === "solo"
+              ? "Solo"
+              : `Shared${details.roommateCount ? ` (${details.roommateCount})` : ""}`}
+          </dd>
+        </div>
+        {details.neighborhood && (
+          <div>
+            <dt className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+              Location
+            </dt>
+            <dd className="mt-1 text-sm text-gray-900">{details.neighborhood}</dd>
+          </div>
+        )}
+        {/* Date info: sublet vs passdown */}
+        {details.subtype === "sublet" && details.moveInDate && (
+          <div>
+            <dt className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+              Move-in
+            </dt>
+            <dd className="mt-1 text-sm text-gray-900">
+              {formatDate(details.moveInDate)}
+            </dd>
+          </div>
+        )}
+        {details.subtype === "sublet" && details.moveOutDate && (
+          <div>
+            <dt className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+              Move-out
+            </dt>
+            <dd className="mt-1 text-sm text-gray-900">
+              {formatDate(details.moveOutDate)}
+            </dd>
+          </div>
+        )}
+        {details.subtype === "passdown" && details.leaseStartDate && (
+          <div>
+            <dt className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+              Lease Start
+            </dt>
+            <dd className="mt-1 text-sm text-gray-900">
+              {formatDate(details.leaseStartDate)}
+            </dd>
+          </div>
+        )}
+        {details.subtype === "passdown" && details.leaseDurationMonths && (
+          <div>
+            <dt className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+              Duration
+            </dt>
+            <dd className="mt-1 text-sm text-gray-900">
+              {LEASE_DURATION_OPTIONS.find((d) => d.value === details.leaseDurationMonths)?.label || `${details.leaseDurationMonths} months`}
+            </dd>
+          </div>
+        )}
+      </div>
+
+      {details.amenities && details.amenities.length > 0 && (
+        <div>
+          <dt className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+            Amenities
+          </dt>
+          <dd className="flex flex-wrap gap-2">
+            {details.amenities.map((amenity) => (
+              <span
+                key={amenity}
+                className="inline-block bg-indigo-50 text-indigo-700 text-xs font-medium px-2.5 py-1 rounded-full"
+              >
+                {HOUSING_AMENITIES.find((a) => a.value === amenity)?.label || amenity}
+              </span>
+            ))}
+          </dd>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ---------- Main page component ----------
 
 export default function PostDetailPage() {
@@ -494,6 +645,7 @@ export default function PostDetailPage() {
   const isFree =
     (post.marketplace?.priceType === "free") ||
     (post.storage?.isFree === true);
+  const isHousing = post.type === "housing";
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -537,6 +689,11 @@ export default function PostDetailPage() {
                     {conditionLabel(post.marketplace.condition)}
                   </span>
                 )}
+                {post.housing && (
+                  <span className="text-xs font-medium text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">
+                    {post.housing.subtype === "sublet" ? "Sublet" : "Passdown"}
+                  </span>
+                )}
               </div>
               <h1 className="text-2xl font-extrabold text-gray-900 mb-2">
                 {post.title}
@@ -549,7 +706,7 @@ export default function PostDetailPage() {
                 >
                   {priceDisplay}
                 </span>
-                {post.storage && !post.storage.isFree && (
+                {((post.storage && !post.storage.isFree) || (isHousing && post.housing?.monthlyRent)) && (
                   <span className="text-sm text-gray-500">per month</span>
                 )}
               </div>
@@ -627,6 +784,13 @@ export default function PostDetailPage() {
             {post.storage && (
               <>
                 <StorageDetailsSection details={post.storage} />
+                <hr className="border-gray-200" />
+              </>
+            )}
+
+            {post.housing && (
+              <>
+                <HousingDetailsSection details={post.housing} />
                 <hr className="border-gray-200" />
               </>
             )}

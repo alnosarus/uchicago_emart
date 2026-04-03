@@ -15,6 +15,7 @@ interface PostCard {
   author: { name: string };
   marketplace: { priceType: string; priceAmount: number | null; condition: string; category: string } | null;
   storage: { size: string; priceMonthly: number | null; isFree: boolean } | null;
+  housing: { monthlyRent: number | null; subtype: string } | null;
   images: { url: string }[];
 }
 
@@ -141,6 +142,8 @@ export default function Home() {
                         ? `$${post.marketplace.priceAmount}`
                         : post.storage?.priceMonthly
                         ? `$${post.storage.priceMonthly}/mo`
+                        : post.housing?.monthlyRent
+                        ? `$${post.housing.monthlyRent}/mo`
                         : "Contact"}
                     </span>
                     <span className="text-xs text-gray-400 capitalize">{post.type}</span>
