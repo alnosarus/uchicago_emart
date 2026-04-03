@@ -84,8 +84,11 @@ export async function getUserTransactions(
       take: limit,
       include: {
         post: {
-          select: { id: true, title: true, type: true, side: true },
-          include: {
+          select: {
+            id: true,
+            title: true,
+            type: true,
+            side: true,
             images: { orderBy: { order: "asc" as const }, take: 1 },
           },
         },
