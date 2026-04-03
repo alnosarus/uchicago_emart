@@ -16,8 +16,8 @@ const router = Router();
 // POST /api/auth/google — Exchange Google auth code for JWT
 router.post("/google", validate(googleAuthSchema), async (req, res: Response, next) => {
   try {
-    const { code } = req.body;
-    const result = await loginWithGoogle(code);
+    const { code, redirectUri } = req.body;
+    const result = await loginWithGoogle(code, redirectUri);
 
     // Set refresh token as httpOnly cookie
     res.cookie("refreshToken", result.refreshToken, {

@@ -10,10 +10,10 @@ export interface AuthResponse {
 
 export function createAuthApi(client: ApiClient) {
   return {
-    loginWithGoogle(code: string) {
+    loginWithGoogle(code: string, redirectUri?: string) {
       return client.request<AuthResponse>("/api/auth/google", {
         method: "POST",
-        body: { code },
+        body: { code, ...(redirectUri && { redirectUri }) },
       });
     },
 

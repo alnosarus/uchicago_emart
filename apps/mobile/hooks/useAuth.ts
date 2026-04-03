@@ -187,7 +187,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function handleAuthCode(code: string) {
     try {
       setIsLoading(true);
-      const result = await api.auth.loginWithGoogle(code);
+      const result = await api.auth.loginWithGoogle(code, redirectUri);
 
       const authUser: AuthUser = {
         id: result.user.id,

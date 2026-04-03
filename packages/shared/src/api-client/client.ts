@@ -8,8 +8,8 @@ interface RequestOptions {
 }
 
 export class ApiClient {
-  private baseUrl: string;
-  private getToken: () => string | null;
+  public readonly baseUrl: string;
+  public readonly getToken: () => string | null;
 
   constructor(baseUrl: string, getToken: () => string | null) {
     this.baseUrl = baseUrl.replace(/\/$/, "");

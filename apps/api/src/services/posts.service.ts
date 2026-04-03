@@ -12,7 +12,7 @@ function mapCondition(condition: string): string {
 
 interface CreatePostInput {
   authorId: string;
-  type: "marketplace" | "storage";
+  type: "marketplace" | "storage" | "housing";
   side: string;
   title: string;
   description?: string;
@@ -34,11 +34,26 @@ interface CreatePostInput {
     isFree?: boolean;
     restrictions?: string | null;
   };
+  housing?: {
+    subtype: string;
+    side: string;
+    monthlyRent?: number | null;
+    bedrooms: number;
+    bathrooms: number;
+    neighborhood?: string | null;
+    amenities?: string[];
+    roommates: boolean;
+    roommateCount?: number | null;
+    moveInDate?: string | null;
+    moveOutDate?: string | null;
+    leaseStartDate?: string | null;
+    leaseDurationMonths?: number | null;
+  };
   imageUrls?: string[];
 }
 
 export async function createPost(input: CreatePostInput) {
-  const { authorId, type, side, title, description, marketplace, storage, imageUrls } = input;
+  const { authorId, type, side, title, description, marketplace, storage, housing, imageUrls } = input;
 
   return prisma.post.create({
     data: {
@@ -73,6 +88,25 @@ export async function createPost(input: CreatePostInput) {
           },
         },
       }),
+      ...(housing && {
+        housing: {
+          create: {
+            subtype: housing.subtype,
+            side: housing.side,
+            monthlyRent: housing.monthlyRent ?? null,
+            bedrooms: housing.bedrooms,
+            bathrooms: housing.bathrooms,
+            neighborhood: housing.neighborhood ?? null,
+            amenities: housing.amenities ?? [],
+            roommates: housing.roommates,
+            roommateCount: housing.roommateCount ?? null,
+            moveInDate: housing.moveInDate ? new Date(housing.moveInDate) : null,
+            moveOutDate: housing.moveOutDate ? new Date(housing.moveOutDate) : null,
+            leaseStartDate: housing.leaseStartDate ? new Date(housing.leaseStartDate) : null,
+            leaseDurationMonths: housing.leaseDurationMonths ?? null,
+          },
+        },
+      }),
       ...(imageUrls && imageUrls.length > 0 && {
         images: {
           create: imageUrls.map((url, i) => ({ url, order: i })),
@@ -83,6 +117,7 @@ export async function createPost(input: CreatePostInput) {
       author: { select: { id: true, name: true, avatarUrl: true, isVerified: true } },
       marketplace: true,
       storage: true,
+      housing: true,
       images: { orderBy: { order: "asc" } },
     },
   });
@@ -100,6 +135,9 @@ interface ListPostsInput {
   priceMin?: number;
   priceMax?: number;
   condition?: string;
+  subtype?: string;
+  bedrooms?: number;
+  bathrooms?: number;
   sort?: string;
   page?: number;
   limit?: number;
@@ -109,6 +147,7 @@ export async function listPosts(input: ListPostsInput) {
   const {
     type, side, q, category, size, locationType,
     priceMin, priceMax, condition,
+    subtype, bedrooms, bathrooms,
     sort = "recent",
     page = 1,
     limit = 20,
@@ -150,6 +189,23 @@ export async function listPosts(input: ListPostsInput) {
     ...(Object.keys(storageWhere).length > 0 && { storage: storageWhere }),
   };
 
+  // Build housing filter
+  if (subtype || bedrooms || bathrooms || (type === "housing" && (priceMin !== undefined || priceMax !== undefined))) {
+    const housingWhere: Record<string, unknown> = {};
+    if (subtype) housingWhere.subtype = subtype;
+    if (bedrooms) housingWhere.bedrooms = bedrooms;
+    if (bathrooms) housingWhere.bathrooms = bathrooms;
+    if (priceMin !== undefined || priceMax !== undefined) {
+      housingWhere.monthlyRent = {
+        ...(priceMin !== undefined && { gte: priceMin }),
+        ...(priceMax !== undefined && { lte: priceMax }),
+      };
+    }
+    if (Object.keys(housingWhere).length > 0) {
+      where.housing = housingWhere;
+    }
+  }
+
   const orderBy: Prisma.PostOrderByWithRelationInput =
     sort === "price_asc" ? { marketplace: { priceAmount: "asc" } } :
     sort === "price_desc" ? { marketplace: { priceAmount: "desc" } } :
@@ -167,6 +223,7 @@ export async function listPosts(input: ListPostsInput) {
         author: { select: { id: true, name: true, avatarUrl: true, isVerified: true } },
         marketplace: true,
         storage: true,
+        housing: true,
         images: { orderBy: { order: "asc" }, take: 1 },
         _count: { select: { savedBy: true } },
       },
@@ -194,6 +251,7 @@ export async function getPostById(postId: string) {
       author: { select: { id: true, name: true, avatarUrl: true, isVerified: true } },
       marketplace: true,
       storage: true,
+      housing: true,
       images: { orderBy: { order: "asc" } },
       _count: { select: { savedBy: true } },
     },
@@ -227,6 +285,21 @@ interface UpdatePostInput {
     priceMonthly?: number | null;
     isFree?: boolean;
     restrictions?: string | null;
+  };
+  housing?: {
+    subtype?: string;
+    side?: string;
+    monthlyRent?: number | null;
+    bedrooms?: number;
+    bathrooms?: number;
+    neighborhood?: string | null;
+    amenities?: string[];
+    roommates?: boolean;
+    roommateCount?: number | null;
+    moveInDate?: string | null;
+    moveOutDate?: string | null;
+    leaseStartDate?: string | null;
+    leaseDurationMonths?: number | null;
   };
 }
 
@@ -267,11 +340,22 @@ export async function updatePost(postId: string, userId: string, input: UpdatePo
           },
         },
       }),
+      ...(input.housing && {
+        housing: {
+          update: {
+            ...input.housing,
+            ...(input.housing.moveInDate && { moveInDate: new Date(input.housing.moveInDate) }),
+            ...(input.housing.moveOutDate && { moveOutDate: new Date(input.housing.moveOutDate) }),
+            ...(input.housing.leaseStartDate && { leaseStartDate: new Date(input.housing.leaseStartDate) }),
+          },
+        },
+      }),
     },
     include: {
       author: { select: { id: true, name: true, avatarUrl: true, isVerified: true } },
       marketplace: true,
       storage: true,
+      housing: true,
       images: { orderBy: { order: "asc" } },
     },
   });

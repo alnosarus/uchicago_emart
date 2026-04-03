@@ -13,9 +13,13 @@ interface GoogleUserInfo {
   hd?: string;
 }
 
-export async function loginWithGoogle(code: string) {
+export async function loginWithGoogle(code: string, redirectUri?: string) {
   // Exchange auth code for tokens
-  const { tokens } = await googleClient.getToken(code);
+  // Mobile clients send a redirectUri; web uses "postmessage" (the default on googleClient)
+  const { tokens } = await googleClient.getToken({
+    code,
+    redirect_uri: redirectUri || "postmessage",
+  });
   const idToken = tokens.id_token;
   if (!idToken) throw new HttpError(400, "No ID token received from Google");
 

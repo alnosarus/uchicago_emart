@@ -1,6 +1,6 @@
 import type { PostWithDetails } from "../types/post";
 import type { PostQueryInput, CreatePostInput } from "../schemas/post.schema";
-import { ApiClient } from "./client";
+import { ApiClient, ApiError } from "./client";
 
 export function createPostsApi(client: ApiClient) {
   return {
@@ -38,6 +38,22 @@ export function createPostsApi(client: ApiClient) {
         method: "PATCH",
         body: { status },
       });
+    },
+
+    async uploadImages(postId: string, formData: FormData): Promise<{ urls: string[] }> {
+      const token = client.getToken();
+      const response = await fetch(`${client.baseUrl}/api/posts/${postId}/images`, {
+        method: "POST",
+        headers: {
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+        body: formData,
+      });
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: "Upload failed" }));
+        throw new ApiError(response.status, error.message);
+      }
+      return response.json();
     },
   };
 }
