@@ -551,6 +551,9 @@ function BrowseContent() {
               <Link href="/saved" className="hidden sm:inline-flex text-sm font-medium text-gray-600 hover:text-maroon-600 px-3 py-1.5 rounded-md transition-colors">
                 Saved
               </Link>
+              <Link href="/history" className="hidden sm:inline-flex text-sm font-medium text-gray-600 hover:text-maroon-600 px-3 py-1.5 rounded-md transition-colors">
+                History
+              </Link>
               <Link href="/notifications" className="text-lg sm:text-xl px-1.5 sm:px-2 py-1 rounded-full hover:bg-gray-100 transition-colors">
                 🔔
               </Link>

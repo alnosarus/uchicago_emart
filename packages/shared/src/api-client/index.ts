@@ -8,6 +8,7 @@ import { createSavedApi } from "./saved";
 
 export { ApiClient, ApiError } from "./client";
 export type { ReviewEligibility } from "./reviews";
+export type { TransactionHistoryItem } from "./transactions";
 
 export function createApi(baseUrl: string, getToken: () => string | null) {
   const client = new ApiClient(baseUrl, getToken);

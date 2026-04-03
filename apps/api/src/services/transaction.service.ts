@@ -65,6 +65,47 @@ export async function getTransactionByPostId(postId: string) {
   });
 }
 
+export async function getUserTransactions(
+  userId: string,
+  page: number = 1,
+  limit: number = 20,
+) {
+  const skip = (page - 1) * limit;
+
+  const where = {
+    OR: [{ sellerId: userId }, { buyerId: userId }],
+  };
+
+  const [transactions, total] = await Promise.all([
+    prisma.transaction.findMany({
+      where,
+      orderBy: { completedAt: "desc" },
+      skip,
+      take: limit,
+      include: {
+        post: {
+          select: { id: true, title: true, type: true, side: true },
+          include: {
+            images: { orderBy: { order: "asc" as const }, take: 1 },
+          },
+        },
+        seller: { select: { id: true, name: true, cnetId: true, avatarUrl: true } },
+        buyer: { select: { id: true, name: true, cnetId: true, avatarUrl: true } },
+      },
+    }),
+    prisma.transaction.count({ where }),
+  ]);
+
+  return {
+    data: transactions.map((t) => ({
+      ...t,
+      role: t.sellerId === userId ? "seller" : "buyer",
+      counterparty: t.sellerId === userId ? t.buyer : t.seller,
+    })),
+    total,
+  };
+}
+
 export async function getUserTransactionCount(userId: string): Promise<number> {
   const [sold, bought] = await Promise.all([
     prisma.transaction.count({ where: { sellerId: userId } }),
