@@ -5,6 +5,7 @@ import { prisma } from "../config/database";
 import { z } from "zod";
 import { validate } from "../middleware/validate";
 import { getReviewsForUser } from "../services/review.service";
+import { getUserTransactionCount } from "../services/transaction.service";
 
 const router = Router();
 
@@ -47,25 +48,60 @@ router.get("/search", requireAuth, async (req: AuthRequest, res: Response, next)
 // GET /api/users/me/profile — Current user's full profile
 router.get("/me/profile", requireAuth, async (req: AuthRequest, res: Response, next) => {
   try {
-    const user = await prisma.user.findUnique({
-      where: { id: req.userId },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        phone: true,
-        avatarUrl: true,
-        isVerified: true,
-        createdAt: true,
-      },
-    });
+    const userId = req.userId!;
+
+    const [user, reviewData, transactionCount, activeListingCount] = await Promise.all([
+      prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          cnetId: true,
+          phone: true,
+          avatarUrl: true,
+          isVerified: true,
+          createdAt: true,
+        },
+      }),
+      getReviewsForUser(userId, 1, 10),
+      getUserTransactionCount(userId),
+      prisma.post.count({
+        where: { authorId: userId, status: "active" },
+      }),
+    ]);
 
     if (!user) {
       res.status(404).json({ message: "User not found" });
       return;
     }
 
-    res.json(user);
+    const activePosts = await prisma.post.findMany({
+      where: { authorId: userId, status: "active" },
+      orderBy: { createdAt: "desc" },
+      include: {
+        author: { select: { id: true, name: true, avatarUrl: true, isVerified: true } },
+        marketplace: true,
+        storage: true,
+        housing: true,
+        images: { orderBy: { order: "asc" }, take: 1 },
+      },
+    });
+
+    res.json({
+      ...user,
+      stats: {
+        averageRating: reviewData.averageRating,
+        reviewCount: reviewData.total,
+        transactionCount,
+        activeListingCount,
+      },
+      activePosts,
+      reviews: {
+        data: reviewData.data,
+        total: reviewData.total,
+      },
+    });
   } catch (err) {
     next(err);
   }
@@ -115,26 +151,61 @@ router.get("/:id/reviews", async (req, res: Response, next) => {
   } catch (err) { next(err); }
 });
 
-// GET /api/users/:id — Public profile
+// GET /api/users/:id — Enriched public profile
 router.get("/:id", async (req, res: Response, next) => {
   try {
-    const user = await prisma.user.findUnique({
-      where: { id: req.params.id },
-      select: {
-        id: true,
-        name: true,
-        avatarUrl: true,
-        isVerified: true,
-        createdAt: true,
-      },
-    });
+    const userId = req.params.id as string;
+
+    const [user, reviewData, transactionCount, activeListingCount] = await Promise.all([
+      prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          name: true,
+          cnetId: true,
+          avatarUrl: true,
+          isVerified: true,
+          createdAt: true,
+        },
+      }),
+      getReviewsForUser(userId, 1, 10),
+      getUserTransactionCount(userId),
+      prisma.post.count({
+        where: { authorId: userId, status: "active" },
+      }),
+    ]);
 
     if (!user) {
       res.status(404).json({ message: "User not found" });
       return;
     }
 
-    res.json(user);
+    const activePosts = await prisma.post.findMany({
+      where: { authorId: userId, status: "active" },
+      orderBy: { createdAt: "desc" },
+      include: {
+        author: { select: { id: true, name: true, avatarUrl: true, isVerified: true } },
+        marketplace: true,
+        storage: true,
+        housing: true,
+        images: { orderBy: { order: "asc" }, take: 1 },
+      },
+    });
+
+    res.json({
+      ...user,
+      stats: {
+        averageRating: reviewData.averageRating,
+        reviewCount: reviewData.total,
+        transactionCount,
+        activeListingCount,
+      },
+      activePosts,
+      reviews: {
+        data: reviewData.data,
+        total: reviewData.total,
+      },
+    });
   } catch (err) {
     next(err);
   }
