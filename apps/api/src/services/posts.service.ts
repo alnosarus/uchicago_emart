@@ -142,6 +142,7 @@ interface ListPostsInput {
   sort?: string;
   page?: number;
   limit?: number;
+  userId?: string;
 }
 
 export async function listPosts(input: ListPostsInput) {
@@ -152,6 +153,7 @@ export async function listPosts(input: ListPostsInput) {
     sort = "recent",
     page = 1,
     limit = 20,
+    userId,
   } = input;
 
   // Build marketplace filter as single object to avoid spread overwrites
@@ -232,8 +234,15 @@ export async function listPosts(input: ListPostsInput) {
     prisma.post.count({ where }),
   ]);
 
+  let postsWithSaved = posts;
+  if (userId) {
+    const { getSavedPostIds } = await import("./saved.service");
+    const savedIds = await getSavedPostIds(userId, posts.map((p) => p.id));
+    postsWithSaved = posts.map((p) => ({ ...p, isSaved: savedIds.has(p.id) }));
+  }
+
   return {
-    posts,
+    posts: postsWithSaved,
     pagination: {
       page,
       limit,
@@ -245,7 +254,7 @@ export async function listPosts(input: ListPostsInput) {
 
 // ── Get Detail ────────────────────────────────
 
-export async function getPostById(postId: string) {
+export async function getPostById(postId: string, userId?: string) {
   const post = await prisma.post.findUnique({
     where: { id: postId },
     include: {
@@ -261,7 +270,13 @@ export async function getPostById(postId: string) {
   if (!post) throw new HttpError(404, "Post not found");
   if (post.status === "deleted") throw new HttpError(404, "Post not found");
 
-  return post;
+  if (userId) {
+    const { getSavedPostIds } = await import("./saved.service");
+    const savedIds = await getSavedPostIds(userId, [postId]);
+    return { ...post, isSaved: savedIds.has(postId) };
+  }
+
+  return { ...post, isSaved: false };
 }
 
 // ── Update ────────────────────────────────────

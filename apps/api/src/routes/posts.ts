@@ -33,7 +33,7 @@ router.post("/", requireAuth, validate(createPostSchema), async (req: AuthReques
 // GET /api/posts — List posts with filters
 router.get("/", optionalAuth, validate(postQuerySchema, "query"), async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const result = await listPosts(req.query as any);
+    const result = await listPosts({ ...req.query as any, userId: req.userId });
     res.json(result);
   } catch (err) { next(err); }
 });
@@ -41,7 +41,7 @@ router.get("/", optionalAuth, validate(postQuerySchema, "query"), async (req: Au
 // GET /api/posts/:id — Get post detail
 router.get("/:id", optionalAuth, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const post = await getPostById(param(req, "id"));
+    const post = await getPostById(param(req, "id"), req.userId);
     res.json(post);
   } catch (err) { next(err); }
 });
