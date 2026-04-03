@@ -14,21 +14,41 @@ interface GoogleUserInfo {
 }
 
 export async function loginWithGoogle(code: string, redirectUri?: string) {
-  // Exchange auth code for tokens
-  // Mobile clients send a redirectUri; web uses "postmessage" (the default on googleClient)
-  const { tokens } = await googleClient.getToken({
-    code,
-    redirect_uri: redirectUri || "postmessage",
-  });
-  const idToken = tokens.id_token;
-  if (!idToken) throw new HttpError(400, "No ID token received from Google");
+  let payload: GoogleUserInfo;
 
-  // Verify and decode the ID token
-  const ticket = await googleClient.verifyIdToken({
-    idToken,
-    audience: env.GOOGLE_CLIENT_ID,
-  });
-  const payload = ticket.getPayload() as GoogleUserInfo;
+  // Determine if `code` is actually a JWT id_token (from mobile) or an auth code (from web)
+  // JWT tokens have 3 dot-separated segments; auth codes don't
+  const isIdToken = code.split(".").length === 3;
+
+  if (isIdToken) {
+    // Mobile flow: client already exchanged the code and sent us the id_token directly
+    // Accept tokens from any of our registered Google client IDs
+    const allowedAudiences = [
+      env.GOOGLE_CLIENT_ID,
+      env.GOOGLE_CLIENT_ID_IOS,
+      env.GOOGLE_CLIENT_ID_ANDROID,
+    ].filter(Boolean) as string[];
+
+    const ticket = await googleClient.verifyIdToken({
+      idToken: code,
+      audience: allowedAudiences,
+    });
+    payload = ticket.getPayload() as GoogleUserInfo;
+  } else {
+    // Web flow: exchange auth code for tokens, then verify the id_token
+    const { tokens } = await googleClient.getToken({
+      code,
+      redirect_uri: redirectUri || "postmessage",
+    });
+    const idToken = tokens.id_token;
+    if (!idToken) throw new HttpError(400, "No ID token received from Google");
+
+    const ticket = await googleClient.verifyIdToken({
+      idToken,
+      audience: env.GOOGLE_CLIENT_ID,
+    });
+    payload = ticket.getPayload() as GoogleUserInfo;
+  }
 
   // Enforce UChicago domain
   if (payload.hd !== env.ALLOWED_EMAIL_DOMAIN) {

@@ -7,18 +7,19 @@ import React, {
   useRef,
   type ReactNode,
 } from "react";
-import * as AuthSession from "expo-auth-session";
+import * as Google from "expo-auth-session/providers/google";
 import * as SecureStore from "expo-secure-store";
+import * as WebBrowser from "expo-web-browser";
 import { api, setTokenGetter } from "@/lib/api";
 import { GOOGLE_AUTH_CONFIG } from "@/lib/auth-config";
+
+// Complete the auth session for web-based redirect
+WebBrowser.maybeCompleteAuthSession();
 
 /* ─── Constants ─── */
 
 const TOKEN_STORAGE_KEY = "auth_access_token";
 const USER_STORAGE_KEY = "auth_user";
-
-const GOOGLE_AUTH_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth";
-const GOOGLE_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 
 /* ─── Types ─── */
 
@@ -94,8 +95,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Keep a ref so getToken always returns the latest value without
-  // needing to re-render consumers that only read the function reference.
   const tokenRef = useRef<string | null>(null);
   tokenRef.current = accessToken;
 
@@ -106,32 +105,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setTokenGetter(getToken);
   }, [getToken]);
 
-  // Build the redirect URI for OAuth
-  const redirectUri = AuthSession.makeRedirectUri();
+  // Use expo-auth-session's Google provider — handles token exchange client-side
+  // This gives us an id_token directly, avoiding the server-side code exchange
+  // redirect URI mismatch that causes invalid_grant errors
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    iosClientId: GOOGLE_AUTH_CONFIG.iosClientId,
+    scopes: GOOGLE_AUTH_CONFIG.scopes,
+  });
 
-  // Build the auth request for Google (authorization code flow)
-  const discovery: AuthSession.DiscoveryDocument = {
-    authorizationEndpoint: GOOGLE_AUTH_ENDPOINT,
-    tokenEndpoint: GOOGLE_TOKEN_ENDPOINT,
-  };
-
-  const [request, response, promptAsync] = AuthSession.useAuthRequest(
-    {
-      clientId: GOOGLE_AUTH_CONFIG.iosClientId || GOOGLE_AUTH_CONFIG.clientId,
-      scopes: GOOGLE_AUTH_CONFIG.scopes,
-      redirectUri,
-      responseType: AuthSession.ResponseType.Code,
-    },
-    discovery,
-  );
-
-  // On mount: try to restore session from storage, then try refresh
+  // On mount: try to restore session from storage
   useEffect(() => {
     let cancelled = false;
 
     async function restoreSession() {
       try {
-        // First try loading from secure store
         const [storedToken, storedUser] = await Promise.all([
           loadToken(),
           loadUser(),
@@ -141,25 +128,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setAccessToken(storedToken);
           setUser(storedUser);
           tokenRef.current = storedToken;
-        }
-
-        // Try to refresh the session with the API
-        // This uses httpOnly cookies which may not work in React Native,
-        // so failure is expected and not an error condition.
-        try {
-          const refreshResult = await api.auth.refresh();
-          if (refreshResult?.accessToken && !cancelled) {
-            setAccessToken(refreshResult.accessToken);
-            tokenRef.current = refreshResult.accessToken;
-            await saveToken(refreshResult.accessToken);
-          }
-        } catch {
-          // Refresh failed — expected in React Native (no httpOnly cookie support).
-          // If we have no stored token either, user stays logged out.
-          if (!storedToken && !cancelled) {
-            setAccessToken(null);
-            setUser(null);
-          }
         }
       } catch {
         // Storage read failed, stay logged out
@@ -171,29 +139,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     restoreSession();
-
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, []);
 
   // Handle the OAuth response when it arrives
   useEffect(() => {
-    if (response?.type === "success" && response.params?.code) {
-      handleAuthCode(response.params.code);
+    if (response?.type === "success" && response.authentication?.idToken) {
+      handleIdToken(response.authentication.idToken);
+    } else if (response?.type === "success" && response.authentication?.accessToken) {
+      // Fallback: use Google access token to get user info, then send to our API
+      handleGoogleAccessToken(response.authentication.accessToken);
     }
   }, [response]);
 
-  async function handleAuthCode(code: string) {
+  async function handleIdToken(idToken: string) {
     try {
       setIsLoading(true);
-      const result = await api.auth.loginWithGoogle(code, redirectUri);
+      // Send the id_token to our API for verification and session creation
+      const result = await api.auth.loginWithGoogle(idToken);
 
       const authUser: AuthUser = {
         id: result.user.id,
         name: result.user.name,
         email: result.user.email,
-        avatarUrl: result.user.avatarUrl,
+        avatarUrl: result.user.avatarUrl ?? null,
         isVerified: result.user.isVerified,
       };
 
@@ -201,15 +170,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(authUser);
       tokenRef.current = result.accessToken;
 
-      // Persist to secure storage
-      await Promise.all([
-        saveToken(result.accessToken),
-        saveUser(authUser),
-      ]);
+      await Promise.all([saveToken(result.accessToken), saveUser(authUser)]);
     } catch (error: unknown) {
-      const message =
-        error instanceof Error ? error.message : "Sign in failed";
-      // Re-throw so the caller can catch if needed, but also log it
+      const message = error instanceof Error ? error.message : "Sign in failed";
+      console.error("Google auth error:", message);
+      throw new Error(
+        message.includes("uchicago.edu")
+          ? "Only @uchicago.edu email addresses are allowed."
+          : `Sign in failed: ${message}`,
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function handleGoogleAccessToken(googleAccessToken: string) {
+    try {
+      setIsLoading(true);
+      // Send the Google access token to our API — it will verify with Google
+      const result = await api.auth.loginWithGoogle(googleAccessToken);
+
+      const authUser: AuthUser = {
+        id: result.user.id,
+        name: result.user.name,
+        email: result.user.email,
+        avatarUrl: result.user.avatarUrl ?? null,
+        isVerified: result.user.isVerified,
+      };
+
+      setAccessToken(result.accessToken);
+      setUser(authUser);
+      tokenRef.current = result.accessToken;
+
+      await Promise.all([saveToken(result.accessToken), saveUser(authUser)]);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Sign in failed";
       console.error("Google auth error:", message);
       throw new Error(
         message.includes("uchicago.edu")
@@ -224,7 +219,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback(async () => {
     if (!request) {
       throw new Error(
-        "Google Sign-In is not configured. Check your EXPO_PUBLIC_GOOGLE_CLIENT_ID.",
+        "Google Sign-In is not configured. Check EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID.",
       );
     }
     await promptAsync();
@@ -235,9 +230,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await api.auth.logout();
     } catch {
-      // Logout API call may fail if session is already gone; that's fine
+      // Logout API call may fail if session is already gone
     }
-
     setAccessToken(null);
     setUser(null);
     tokenRef.current = null;
