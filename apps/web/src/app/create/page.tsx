@@ -203,6 +203,7 @@ export default function CreatePostPage() {
         description: description.trim() || null,
         housing: {
           subtype: housing.subtype,
+          side: housing.side,
           monthlyRent: parseFloat(housing.monthlyRent) || 0,
           bedrooms: housing.bedrooms,
           bathrooms: housing.bathrooms,
