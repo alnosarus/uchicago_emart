@@ -282,7 +282,11 @@ function PostCard({ post }: { post: Post }) {
 
         {/* Author + time */}
         <div className="flex items-center justify-between mt-2.5 pt-2.5 border-t border-gray-100">
-          <div className="flex items-center gap-1.5 min-w-0">
+          <Link
+            href={`/profile/${post.author.id}`}
+            onClick={(e) => e.stopPropagation()}
+            className="flex items-center gap-1.5 min-w-0 hover:opacity-75 transition-opacity"
+          >
             <div className="w-5 h-5 rounded-full bg-gradient-to-br from-maroon-400 to-maroon-600 flex items-center justify-center text-white text-[10px] font-bold shrink-0">
               {post.author.name
                 .split(" ")
@@ -300,7 +304,7 @@ function PostCard({ post }: { post: Post }) {
                 />
               </svg>
             )}
-          </div>
+          </Link>
           <span className="text-xs text-gray-400 shrink-0">{timeAgo(post.createdAt)}</span>
         </div>
       </div>

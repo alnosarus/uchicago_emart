@@ -915,7 +915,7 @@ export default function PostDetailPage() {
             <hr className="border-gray-200" />
 
             {/* Author */}
-            <div className="flex items-center gap-3">
+            <Link href={`/profile/${post.author.id}`} className="flex items-center gap-3 hover:bg-gray-50 -mx-2 px-2 py-2 rounded-lg transition-colors">
               {post.author.avatarUrl ? (
                 <img
                   src={post.author.avatarUrl}
@@ -954,7 +954,7 @@ export default function PostDetailPage() {
                   Posted {formatDate(post.createdAt)}
                 </p>
               </div>
-            </div>
+            </Link>
 
             <hr className="border-gray-200" />
 

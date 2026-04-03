@@ -13,7 +13,7 @@ interface PostCard {
   type: string;
   side: string;
   createdAt: string;
-  author: { name: string };
+  author: { id: string; name: string };
   marketplace: { priceType: string; priceAmount: number | null; condition: string; category: string } | null;
   storage: { size: string; priceMonthly: number | null; isFree: boolean } | null;
   housing: { monthlyRent: number | null; subtype: string } | null;
@@ -167,7 +167,13 @@ export default function Home() {
                 </div>
                 <div className="p-3">
                   <p className="font-semibold text-gray-900 text-sm truncate">{post.title}</p>
-                  <p className="text-xs text-gray-500 mt-1">{post.author.name}</p>
+                  <Link
+                    href={`/profile/${post.author.id}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-xs text-gray-500 mt-1 hover:text-maroon-600 transition-colors block"
+                  >
+                    {post.author.name}
+                  </Link>
                   <div className="flex items-center justify-between mt-2">
                     <span className="text-sm font-bold text-maroon-700">
                       {post.marketplace?.priceType === "free" || post.storage?.isFree
