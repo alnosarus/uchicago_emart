@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
+import { useAuth } from "@/lib/auth-context";
 
 // ── Constants ────────────────────────────────────
 
@@ -424,6 +425,7 @@ function LoadingSkeleton() {
 // ── Main Browse Content ──────────────────────────
 
 function BrowseContent() {
+  const { user, isLoading: authLoading, logout } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -525,6 +527,56 @@ function BrowseContent() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
+      {/* Navbar */}
+      <nav className="bg-white border-b border-gray-200 px-4 sm:px-8 h-14 sm:h-16 flex items-center justify-between sticky top-0 z-50 shadow-sm">
+        <Link href="/" className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <span className="text-xl sm:text-2xl font-bold tracking-wide uppercase bg-gradient-to-br from-maroon-700 to-maroon-500 bg-clip-text text-transparent">
+            UChicago
+          </span>
+          <span className="hidden sm:inline text-sm font-medium text-gray-400 uppercase tracking-wider">
+            Marketplace
+          </span>
+        </Link>
+        <div className="flex items-center gap-2 sm:gap-3">
+          <Link href="/browse" className="text-sm font-semibold text-maroon-600 px-2 sm:px-3 py-1.5 rounded-md">
+            Browse
+          </Link>
+          {authLoading ? (
+            <div className="w-16 sm:w-20 h-8 bg-gray-100 rounded-full animate-pulse" />
+          ) : user ? (
+            <>
+              <Link href="/create" className="hidden sm:inline-flex text-sm font-medium text-gray-600 hover:text-maroon-600 px-3 py-1.5 rounded-md transition-colors">
+                + Post
+              </Link>
+              <Link href="/saved" className="hidden sm:inline-flex text-sm font-medium text-gray-600 hover:text-maroon-600 px-3 py-1.5 rounded-md transition-colors">
+                Saved
+              </Link>
+              <Link href="/notifications" className="text-lg sm:text-xl px-1.5 sm:px-2 py-1 rounded-full hover:bg-gray-100 transition-colors">
+                🔔
+              </Link>
+              <button
+                onClick={logout}
+                className="hidden sm:inline-flex text-sm font-semibold text-gray-700 border border-gray-300 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full hover:bg-gray-100 transition-colors"
+              >
+                Log Out
+              </button>
+              <Link href={`/profile/${user.id}`} className="w-8 h-8 rounded-full bg-gradient-to-br from-maroon-500 to-maroon-700 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                {user.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link href="/auth" className="hidden sm:inline-flex text-sm font-semibold text-gray-700 border border-gray-300 px-4 py-2 rounded-full hover:bg-gray-100 transition-colors">
+                Log In
+              </Link>
+              <Link href="/auth" className="text-sm font-semibold text-white bg-gradient-to-br from-maroon-600 to-maroon-700 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full shadow-md hover:from-maroon-700 hover:to-maroon-800 transition-all">
+                Sign Up
+              </Link>
+            </>
+          )}
+        </div>
+      </nav>
+
       {/* Header */}
       <div className="bg-gradient-to-br from-maroon-800 to-maroon-600 px-4 sm:px-8 py-8 pb-12">
         <div className="max-w-5xl mx-auto">
