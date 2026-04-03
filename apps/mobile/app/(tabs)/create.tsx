@@ -11,6 +11,8 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { useAuth } from "@/hooks/useAuth";
 import {
   MARKETPLACE_CATEGORIES,
   MARKETPLACE_TAGS,
@@ -815,8 +817,35 @@ function StepReview({ state }: { state: CreatePostState }) {
 export default function CreateScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const { state, update, goToStep, nextStep, prevStep, canAdvance, submit } =
     useCreatePost();
+
+  if (authLoading) {
+    return (
+      <View style={styles.authGate}>
+        <ActivityIndicator size="large" color={colors.maroon[600]} />
+      </View>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <View style={[styles.authGate, { paddingTop: insets.top }]}>
+        <FontAwesome name="lock" size={40} color={colors.gray[300]} />
+        <Text style={styles.authGateTitle}>Sign in to create a post</Text>
+        <Text style={styles.authGateSubtitle}>
+          You need to be signed in with your UChicago account to create posts.
+        </Text>
+        <Pressable
+          style={styles.authGateButton}
+          onPress={() => router.push("/(tabs)/profile" as never)}
+        >
+          <Text style={styles.authGateButtonText}>Go to Profile</Text>
+        </Pressable>
+      </View>
+    );
+  }
 
   const accent = state.type ? getAccentColor(state.type) : colors.maroon[600];
 
@@ -1038,5 +1067,39 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.gray[500],
     textDecorationLine: "underline",
+  },
+
+  /* Auth gate */
+  authGate: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 32,
+    backgroundColor: colors.white,
+    gap: 12,
+  },
+  authGateTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: colors.gray[900],
+    marginTop: 8,
+  },
+  authGateSubtitle: {
+    fontSize: 13,
+    color: colors.gray[500],
+    textAlign: "center",
+    lineHeight: 18,
+  },
+  authGateButton: {
+    marginTop: 8,
+    backgroundColor: colors.maroon[600],
+    paddingHorizontal: 24,
+    paddingVertical: 14,
+    borderRadius: 12,
+  },
+  authGateButtonText: {
+    color: colors.white,
+    fontWeight: "700",
+    fontSize: 14,
   },
 });

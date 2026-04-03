@@ -6,8 +6,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import "react-native-reanimated";
 import { useColorScheme } from "@/components/useColorScheme";
-import { AuthProvider, useAuth } from "@/hooks/useAuth";
-import { setTokenGetter } from "@/lib/api";
+import { AuthProvider } from "@/hooks/useAuth";
 
 export { ErrorBoundary } from "expo-router";
 export const unstable_settings = { initialRouteName: "(tabs)" };
@@ -15,8 +14,6 @@ SplashScreen.preventAutoHideAsync();
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
-  const { getToken } = useAuth();
-  useEffect(() => { setTokenGetter(getToken); }, [getToken]);
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
