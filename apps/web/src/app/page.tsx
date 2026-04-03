@@ -54,6 +54,9 @@ export default function Home() {
               <Link href="/create" className="hidden sm:inline-flex text-sm font-medium text-gray-600 hover:text-maroon-600 px-3 py-1.5 rounded-md transition-colors">
                 + Post
               </Link>
+              <Link href="/saved" className="hidden sm:inline-flex text-sm font-medium text-gray-600 hover:text-maroon-600 px-3 py-1.5 rounded-md transition-colors">
+                Saved
+              </Link>
               <Link href="/notifications" className="text-lg sm:text-xl px-1.5 sm:px-2 py-1 rounded-full hover:bg-gray-100 transition-colors">
                 🔔
               </Link>
@@ -63,7 +66,7 @@ export default function Home() {
               >
                 Log Out
               </button>
-              <Link href="/profile" className="w-8 h-8 rounded-full bg-gradient-to-br from-maroon-500 to-maroon-700 flex items-center justify-center text-white text-xs font-bold shrink-0">
+              <Link href={`/profile/${user.id}`} className="w-8 h-8 rounded-full bg-gradient-to-br from-maroon-500 to-maroon-700 flex items-center justify-center text-white text-xs font-bold shrink-0">
                 {user.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
               </Link>
             </>
