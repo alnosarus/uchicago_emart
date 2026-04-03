@@ -4,6 +4,7 @@ import { requireAuth, type AuthRequest } from "../middleware/auth";
 import { prisma } from "../config/database";
 import { z } from "zod";
 import { validate } from "../middleware/validate";
+import { getReviewsForUser } from "../services/review.service";
 
 const router = Router();
 
@@ -103,6 +104,16 @@ router.patch(
     }
   }
 );
+
+// GET /api/users/:id/reviews — Reviews received by a user
+router.get("/:id/reviews", async (req, res: Response, next) => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const result = await getReviewsForUser(req.params.id as string, page, limit);
+    res.json(result);
+  } catch (err) { next(err); }
+});
 
 // GET /api/users/:id — Public profile
 router.get("/:id", async (req, res: Response, next) => {
