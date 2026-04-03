@@ -10,6 +10,7 @@ import {
   ScrollView,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { colors } from "@/constants/colors";
 import { useAuth } from "@/hooks/useAuth";
@@ -68,6 +69,7 @@ function AuthenticatedProfile({
   onSignOut: () => void;
 }) {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   async function handleSignOut() {
@@ -107,6 +109,16 @@ function AuthenticatedProfile({
           </View>
         )}
       </View>
+
+      {/* View Full Profile button */}
+      <Pressable
+        style={styles.viewProfileButton}
+        onPress={() => router.push(`/profile/${user.id}` as never)}
+      >
+        <FontAwesome name="user-circle-o" size={16} color={colors.maroon[600]} />
+        <Text style={styles.viewProfileButtonText}>View Full Profile</Text>
+        <FontAwesome name="chevron-right" size={12} color={colors.maroon[600]} />
+      </Pressable>
 
       {/* My Posts section */}
       <View style={styles.section}>
@@ -303,5 +315,25 @@ const styles = StyleSheet.create({
 
   disabledButton: {
     opacity: 0.5,
+  },
+
+  /* View Full Profile */
+  viewProfileButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    backgroundColor: colors.maroon[50],
+    borderRadius: 12,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: colors.maroon[100],
+  },
+  viewProfileButtonText: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: "600",
+    color: colors.maroon[600],
   },
 });
