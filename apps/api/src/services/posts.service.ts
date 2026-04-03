@@ -8,6 +8,7 @@ function mapCondition(condition: string): string {
   return condition;
 }
 
+
 // ── Create ──────────────────────────────────────
 
 interface CreatePostInput {
@@ -93,9 +94,9 @@ export async function createPost(input: CreatePostInput) {
           create: {
             subtype: housing.subtype as any,
             side: housing.side as any,
-            monthlyRent: housing.monthlyRent ?? null,
-            bedrooms: housing.bedrooms as any,
-            bathrooms: housing.bathrooms as any,
+            monthlyRent: housing.monthlyRent,
+            bedrooms: housing.bedrooms,
+            bathrooms: housing.bathrooms,
             neighborhood: housing.neighborhood ?? null,
             amenities: housing.amenities ?? [],
             roommates: housing.roommates as any,
@@ -290,11 +291,11 @@ interface UpdatePostInput {
     subtype?: string;
     side?: string;
     monthlyRent?: number | null;
-    bedrooms?: number;
-    bathrooms?: number;
+    bedrooms?: string;
+    bathrooms?: string;
     neighborhood?: string | null;
     amenities?: string[];
-    roommates?: boolean;
+    roommates?: string;
     roommateCount?: number | null;
     moveInDate?: string | null;
     moveOutDate?: string | null;

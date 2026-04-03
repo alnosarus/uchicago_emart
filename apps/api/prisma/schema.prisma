@@ -150,18 +150,11 @@ enum HousingSide {
   looking
 }
 
-enum Bedrooms {
-  studio
-  one        @map("1")
-  two        @map("2")
-  three_plus @map("3_plus")
-}
-
-enum Bathrooms {
-  one      @map("1")
-  one_half @map("1.5")
-  two_plus @map("2_plus")
-}
+// Bedrooms and Bathrooms are stored as String (validated by Zod at API layer)
+// Values: "studio", "1", "2", "3_plus" for bedrooms
+// Values: "1", "1.5", "2_plus" for bathrooms
+// Using String avoids Prisma enum @map mismatches since these values
+// can't be valid Prisma identifiers (start with numbers, contain dots)
 
 enum RoommateType {
   solo
@@ -192,8 +185,8 @@ model HousingDetails {
   subtype             HousingSubtype
   side                HousingSide
   monthlyRent         Float          @map("monthly_rent")
-  bedrooms            Bedrooms
-  bathrooms           Bathrooms
+  bedrooms            String
+  bathrooms           String
   neighborhood        String?
   amenities           String[]       @default([])
   roommates           RoommateType
