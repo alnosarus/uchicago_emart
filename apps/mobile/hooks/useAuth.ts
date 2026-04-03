@@ -117,7 +117,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const [request, response, promptAsync] = AuthSession.useAuthRequest(
     {
-      clientId: GOOGLE_AUTH_CONFIG.clientId,
+      clientId: GOOGLE_AUTH_CONFIG.iosClientId || GOOGLE_AUTH_CONFIG.clientId,
       scopes: GOOGLE_AUTH_CONFIG.scopes,
       redirectUri,
       responseType: AuthSession.ResponseType.Code,
