@@ -77,7 +77,22 @@ interface Post {
   storage: StorageDetails | null;
   housing: HousingDetails | null;
   images: PostImage[];
+  isSaved?: boolean;
   _count: { savedBy: number };
+}
+
+interface UserSearchResult {
+  id: string;
+  name: string;
+  cnetId: string;
+  avatarUrl: string | null;
+}
+
+interface ReviewEligibility {
+  eligible: boolean;
+  revieweeId?: string;
+  revieweeName?: string;
+  alreadyReviewed: boolean;
 }
 
 // ---------- Helpers ----------
@@ -585,13 +600,35 @@ export default function PostDetailPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
 
+  // Save/unsave
+  const [isSaved, setIsSaved] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Mark as sold/completed
+  const [showMarkSold, setShowMarkSold] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<UserSearchResult[]>([]);
+  const [selectedBuyer, setSelectedBuyer] = useState<{ id: string; name: string; cnetId: string } | null>(null);
+  const [isSubmittingTransaction, setIsSubmittingTransaction] = useState(false);
+
+  // Review
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewText, setReviewText] = useState("");
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [reviewEligibility, setReviewEligibility] = useState<ReviewEligibility | null>(null);
+
   const postId = params.id;
 
   const fetchPost = useCallback(async () => {
     setIsLoading(true);
     setNotFound(false);
     try {
-      const res = await fetch(`${API_URL}/api/posts/${postId}`);
+      const headers: Record<string, string> = {};
+      if (accessToken) {
+        headers["Authorization"] = `Bearer ${accessToken}`;
+      }
+      const res = await fetch(`${API_URL}/api/posts/${postId}`, { headers });
       if (res.status === 404) {
         setNotFound(true);
         return;
@@ -602,18 +639,65 @@ export default function PostDetailPage() {
       }
       const data = await res.json();
       setPost(data);
+      setIsSaved(data.isSaved ?? false);
     } catch {
       setNotFound(true);
     } finally {
       setIsLoading(false);
     }
-  }, [postId]);
+  }, [postId, accessToken]);
 
   useEffect(() => {
     if (postId) {
       fetchPost();
     }
   }, [postId, fetchPost]);
+
+  // Debounced user search for mark-sold modal
+  useEffect(() => {
+    if (!showMarkSold) return;
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `${API_URL}/api/users/search?q=${encodeURIComponent(searchQuery)}`,
+          { headers: { Authorization: `Bearer ${accessToken}` } }
+        );
+        if (res.ok) {
+          const data = await res.json();
+          setSearchResults(data);
+        }
+      } catch {
+        // ignore search errors
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery, showMarkSold, accessToken]);
+
+  // Fetch review eligibility when post is sold/completed
+  useEffect(() => {
+    if (!post || !accessToken || !user) return;
+    if (post.status !== "sold" && post.status !== "completed") return;
+    if (post.author.id === user.id) return; // owner doesn't review themselves
+    const fetchEligibility = async () => {
+      try {
+        const res = await fetch(
+          `${API_URL}/api/reviews/eligibility?postId=${postId}`,
+          { headers: { Authorization: `Bearer ${accessToken}` } }
+        );
+        if (res.ok) {
+          const data = await res.json();
+          setReviewEligibility(data);
+        }
+      } catch {
+        // ignore eligibility errors
+      }
+    };
+    fetchEligibility();
+  }, [post, postId, accessToken, user]);
 
   const handleDelete = async () => {
     if (!accessToken) return;
@@ -634,6 +718,88 @@ export default function PostDetailPage() {
       setDeleteError("Failed to delete post. Please try again.");
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const handleToggleSave = async () => {
+    if (!user) {
+      router.push("/auth");
+      return;
+    }
+    if (isSaving) return;
+    const prevSaved = isSaved;
+    setIsSaved(!prevSaved);
+    setIsSaving(true);
+    try {
+      const res = await fetch(`${API_URL}/api/saved/${postId}`, {
+        method: prevSaved ? "DELETE" : "POST",
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (!res.ok) {
+        setIsSaved(prevSaved); // rollback
+      }
+    } catch {
+      setIsSaved(prevSaved); // rollback
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleMarkSoldOpen = () => {
+    setSearchQuery("");
+    setSearchResults([]);
+    setSelectedBuyer(null);
+    setShowMarkSold(true);
+  };
+
+  const handleMarkSoldConfirm = async () => {
+    if (!selectedBuyer || !accessToken) return;
+    setIsSubmittingTransaction(true);
+    try {
+      const res = await fetch(`${API_URL}/api/transactions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ postId, buyerId: selectedBuyer.id }),
+      });
+      if (res.ok) {
+        setShowMarkSold(false);
+        fetchPost();
+      }
+    } catch {
+      // ignore, keep modal open
+    } finally {
+      setIsSubmittingTransaction(false);
+    }
+  };
+
+  const handleSubmitReview = async () => {
+    if (!reviewEligibility?.revieweeId || reviewRating === 0 || !accessToken) return;
+    setIsSubmittingReview(true);
+    try {
+      const res = await fetch(`${API_URL}/api/reviews`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          postId,
+          revieweeId: reviewEligibility.revieweeId,
+          rating: reviewRating,
+          text: reviewText.trim() || undefined,
+        }),
+      });
+      if (res.ok) {
+        setShowReviewForm(false);
+        setReviewEligibility({ ...reviewEligibility, eligible: false, alreadyReviewed: true });
+      }
+    } catch {
+      // ignore, keep form open
+    } finally {
+      setIsSubmittingReview(false);
     }
   };
 
@@ -694,10 +860,44 @@ export default function PostDetailPage() {
                     {post.housing.subtype === "sublet" ? "Sublet" : "Passdown"}
                   </span>
                 )}
+                {(post.status === "sold" || post.status === "completed") && (
+                  <span className="text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wide bg-gray-200 text-gray-600">
+                    {post.status === "sold" ? "Sold" : "Completed"}
+                  </span>
+                )}
               </div>
-              <h1 className="text-2xl font-extrabold text-gray-900 mb-2">
-                {post.title}
-              </h1>
+              <div className="flex items-start gap-3">
+                <h1 className="text-2xl font-extrabold text-gray-900 mb-2 flex-1">
+                  {post.title}
+                </h1>
+                {/* Save button */}
+                {!isOwner && (
+                  <button
+                    onClick={handleToggleSave}
+                    disabled={isSaving}
+                    aria-label={isSaved ? "Unsave post" : "Save post"}
+                    className={`mt-0.5 p-2 rounded-full transition-colors ${
+                      isSaved
+                        ? "text-maroon-600 bg-maroon-50 hover:bg-maroon-100"
+                        : "text-gray-400 bg-gray-100 hover:bg-gray-200"
+                    } disabled:opacity-50`}
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill={isSaved ? "currentColor" : "none"}
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"
+                      />
+                    </svg>
+                  </button>
+                )}
+              </div>
               <div className="flex items-baseline gap-3">
                 <span
                   className={`text-3xl font-black ${
@@ -811,29 +1011,64 @@ export default function PostDetailPage() {
               >
                 Message Seller
               </button>
-              <button
-                disabled
-                className="flex-1 min-w-[120px] sm:min-w-[140px] border border-gray-300 text-gray-700 text-sm font-semibold py-3 rounded-lg hover:bg-gray-50 transition-colors opacity-50 cursor-not-allowed"
-              >
-                Save
-              </button>
+              {!isOwner && (
+                <button
+                  onClick={handleToggleSave}
+                  disabled={isSaving}
+                  className={`flex-1 min-w-[120px] sm:min-w-[140px] border text-sm font-semibold py-3 rounded-lg transition-colors disabled:opacity-50 ${
+                    isSaved
+                      ? "border-maroon-600 text-maroon-700 bg-maroon-50 hover:bg-maroon-100"
+                      : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  {isSaved ? "Saved" : "Save"}
+                </button>
+              )}
             </div>
 
             {/* Owner actions */}
             {isOwner && (
-              <div className="flex gap-3 pt-2">
-                <Link
-                  href={`/posts/${post.id}/edit`}
-                  className="flex-1 text-center border border-maroon-600 text-maroon-700 text-sm font-semibold py-2.5 rounded-lg hover:bg-maroon-50 transition-colors"
-                >
-                  Edit Post
-                </Link>
-                <button
-                  onClick={() => setShowDeleteDialog(true)}
-                  className="flex-1 text-center border border-red-300 text-red-600 text-sm font-semibold py-2.5 rounded-lg hover:bg-red-50 transition-colors"
-                >
-                  Delete Post
-                </button>
+              <div className="flex flex-col gap-3 pt-2">
+                {post.status === "active" && (
+                  <button
+                    onClick={handleMarkSoldOpen}
+                    className="w-full bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2.5 rounded-lg transition-colors"
+                  >
+                    {post.type === "marketplace" ? "Mark as Sold" : "Mark as Completed"}
+                  </button>
+                )}
+                <div className="flex gap-3">
+                  <Link
+                    href={`/posts/${post.id}/edit`}
+                    className="flex-1 text-center border border-maroon-600 text-maroon-700 text-sm font-semibold py-2.5 rounded-lg hover:bg-maroon-50 transition-colors"
+                  >
+                    Edit Post
+                  </Link>
+                  <button
+                    onClick={() => setShowDeleteDialog(true)}
+                    className="flex-1 text-center border border-red-300 text-red-600 text-sm font-semibold py-2.5 rounded-lg hover:bg-red-50 transition-colors"
+                  >
+                    Delete Post
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Review section (non-owners, post sold/completed) */}
+            {!isOwner && user && reviewEligibility && (
+              <div className="pt-1">
+                {reviewEligibility.alreadyReviewed ? (
+                  <p className="text-sm text-gray-500 italic">
+                    You have already reviewed this transaction.
+                  </p>
+                ) : reviewEligibility.eligible ? (
+                  <button
+                    onClick={() => setShowReviewForm(true)}
+                    className="w-full border border-amber-400 text-amber-700 bg-amber-50 hover:bg-amber-100 text-sm font-semibold py-2.5 rounded-lg transition-colors"
+                  >
+                    Leave a Review for {reviewEligibility.revieweeName}
+                  </button>
+                ) : null}
               </div>
             )}
 
@@ -874,6 +1109,182 @@ export default function PostDetailPage() {
           onCancel={() => setShowDeleteDialog(false)}
           isDeleting={isDeleting}
         />
+      )}
+
+      {/* Mark as Sold/Completed modal */}
+      {showMarkSold && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+          onClick={() => setShowMarkSold(false)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-xl max-w-md w-full mx-4 p-6 space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-bold text-gray-900">
+              {post.type === "marketplace" ? "Mark as Sold" : "Mark as Completed"}
+            </h3>
+            <p className="text-sm text-gray-500">
+              Search for the person you transacted with.
+            </p>
+
+            {/* User search */}
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setSelectedBuyer(null);
+              }}
+              placeholder="Search by name or CNetID..."
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
+
+            {/* Search results */}
+            {searchResults.length > 0 && !selectedBuyer && (
+              <ul className="border border-gray-200 rounded-lg divide-y divide-gray-100 max-h-48 overflow-y-auto">
+                {searchResults.map((u) => (
+                  <li key={u.id}>
+                    <button
+                      onClick={() => {
+                        setSelectedBuyer({ id: u.id, name: u.name, cnetId: u.cnetId });
+                        setSearchResults([]);
+                      }}
+                      className="w-full text-left px-3 py-2 hover:bg-gray-50 transition-colors flex items-center gap-3"
+                    >
+                      {u.avatarUrl ? (
+                        <img
+                          src={u.avatarUrl}
+                          alt={u.name}
+                          className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                        />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-maroon-500 to-maroon-700 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                          {u.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                        </div>
+                      )}
+                      <div>
+                        <div className="text-sm font-semibold text-gray-900">{u.name}</div>
+                        <div className="text-xs text-gray-500">@{u.cnetId}</div>
+                      </div>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {/* Selected user */}
+            {selectedBuyer && (
+              <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-3 flex items-center justify-between">
+                <div>
+                  <div className="text-sm font-semibold text-green-800">{selectedBuyer.name}</div>
+                  <div className="text-xs text-green-600">@{selectedBuyer.cnetId}</div>
+                </div>
+                <button
+                  onClick={() => setSelectedBuyer(null)}
+                  className="text-green-600 hover:text-green-800 text-xs font-medium"
+                >
+                  Change
+                </button>
+              </div>
+            )}
+
+            <div className="flex gap-3 justify-end pt-2">
+              <button
+                onClick={() => setShowMarkSold(false)}
+                disabled={isSubmittingTransaction}
+                className="px-4 py-2 text-sm font-semibold text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleMarkSoldConfirm}
+                disabled={!selectedBuyer || isSubmittingTransaction}
+                className="px-4 py-2 text-sm font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+              >
+                {isSubmittingTransaction ? "Confirming..." : "Confirm"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Leave a Review modal */}
+      {showReviewForm && reviewEligibility && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+          onClick={() => setShowReviewForm(false)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-xl max-w-md w-full mx-4 p-6 space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-bold text-gray-900">
+              Leave a Review for {reviewEligibility.revieweeName}
+            </h3>
+
+            {/* Star rating */}
+            <div>
+              <p className="text-sm font-medium text-gray-700 mb-2">Rating</p>
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    onClick={() => setReviewRating(star)}
+                    aria-label={`Rate ${star} star${star !== 1 ? "s" : ""}`}
+                    className="focus:outline-none"
+                  >
+                    <svg
+                      className={`w-8 h-8 transition-colors ${
+                        star <= reviewRating ? "text-amber-400" : "text-gray-300"
+                      }`}
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292Z" />
+                    </svg>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Review text */}
+            <div>
+              <label className="text-sm font-medium text-gray-700 block mb-2">
+                Review (optional)
+              </label>
+              <textarea
+                value={reviewText}
+                onChange={(e) => {
+                  if (e.target.value.length <= 500) setReviewText(e.target.value);
+                }}
+                placeholder="Share your experience..."
+                rows={4}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 resize-none"
+              />
+              <p className="text-xs text-gray-400 text-right mt-1">
+                {reviewText.length}/500
+              </p>
+            </div>
+
+            <div className="flex gap-3 justify-end pt-2">
+              <button
+                onClick={() => setShowReviewForm(false)}
+                disabled={isSubmittingReview}
+                className="px-4 py-2 text-sm font-semibold text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmitReview}
+                disabled={reviewRating === 0 || isSubmittingReview}
+                className="px-4 py-2 text-sm font-semibold text-white bg-amber-500 rounded-lg hover:bg-amber-600 transition-colors disabled:opacity-50"
+              >
+                {isSubmittingReview ? "Submitting..." : "Submit Review"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
