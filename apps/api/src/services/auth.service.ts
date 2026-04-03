@@ -75,6 +75,7 @@ export async function loginWithGoogle(code: string, redirectUri?: string) {
         name: payload.name,
         avatarUrl: payload.picture || null,
         isVerified: false,
+        cnetId: payload.email.split("@")[0],
       },
     });
   }
