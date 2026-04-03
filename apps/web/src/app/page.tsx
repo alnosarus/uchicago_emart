@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/lib/auth-context";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
@@ -21,8 +22,10 @@ interface PostCard {
 
 export default function Home() {
   const { user, isLoading, logout } = useAuth();
+  const router = useRouter();
   const [recentPosts, setRecentPosts] = useState<PostCard[]>([]);
   const [activeTab, setActiveTab] = useState("marketplace");
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     fetch(`${API_URL}/api/posts?type=${activeTab}&limit=6`)
@@ -91,17 +94,26 @@ export default function Home() {
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-6 sm:mb-9 relative z-10">
           UChicago Marketplace
         </h1>
-        <div className="max-w-xl mx-auto flex bg-white rounded-full shadow-2xl overflow-hidden p-1 sm:p-1.5 pl-4 sm:pl-6 gap-1.5 sm:gap-2 items-center relative z-10">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            const q = searchQuery.trim();
+            router.push(q ? `/browse?q=${encodeURIComponent(q)}` : "/browse");
+          }}
+          className="max-w-xl mx-auto flex bg-white rounded-full shadow-2xl overflow-hidden p-1 sm:p-1.5 pl-4 sm:pl-6 gap-1.5 sm:gap-2 items-center relative z-10"
+        >
           <span className="text-gray-400 text-base sm:text-lg">&#128269;</span>
           <input
             type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search listings, storage..."
             className="flex-1 border-none text-sm sm:text-base text-gray-800 bg-transparent outline-none min-w-0"
           />
-          <button className="bg-gradient-to-br from-maroon-600 to-maroon-700 text-white text-xs sm:text-sm font-semibold px-4 sm:px-6 py-2 sm:py-2.5 rounded-full shadow-md shrink-0">
+          <button type="submit" className="bg-gradient-to-br from-maroon-600 to-maroon-700 text-white text-xs sm:text-sm font-semibold px-4 sm:px-6 py-2 sm:py-2.5 rounded-full shadow-md shrink-0">
             Browse
           </button>
-        </div>
+        </form>
       </section>
 
       {/* Feature tabs */}
