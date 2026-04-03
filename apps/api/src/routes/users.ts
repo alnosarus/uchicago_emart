@@ -7,26 +7,37 @@ import { validate } from "../middleware/validate";
 
 const router = Router();
 
-// GET /api/users/:id — Public profile
-router.get("/:id", async (req, res: Response, next) => {
+// GET /api/users/search — Search users by name or cnetId
+router.get("/search", requireAuth, async (req: AuthRequest, res: Response, next) => {
   try {
-    const user = await prisma.user.findUnique({
-      where: { id: req.params.id },
-      select: {
-        id: true,
-        name: true,
-        avatarUrl: true,
-        isVerified: true,
-        createdAt: true,
-      },
-    });
-
-    if (!user) {
-      res.status(404).json({ message: "User not found" });
+    const q = (req.query.q as string || "").trim();
+    if (q.length < 2) {
+      res.json([]);
       return;
     }
 
-    res.json(user);
+    const users = await prisma.user.findMany({
+      where: {
+        AND: [
+          { id: { not: req.userId } },
+          {
+            OR: [
+              { name: { contains: q, mode: "insensitive" } },
+              { cnetId: { startsWith: q, mode: "insensitive" } },
+            ],
+          },
+        ],
+      },
+      select: {
+        id: true,
+        name: true,
+        cnetId: true,
+        avatarUrl: true,
+      },
+      take: 10,
+    });
+
+    res.json(users);
   } catch (err) {
     next(err);
   }
@@ -92,5 +103,30 @@ router.patch(
     }
   }
 );
+
+// GET /api/users/:id — Public profile
+router.get("/:id", async (req, res: Response, next) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.params.id },
+      select: {
+        id: true,
+        name: true,
+        avatarUrl: true,
+        isVerified: true,
+        createdAt: true,
+      },
+    });
+
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    res.json(user);
+  } catch (err) {
+    next(err);
+  }
+});
 
 export default router;
