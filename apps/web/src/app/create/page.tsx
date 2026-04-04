@@ -346,7 +346,7 @@ export default function CreatePostPage() {
                 : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm"
             }`}
           >
-            <div className="text-2xl mb-2">🛒</div>
+            <div className="mb-2"><img src="/icons/cart.png" alt="" className="w-8 h-8" /></div>
             <h3 className="text-base font-bold text-gray-900">Marketplace</h3>
             <p className="text-sm text-gray-500 mt-1">Buy or sell items with fellow Maroons</p>
           </button>
@@ -359,7 +359,7 @@ export default function CreatePostPage() {
                 : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm"
             }`}
           >
-            <div className="text-2xl mb-2">📦</div>
+            <div className="mb-2"><img src="/icons/package.png" alt="" className="w-8 h-8" /></div>
             <h3 className="text-base font-bold text-gray-900">Storage</h3>
             <p className="text-sm text-gray-500 mt-1">Find or offer storage space on/off campus</p>
           </button>
@@ -372,7 +372,7 @@ export default function CreatePostPage() {
                 : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm"
             }`}
           >
-            <div className="text-2xl mb-2">🏠</div>
+            <div className="mb-2"><img src="/icons/home.png" alt="" className="w-8 h-8 -mt-4" /></div>
             <h3 className="text-base font-bold text-gray-900">Housing</h3>
             <p className="text-sm text-gray-500 mt-1">Sublets & passdowns</p>
           </button>
@@ -1105,13 +1105,8 @@ export default function CreatePostPage() {
     <>
       {/* Navbar */}
       <nav className="bg-white border-b border-gray-200 px-4 sm:px-8 h-14 sm:h-16 flex items-center justify-between sticky top-0 z-50 shadow-sm">
-        <Link href="/" className="flex items-center gap-1.5 sm:gap-2">
-          <span className="text-xl sm:text-2xl font-bold tracking-wide uppercase bg-gradient-to-br from-maroon-700 to-maroon-500 bg-clip-text text-transparent">
-            UChicago
-          </span>
-          <span className="hidden sm:inline text-sm font-medium text-gray-400 uppercase tracking-wider">
-            Marketplace
-          </span>
+        <Link href="/" className="flex items-center">
+          <img src="/logos/emart-logo.svg" alt="UChicago E-mart" className="h-10 sm:h-11" />
         </Link>
         <Link
           href="/"

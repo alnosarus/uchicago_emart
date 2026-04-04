@@ -3,7 +3,7 @@ import { Providers } from "./providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "UChicago Marketplace",
+  title: "UChicago E-mart",
   description: "Buy, sell, share rides, and find storage with fellow Maroons",
 };
 

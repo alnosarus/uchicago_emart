@@ -1092,13 +1092,8 @@ export default function EditPostPage() {
     <>
       {/* Navbar */}
       <nav className="bg-white border-b border-gray-200 px-4 sm:px-8 h-14 sm:h-16 flex items-center justify-between sticky top-0 z-50 shadow-sm">
-        <Link href="/" className="flex items-center gap-2">
-          <span className="text-2xl font-bold tracking-wide uppercase bg-gradient-to-br from-maroon-700 to-maroon-500 bg-clip-text text-transparent">
-            UChicago
-          </span>
-          <span className="text-sm font-medium text-gray-400 uppercase tracking-wider">
-            Marketplace
-          </span>
+        <Link href="/" className="flex items-center">
+          <img src="/logos/emart-logo.svg" alt="UChicago E-mart" className="h-10 sm:h-11" />
         </Link>
         <Link
           href={`/posts/${postId}`}

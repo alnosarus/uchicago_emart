@@ -7,7 +7,31 @@
       "Bash(git commit:*)",
       "Bash(git remote:*)",
       "Bash(git push:*)",
-      "Bash(git branch:*)"
+      "Bash(git branch:*)",
+      "Bash(python -c ':*)",
+      "Bash(node -e ':*)",
+      "Bash(ls \"c:/Users/Kenneth/Desktop/Kenneth/uchicago_emart/\"*.png)",
+      "Bash(git stash:*)",
+      "Bash(git pull:*)",
+      "Bash(npm run:*)",
+      "Bash(winget install:*)",
+      "Bash(winget search:*)",
+      "Read(//c/Program Files/PostgreSQL/17/bin/**)",
+      "Bash(./psql -U postgres -c \"CREATE USER claudeadmin WITH PASSWORD 'admin123';\")",
+      "Bash(./psql -U postgres -c \"CREATE DATABASE uchicago_marketplace OWNER claudeadmin;\")",
+      "Bash(npx prisma:*)",
+      "Bash(grep -E \"\\\\.\\(svg|png\\)$\")",
+      "Bash(mkdir -p logos icons images)",
+      "Bash(mv logo-version2.svg emart-logo-long.svg emart-logo-short.svg logos/)",
+      "Bash(mv bell.png shopping-cart.png package-box.png search-interface-symbol.png icons/)",
+      "Bash(mv wing.svg icons/)",
+      "Bash(mv phoenix.png images/)",
+      "Bash(xargs sed:*)",
+      "Bash(mv logos/logo-version2-real.svg logos/emart-logo.svg)",
+      "Bash(mv logos/logo-version2.svg logos/emart-logo-v1.svg)",
+      "Bash(mv icons/search-interface-symbol.png icons/search.png)",
+      "Bash(mv icons/package-box.png icons/package.png)",
+      "Bash(mv icons/shopping-cart.png icons/cart.png)"
     ]
   }
 }

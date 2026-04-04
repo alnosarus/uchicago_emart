@@ -47,19 +47,14 @@ export default function AuthPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-block">
-            <span className="text-3xl font-bold tracking-wide uppercase bg-gradient-to-br from-maroon-700 to-maroon-500 bg-clip-text text-transparent">
-              UChicago
-            </span>
-            <span className="block text-sm font-medium text-gray-400 uppercase tracking-wider">
-              Marketplace
-            </span>
+            <img src="/logos/emart-logo.svg" alt="UChicago E-mart" className="h-12" />
           </Link>
         </div>
 
         {/* Card */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
           <h1 className="text-xl font-extrabold text-gray-900 text-center mb-1">
-            Welcome to UChicago Marketplace
+            Welcome to UChicago E-mart
           </h1>
           <p className="text-sm text-gray-500 text-center mb-8">
             Sign in with your UChicago Google account

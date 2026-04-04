@@ -533,13 +533,8 @@ function BrowseContent() {
     <div className="min-h-screen flex flex-col bg-gray-50">
       {/* Navbar */}
       <nav className="bg-white border-b border-gray-200 px-4 sm:px-8 h-14 sm:h-16 flex items-center justify-between sticky top-0 z-50 shadow-sm">
-        <Link href="/" className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-          <span className="text-xl sm:text-2xl font-bold tracking-wide uppercase bg-gradient-to-br from-maroon-700 to-maroon-500 bg-clip-text text-transparent">
-            UChicago
-          </span>
-          <span className="hidden sm:inline text-sm font-medium text-gray-400 uppercase tracking-wider">
-            Marketplace
-          </span>
+        <Link href="/" className="flex items-center shrink-0">
+          <img src="/logos/emart-logo.svg" alt="UChicago E-mart" className="h-10 sm:h-11" />
         </Link>
         <div className="flex items-center gap-2 sm:gap-3">
           <Link href="/browse" className="text-sm font-semibold text-maroon-600 px-2 sm:px-3 py-1.5 rounded-md">
@@ -558,8 +553,8 @@ function BrowseContent() {
               <Link href="/history" className="hidden sm:inline-flex text-sm font-medium text-gray-600 hover:text-maroon-600 px-3 py-1.5 rounded-md transition-colors">
                 History
               </Link>
-              <Link href="/notifications" className="text-lg sm:text-xl px-1.5 sm:px-2 py-1 rounded-full hover:bg-gray-100 transition-colors">
-                🔔
+              <Link href="/notifications" className="px-1.5 sm:px-2 py-1 rounded-full hover:bg-gray-100 transition-colors flex items-center justify-center">
+                <img src="/icons/bell.png" alt="Notifications" className="w-5 h-5 sm:w-6 sm:h-6" />
               </Link>
               <button
                 onClick={logout}

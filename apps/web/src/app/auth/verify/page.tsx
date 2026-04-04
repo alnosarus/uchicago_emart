@@ -100,12 +100,7 @@ export default function VerifyPhonePage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <span className="text-3xl font-bold tracking-wide uppercase bg-gradient-to-br from-maroon-700 to-maroon-500 bg-clip-text text-transparent">
-            UChicago
-          </span>
-          <span className="block text-sm font-medium text-gray-400 uppercase tracking-wider">
-            Marketplace
-          </span>
+          <img src="/logos/emart-logo.svg" alt="UChicago E-mart" className="h-12 mx-auto" />
         </div>
 
         <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">

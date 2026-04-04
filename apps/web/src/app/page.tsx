@@ -38,13 +38,8 @@ export default function Home() {
     <>
       {/* Navbar */}
       <nav className="bg-white border-b border-gray-200 px-4 sm:px-8 h-14 sm:h-16 flex items-center justify-between sticky top-0 z-50 shadow-sm">
-        <Link href="/" className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-          <span className="text-xl sm:text-2xl font-bold tracking-wide uppercase bg-gradient-to-br from-maroon-700 to-maroon-500 bg-clip-text text-transparent">
-            UChicago
-          </span>
-          <span className="hidden sm:inline text-sm font-medium text-gray-400 uppercase tracking-wider">
-            Marketplace
-          </span>
+        <Link href="/" className="flex items-center shrink-0">
+          <img src="/logos/emart-logo.svg" alt="UChicago E-mart" className="h-10 sm:h-11" />
         </Link>
         <div className="flex items-center gap-2 sm:gap-3">
           <Link href="/browse" className="text-sm font-medium text-gray-600 hover:text-maroon-600 px-2 sm:px-3 py-1.5 rounded-md transition-colors">
@@ -63,8 +58,8 @@ export default function Home() {
               <Link href="/history" className="hidden sm:inline-flex text-sm font-medium text-gray-600 hover:text-maroon-600 px-3 py-1.5 rounded-md transition-colors">
                 History
               </Link>
-              <Link href="/notifications" className="text-lg sm:text-xl px-1.5 sm:px-2 py-1 rounded-full hover:bg-gray-100 transition-colors">
-                🔔
+              <Link href="/notifications" className="px-1.5 sm:px-2 py-1 rounded-full hover:bg-gray-100 transition-colors flex items-center justify-center">
+                <img src="/icons/bell.png" alt="Notifications" className="w-5 h-5 sm:w-6 sm:h-6" />
               </Link>
               <button
                 onClick={logout}
@@ -91,8 +86,10 @@ export default function Home() {
 
       {/* Hero */}
       <section className="bg-gradient-to-br from-maroon-900 via-maroon-700 to-maroon-500 px-4 sm:px-8 py-14 sm:py-24 text-center relative overflow-hidden">
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-6 sm:mb-9 relative z-10">
-          UChicago Marketplace
+        <img src="/images/phoenix.png" alt="" aria-hidden="true" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-full w-auto opacity-15 pointer-events-none select-none" />
+        <h1 className="text-white mb-3 sm:mb-4 relative z-10">
+          <span className="block text-5xl sm:text-6xl md:text-7xl font-bold tracking-[.18em] uppercase" style={{ fontFamily: "'Oswald', sans-serif" }}>UChicago</span>
+          <span className="block text-3xl sm:text-4xl md:text-5xl font-light tracking-[.2em] uppercase opacity-85 mt-3 sm:mt-4" style={{ fontFamily: "'Raleway', sans-serif" }}>E-mart</span>
         </h1>
         <form
           onSubmit={(e) => {
@@ -102,7 +99,7 @@ export default function Home() {
           }}
           className="max-w-xl mx-auto flex bg-white rounded-full shadow-2xl overflow-hidden p-1 sm:p-1.5 pl-4 sm:pl-6 gap-1.5 sm:gap-2 items-center relative z-10"
         >
-          <span className="text-gray-400 text-base sm:text-lg">&#128269;</span>
+          <img src="/icons/search.png" alt="" className="w-4 h-4 sm:w-5 sm:h-5 opacity-40 shrink-0" />
           <input
             type="text"
             value={searchQuery}
@@ -162,7 +159,7 @@ export default function Home() {
                   {post.images[0] ? (
                     <img src={post.images[0].url} alt={post.title} className="w-full h-full object-cover" />
                   ) : (
-                    <span className="text-gray-300 text-4xl">&#128247;</span>
+                    <svg className="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                   )}
                 </div>
                 <div className="p-3">
@@ -201,7 +198,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="bg-gray-900 text-gray-500 text-center py-6 text-sm mt-auto">
-        &copy; 2026 UChicago Marketplace &middot; Made for Maroons, by Maroons
+        &copy; 2026 UChicago E-mart &middot; Made for Maroons, by Maroons
       </footer>
     </>
   );

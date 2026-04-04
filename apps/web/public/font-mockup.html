@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Font Mockups — UChicago E-mart</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600;700&family=Playfair+Display:wght@700;900&family=Raleway:wght@300;700&family=Libre+Baskerville:wght@700&family=Inter:wght@400;900&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f3f4f6; font-family: Inter, sans-serif; padding: 32px 24px; }
+    h2 { font-size: 13px; font-weight: 600; color: #6b7280; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 10px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+    .card {
+      background: linear-gradient(135deg, #3a0000, #6b0000, #9b1212);
+      border-radius: 16px;
+      padding: 40px 28px;
+      text-align: center;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+    .card .label {
+      position: absolute;
+      top: 12px; left: 14px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      background: rgba(255,255,255,0.15);
+      padding: 3px 8px;
+      border-radius: 99px;
+      color: rgba(255,255,255,0.85);
+    }
+    .title { margin-bottom: 20px; }
+    .searchbar {
+      background: white;
+      border-radius: 999px;
+      padding: 10px 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      max-width: 320px;
+      margin: 0 auto;
+    }
+    .searchbar span { color: #9ca3af; font-size: 13px; flex: 1; text-align: left; }
+    .searchbar button {
+      background: #800000;
+      color: white;
+      border: none;
+      border-radius: 999px;
+      padding: 6px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Option 1 — Oswald */
+    .opt1 .title { font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 38px; letter-spacing: .04em; text-transform: uppercase; }
+
+    /* Option 2 — Playfair Display */
+    .opt2 .title { font-family: 'Playfair Display', serif; font-weight: 900; font-size: 36px; }
+
+    /* Option 3 — Raleway */
+    .opt3 .title { font-family: 'Raleway', sans-serif; font-weight: 300; font-size: 40px; letter-spacing: .18em; text-transform: uppercase; }
+
+    /* Option 4 — Libre Baskerville */
+    .opt4 .title { font-family: 'Libre Baskerville', serif; font-weight: 700; font-size: 32px; }
+
+    /* Option 5 — Inter, wider tracking */
+    .opt5 .title { font-family: 'Inter', sans-serif; font-weight: 900; font-size: 36px; letter-spacing: .12em; text-transform: uppercase; }
+
+    /* Option 6 — Oswald + Raleway split */
+    .opt6 .title { font-size: 38px; line-height: 1.1; }
+    .opt6 .title .uchicago { font-family: 'Oswald', sans-serif; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; display: block; }
+    .opt6 .title .emart { font-family: 'Raleway', sans-serif; font-weight: 300; letter-spacing: .22em; text-transform: uppercase; display: block; font-size: .7em; opacity: .85; margin-top: 2px; }
+  </style>
+</head>
+<body>
+  <h2 style="margin-bottom:20px;">UChicago E-mart — Hero Title Font Options</h2>
+  <div class="grid">
+
+    <div class="card opt1">
+      <span class="label">1 — Oswald</span>
+      <div class="title">UChicago E-mart</div>
+      <div class="searchbar">
+        <span>Search listings, storage...</span>
+        <button>Browse</button>
+      </div>
+    </div>
+
+    <div class="card opt2">
+      <span class="label">2 — Playfair Display</span>
+      <div class="title">UChicago E-mart</div>
+      <div class="searchbar">
+        <span>Search listings, storage...</span>
+        <button>Browse</button>
+      </div>
+    </div>
+
+    <div class="card opt3">
+      <span class="label">3 — Raleway Light</span>
+      <div class="title">UChicago E-mart</div>
+      <div class="searchbar">
+        <span>Search listings, storage...</span>
+        <button>Browse</button>
+      </div>
+    </div>
+
+    <div class="card opt4">
+      <span class="label">4 — Libre Baskerville</span>
+      <div class="title">UChicago E-mart</div>
+      <div class="searchbar">
+        <span>Search listings, storage...</span>
+        <button>Browse</button>
+      </div>
+    </div>
+
+    <div class="card opt5">
+      <span class="label">5 — Inter Spaced</span>
+      <div class="title">UChicago E-mart</div>
+      <div class="searchbar">
+        <span>Search listings, storage...</span>
+        <button>Browse</button>
+      </div>
+    </div>
+
+    <div class="card opt6">
+      <span class="label">6 — Oswald + Raleway</span>
+      <div class="title">
+        <span class="uchicago">UChicago</span>
+        <span class="emart">E-mart</span>
+      </div>
+      <div class="searchbar">
+        <span>Search listings, storage...</span>
+        <button>Browse</button>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>
