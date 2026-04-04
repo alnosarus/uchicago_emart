@@ -4,6 +4,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useState, useEffect, useCallback } from "react";
+import { Blurhash } from "react-blurhash";
 import {
   HOUSING_AMENITIES,
   BEDROOM_OPTIONS,
@@ -25,6 +26,10 @@ interface PostAuthor {
 interface PostImage {
   id: string;
   url: string;
+  fullUrl: string | null;
+  thumbUrl: string | null;
+  blurHash: string | null;
+  status: string;
   order: number;
 }
 
@@ -254,11 +259,16 @@ function ImageGallery({ images }: { images: PostImage[] }) {
   return (
     <div className="space-y-3">
       {/* Main image */}
-      <div className="aspect-square bg-gray-100 rounded-2xl overflow-hidden border border-gray-200">
+      <div className="relative aspect-square bg-gray-100 rounded-2xl overflow-hidden border border-gray-200">
+        {sorted[activeIndex].blurHash && (
+          <div className="absolute inset-0">
+            <Blurhash hash={sorted[activeIndex].blurHash!} width="100%" height="100%" />
+          </div>
+        )}
         <img
-          src={sorted[activeIndex].url}
+          src={sorted[activeIndex].fullUrl || sorted[activeIndex].url}
           alt={`Image ${activeIndex + 1}`}
-          className="w-full h-full object-cover"
+          className="relative w-full h-full object-cover"
         />
       </div>
 
@@ -276,7 +286,7 @@ function ImageGallery({ images }: { images: PostImage[] }) {
               }`}
             >
               <img
-                src={img.url}
+                src={img.thumbUrl || img.url}
                 alt={`Thumbnail ${idx + 1}`}
                 className="w-full h-full object-cover"
               />
