@@ -7,15 +7,12 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
-    "lint": "echo 'no linter configured yet'",
-    "worker": "tsx src/worker.ts",
-    "worker:dev": "tsx watch src/worker.ts"
+    "lint": "echo 'no linter configured yet'"
   },
   "dependencies": {
     "@prisma/client": "^6.4.0",
     "@uchicago-marketplace/shared": "workspace:*",
     "blurhash": "^2.0.5",
-    "bullmq": "^5.73.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.0",
@@ -23,7 +20,6 @@
     "firebase-admin": "^13.7.0",
     "google-auth-library": "^10.6.2",
     "helmet": "^8.0.0",
-    "ioredis": "^5.10.1",
     "jsonwebtoken": "^9.0.3",
     "morgan": "^1.10.0",
     "multer": "^2.1.1",

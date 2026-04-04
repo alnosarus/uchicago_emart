@@ -1,6 +1,5 @@
 import { prisma } from "../config/database";
 import { HttpError } from "../utils/errors";
-import { enqueueImageProcessing } from "../queues/image-processing.queue";
 import type { UploadResult } from "./upload.service";
 import type { Prisma } from "@prisma/client";
 
@@ -416,21 +415,12 @@ export async function addPostImages(postId: string, userId: string, uploads: Upl
         data: {
           postId,
           url: upload.url,
+          fullUrl: upload.fullUrl,
+          thumbUrl: upload.thumbUrl,
+          blurHash: upload.blurHash,
           order: existing + i,
-          status: "processing",
+          status: "ready",
         },
-      })
-    )
-  );
-
-  // Enqueue processing jobs
-  await Promise.all(
-    images.map((image, i) =>
-      enqueueImageProcessing({
-        imageId: image.id,
-        postId,
-        originalUrl: uploads[i].url,
-        firebasePath: uploads[i].firebasePath,
       })
     )
   );
