@@ -4,6 +4,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { ImageUploadGrid, type ImageItem } from "@/components/ImageUploadGrid";
 import {
   HOUSING_AMENITIES,
   BEDROOM_OPTIONS,
@@ -87,6 +88,7 @@ export default function CreatePostPage() {
   const [description, setDescription] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [images, setImages] = useState<ImageItem[]>([]);
 
   const [marketplace, setMarketplace] = useState<MarketplaceFields>({
     side: "sell",
@@ -264,6 +266,28 @@ export default function CreatePostPage() {
         throw new Error(data?.message || `Request failed (${res.status})`);
       }
       const post = await res.json();
+
+      // Upload images if any
+      const localImages = images.filter((img): img is Extract<ImageItem, { type: "local" }> => img.type === "local");
+      if (localImages.length > 0) {
+        const formData = new FormData();
+        localImages.forEach((img) => {
+          formData.append("images", img.file);
+        });
+
+        const uploadRes = await fetch(`${API_URL}/api/posts/${post.id}/images`, {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: formData,
+        });
+        if (!uploadRes.ok) {
+          console.error("Image upload failed:", await uploadRes.text());
+        }
+      }
+
       router.push(`/posts/${post.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
@@ -549,6 +573,12 @@ export default function CreatePostPage() {
             <p className="text-xs text-gray-400 mt-1">Separate tags with commas</p>
           </div>
         </div>
+
+        {/* Divider */}
+        <div className="border-t border-gray-200 my-6" />
+
+        {/* Images */}
+        <ImageUploadGrid images={images} onImagesChange={setImages} />
       </div>
     );
   }
@@ -707,6 +737,12 @@ export default function CreatePostPage() {
             )}
           </div>
         </div>
+
+        {/* Divider */}
+        <div className="border-t border-gray-200 my-6" />
+
+        {/* Images */}
+        <ImageUploadGrid images={images} onImagesChange={setImages} />
       </div>
     );
   }
@@ -966,6 +1002,12 @@ export default function CreatePostPage() {
             )}
           </div>
         </div>
+
+        {/* Divider */}
+        <div className="border-t border-gray-200 my-6" />
+
+        {/* Images */}
+        <ImageUploadGrid images={images} onImagesChange={setImages} />
       </div>
     );
   }
@@ -1094,6 +1136,29 @@ export default function CreatePostPage() {
               </>
             )}
           </div>
+
+          {/* Image preview */}
+          {images.length > 0 && (
+            <div>
+              <h4 className="text-sm font-semibold text-gray-700 mb-2">Photos ({images.length})</h4>
+              <div className="grid grid-cols-4 gap-2">
+                {images.map((img, i) => (
+                  <div key={img.id} className="relative aspect-square rounded-lg overflow-hidden">
+                    <img
+                      src={img.type === "local" ? img.previewUrl : img.image.url}
+                      alt={`Photo ${i + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                    {i === 0 && (
+                      <span className="absolute top-1 left-1 bg-maroon-600 text-white text-[9px] font-bold px-1 py-0.5 rounded">
+                        Cover
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );
