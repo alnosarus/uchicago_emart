@@ -60,6 +60,12 @@ enum PostStatus {
   deleted
 }
 
+enum ImageStatus {
+  processing
+  ready
+  failed
+}
+
 model Post {
   id          String     @id @default(uuid())
   authorId    String     @map("author_id")
@@ -89,14 +95,19 @@ model Post {
 }
 
 model PostImage {
-  id        String   @id @default(uuid())
-  postId    String   @map("post_id")
+  id        String      @id @default(uuid())
+  postId    String      @map("post_id")
   url       String
-  order     Int      @default(0)
-  createdAt DateTime @default(now()) @map("created_at")
+  fullUrl   String?     @map("full_url")
+  thumbUrl  String?     @map("thumb_url")
+  blurHash  String?     @map("blur_hash")
+  status    ImageStatus @default(processing)
+  order     Int         @default(0)
+  createdAt DateTime    @default(now()) @map("created_at")
 
   post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
 
+  @@index([postId])
   @@map("post_images")
 }
 
