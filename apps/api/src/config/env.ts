@@ -15,6 +15,7 @@ const envSchema = z.object({
   JWT_REFRESH_SECRET: z.string().min(1),
   FIREBASE_SERVICE_ACCOUNT: z.string().min(1),
   FIREBASE_STORAGE_BUCKET: z.string().optional(),
+  REDIS_URL: z.string().default("redis://localhost:6379"),
   ALLOWED_EMAIL_DOMAIN: z.string().default("uchicago.edu"),
 });
 
