@@ -2,6 +2,13 @@ import { useState, useCallback } from "react";
 import type { CreatePostInput } from "@uchicago-marketplace/shared";
 import { api } from "@/lib/api";
 
+export type ImageUploadStatus = "pending" | "uploading" | "done" | "failed";
+
+export interface ImageUploadState {
+  uri: string;
+  status: ImageUploadStatus;
+}
+
 export interface CreatePostState {
   step: number;
   images: string[];
@@ -89,6 +96,7 @@ const INITIAL_STATE: CreatePostState = {
 
 export function useCreatePost() {
   const [state, setState] = useState<CreatePostState>({ ...INITIAL_STATE });
+  const [uploadStates, setUploadStates] = useState<ImageUploadState[]>([]);
 
   const update = useCallback((partial: Partial<CreatePostState>) => {
     setState((prev) => ({ ...prev, ...partial }));
@@ -221,6 +229,9 @@ export function useCreatePost() {
 
       // Upload images if any
       if (state.images.length > 0) {
+        const states: ImageUploadState[] = state.images.map((uri) => ({ uri, status: "uploading" as const }));
+        setUploadStates(states);
+
         const formData = new FormData();
         state.images.forEach((uri, i) => {
           const filename = uri.split("/").pop() || `photo_${i}.jpg`;
@@ -232,11 +243,20 @@ export function useCreatePost() {
             type: mimeType,
           } as unknown as Blob);
         });
-        await api.posts.uploadImages(post.id, formData);
+
+        try {
+          await api.posts.uploadImages(post.id, formData);
+          setUploadStates((prev) => prev.map((s) => ({ ...s, status: "done" })));
+        } catch {
+          setUploadStates((prev) => prev.map((s) => ({ ...s, status: "failed" })));
+          // Post was created but images failed — still return postId
+          // User can retry via edit
+        }
       }
 
       const postId = post.id;
       setState({ ...INITIAL_STATE });
+      setUploadStates([]);
       return postId;
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to create post";
@@ -259,6 +279,7 @@ export function useCreatePost() {
     buildPayload,
     submit,
     reset,
+    uploadStates,
   };
 }
 

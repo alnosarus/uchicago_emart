@@ -1,5 +1,6 @@
 import { prisma } from "../config/database";
 import { HttpError } from "../utils/errors";
+import type { UploadResult } from "./upload.service";
 import type { Prisma } from "@prisma/client";
 
 // Prisma enum uses "new_item" but the API/schema uses "new"
@@ -401,20 +402,30 @@ export async function deletePost(postId: string, userId: string) {
 
 // ── Add Images ────────────────────────────────
 
-export async function addPostImages(postId: string, userId: string, imageUrls: string[]) {
+export async function addPostImages(postId: string, userId: string, uploads: UploadResult[]) {
   const post = await prisma.post.findUnique({ where: { id: postId } });
   if (!post) throw new HttpError(404, "Post not found");
   if (post.authorId !== userId) throw new HttpError(403, "Not authorized");
 
   const existing = await prisma.postImage.count({ where: { postId } });
 
-  return prisma.postImage.createMany({
-    data: imageUrls.map((url, i) => ({
-      postId,
-      url,
-      order: existing + i,
-    })),
-  });
+  const images = await prisma.$transaction(
+    uploads.map((upload, i) =>
+      prisma.postImage.create({
+        data: {
+          postId,
+          url: upload.url,
+          fullUrl: upload.fullUrl,
+          thumbUrl: upload.thumbUrl,
+          blurHash: upload.blurHash,
+          order: existing + i,
+          status: "ready",
+        },
+      })
+    )
+  );
+
+  return images;
 }
 
 export async function deletePostImage(imageId: string, userId: string) {
@@ -426,4 +437,26 @@ export async function deletePostImage(imageId: string, userId: string) {
   if (image.post.authorId !== userId) throw new HttpError(403, "Not authorized");
 
   await prisma.postImage.delete({ where: { id: imageId } });
+}
+
+export async function reorderPostImages(postId: string, userId: string, imageIds: string[]) {
+  const post = await prisma.post.findUnique({ where: { id: postId } });
+  if (!post) throw new HttpError(404, "Post not found");
+  if (post.authorId !== userId) throw new HttpError(403, "Not authorized");
+
+  // Verify all IDs belong to this post
+  const images = await prisma.postImage.findMany({ where: { postId } });
+  const existingIds = new Set(images.map((img) => img.id));
+  for (const id of imageIds) {
+    if (!existingIds.has(id)) {
+      throw new HttpError(400, `Image ${id} does not belong to this post`);
+    }
+  }
+
+  // Update order based on array position
+  await prisma.$transaction(
+    imageIds.map((id, order) =>
+      prisma.postImage.update({ where: { id }, data: { order } })
+    )
+  );
 }

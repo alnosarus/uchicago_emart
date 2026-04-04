@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
+import { Blurhash } from "react-blurhash";
 import { useAuth } from "@/lib/auth-context";
 
 // ── Constants ────────────────────────────────────
@@ -80,6 +81,9 @@ interface HousingDetails {
 
 interface PostImage {
   url: string;
+  thumbUrl: string | null;
+  blurHash: string | null;
+  status: string;
 }
 
 interface Post {
@@ -173,7 +177,7 @@ function conditionLabel(condition: string): string {
 
 function PostCard({ post }: { post: Post }) {
   const price = formatPrice(post);
-  const imageUrl = post.images.length > 0 ? post.images[0].url : null;
+  const imageUrl = post.images.length > 0 ? (post.images[0].thumbUrl || post.images[0].url) : null;
 
   return (
     <Link
@@ -183,11 +187,19 @@ function PostCard({ post }: { post: Post }) {
       {/* Image */}
       <div className="relative aspect-[4/3] bg-gray-100 overflow-hidden">
         {imageUrl ? (
-          <img
-            src={imageUrl}
-            alt={post.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          />
+          <>
+            {post.images[0]?.blurHash && (
+              <div className="absolute inset-0">
+                <Blurhash hash={post.images[0].blurHash} width="100%" height="100%" />
+              </div>
+            )}
+            <img
+              src={imageUrl}
+              alt={post.title}
+              className="relative w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              loading="lazy"
+            />
+          </>
         ) : (
           <div className="w-full h-full flex items-center justify-center text-gray-300">
             <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">

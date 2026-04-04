@@ -35,10 +35,16 @@ export interface Post {
   images: PostImage[];
 }
 
+export type ImageStatus = "processing" | "ready" | "failed";
+
 export interface PostImage {
   id: string;
   postId: string;
   url: string;
+  fullUrl: string | null;
+  thumbUrl: string | null;
+  blurHash: string | null;
+  status: ImageStatus;
   order: number;
 }
 

@@ -2,20 +2,30 @@ import { useState, useCallback, useRef } from "react";
 import {
   View,
   FlatList,
-  Image,
   Text,
   Dimensions,
   StyleSheet,
   type NativeSyntheticEvent,
   type NativeScrollEvent,
 } from "react-native";
+import { Image } from "expo-image";
 import { colors } from "@/constants/colors";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const IMAGE_HEIGHT = SCREEN_WIDTH * 0.75; // 4:3 aspect ratio
 
+interface CarouselImage {
+  id: string;
+  url: string;
+  fullUrl?: string | null;
+  thumbUrl?: string | null;
+  blurHash?: string | null;
+  status?: string;
+  order: number;
+}
+
 interface ImageCarouselProps {
-  images: { id: string; url: string; order: number }[];
+  images: CarouselImage[];
 }
 
 export function ImageCarousel({ images }: ImageCarouselProps) {
@@ -51,9 +61,11 @@ export function ImageCarousel({ images }: ImageCarouselProps) {
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <Image
-            source={{ uri: item.url }}
+            source={{ uri: item.fullUrl || item.url }}
+            placeholder={item.blurHash ? { blurhash: item.blurHash } : undefined}
             style={{ width: SCREEN_WIDTH, height: IMAGE_HEIGHT }}
-            resizeMode="cover"
+            contentFit="cover"
+            transition={200}
           />
         )}
       />
