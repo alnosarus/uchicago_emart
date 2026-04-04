@@ -12,6 +12,7 @@ import {
   deletePost,
   addPostImages,
   deletePostImage,
+  reorderPostImages,
 } from "../services/posts.service";
 import { uploadImage } from "../services/upload.service";
 
@@ -63,7 +64,7 @@ router.delete("/:id", requireAuth, async (req: AuthRequest, res: Response, next:
 });
 
 // POST /api/posts/:id/images — Upload images to a post
-router.post("/:id/images", requireAuth, upload.array("images", 5), async (req: AuthRequest, res: Response, next: NextFunction) => {
+router.post("/:id/images", requireAuth, upload.array("images", 8), async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const files = req.files as Express.Multer.File[];
     if (!files || files.length === 0) {
@@ -71,12 +72,26 @@ router.post("/:id/images", requireAuth, upload.array("images", 5), async (req: A
       return;
     }
 
-    const urls = await Promise.all(
-      files.map((f) => uploadImage(f.buffer, f.mimetype, f.originalname))
+    const postId = param(req, "id");
+    const uploads = await Promise.all(
+      files.map((f) => uploadImage(f.buffer, f.mimetype, f.originalname, postId))
     );
 
-    await addPostImages(param(req, "id"), req.userId!, urls);
-    res.status(201).json({ urls });
+    const images = await addPostImages(postId, req.userId!, uploads);
+    res.status(201).json({ images });
+  } catch (err) { next(err); }
+});
+
+// PATCH /api/posts/:id/images/reorder — Reorder images
+router.patch("/:id/images/reorder", requireAuth, async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const { imageIds } = req.body as { imageIds: string[] };
+    if (!imageIds || !Array.isArray(imageIds)) {
+      res.status(400).json({ message: "imageIds array required" });
+      return;
+    }
+    await reorderPostImages(param(req, "id"), req.userId!, imageIds);
+    res.json({ success: true });
   } catch (err) { next(err); }
 });
 
