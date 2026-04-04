@@ -55,5 +55,18 @@ export function createPostsApi(client: ApiClient) {
       }
       return response.json();
     },
+
+    async deleteImage(imageId: string): Promise<void> {
+      await client.request<void>(`/api/posts/images/${imageId}`, {
+        method: "DELETE",
+      });
+    },
+
+    async reorderImages(postId: string, imageIds: string[]): Promise<void> {
+      await client.request<void>(`/api/posts/${postId}/images/reorder`, {
+        method: "PATCH",
+        body: { imageIds },
+      });
+    },
   };
 }
