@@ -26,7 +26,5 @@ export function getImageProcessingQueue(): Queue<ImageProcessingJob> {
 }
 
 export async function enqueueImageProcessing(job: ImageProcessingJob): Promise<void> {
-  await getImageProcessingQueue().add("process-image", job, {
-    timeout: 30_000,
-  });
+  await getImageProcessingQueue().add("process-image", job);
 }
