@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { NotificationBell } from "@/components/NotificationBell";
 import { MessageBell } from "@/components/MessageBell";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
@@ -29,13 +29,62 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState("marketplace");
   const [searchQuery, setSearchQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
 
+  // Reset when tab changes
   useEffect(() => {
-    fetch(`${API_URL}/api/posts?type=${activeTab}&limit=6`)
-      .then(r => r.ok ? r.json() : { posts: [] })
-      .then(data => setRecentPosts(data.posts || []))
-      .catch(() => {});
+    setRecentPosts([]);
+    setPage(1);
+    setHasMore(true);
   }, [activeTab]);
+
+  // Fetch posts
+  useEffect(() => {
+    let cancelled = false;
+    const isFirstPage = page === 1;
+    if (isFirstPage) setLoadingMore(false);
+    else setLoadingMore(true);
+
+    fetch(`${API_URL}/api/posts?type=${activeTab}&limit=12&page=${page}`)
+      .then(r => r.ok ? r.json() : { posts: [], pagination: { page: 1, totalPages: 1 } })
+      .then(data => {
+        if (cancelled) return;
+        if (isFirstPage) {
+          setRecentPosts(data.posts || []);
+        } else {
+          setRecentPosts(prev => [...prev, ...(data.posts || [])]);
+        }
+        setHasMore(data.pagination ? data.pagination.page < data.pagination.totalPages : false);
+        setLoadingMore(false);
+      })
+      .catch(() => { if (!cancelled) setLoadingMore(false); });
+
+    return () => { cancelled = true; };
+  }, [activeTab, page]);
+
+  // IntersectionObserver
+  useEffect(() => {
+    if (observerRef.current) observerRef.current.disconnect();
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loadingMore) {
+          setPage(prev => prev + 1);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (sentinelRef.current) {
+      observerRef.current.observe(sentinelRef.current);
+    }
+
+    return () => observerRef.current?.disconnect();
+  }, [hasMore, loadingMore]);
 
   return (
     <>
@@ -169,6 +218,7 @@ export default function Home() {
           </div>
         </div>
         {recentPosts.length > 0 ? (
+          <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {recentPosts.map(post => (
               <Link key={post.id} href={`/posts/${post.id}`} className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
@@ -206,6 +256,14 @@ export default function Home() {
               </Link>
             ))}
           </div>
+          {/* Sentinel for infinite scroll */}
+          <div ref={sentinelRef} className="h-1" />
+          {loadingMore && (
+            <div className="flex justify-center py-6">
+              <div className="w-6 h-6 border-2 border-maroon-600 border-t-transparent rounded-full animate-spin" />
+            </div>
+          )}
+          </>
         ) : (
           <div className="text-center py-16">
             <p className="text-gray-400">{user ? "No posts yet. Be the first to list something!" : "Sign in to start buying and selling with fellow Maroons."}</p>
