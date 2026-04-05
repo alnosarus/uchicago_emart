@@ -15,6 +15,7 @@ import transactionRoutes from "./routes/transactions";
 import reviewRoutes from "./routes/reviews";
 import savedRoutes from "./routes/saved";
 import notificationRoutes from "./routes/notifications";
+import conversationRoutes from "./routes/conversations";
 
 const app = express();
 const server = createServer(app);
@@ -45,6 +46,7 @@ app.use("/api/transactions", transactionRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/saved", savedRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/conversations", conversationRoutes);
 
 // Error handler (must be last)
 app.use(errorHandler);
