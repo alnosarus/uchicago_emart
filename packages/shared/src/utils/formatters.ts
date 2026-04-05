@@ -1,6 +1,6 @@
 export function formatPrice(amount: number | null, type: "fixed" | "free" | "trade"): string {
   if (type === "free") return "Free";
-  if (type === "trade") return "Trade";
+  if (type === "trade") return "Negotiable";
   if (amount === null) return "—";
   return `$${amount.toFixed(amount % 1 === 0 ? 0 : 2)}`;
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from "react";
 
 interface User {
   id: string;
@@ -28,6 +28,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const fetchWithAuth = useCallback(async (path: string, options: RequestInit = {}) => {
     const res = await fetch(`${API_URL}${path}`, {
@@ -41,6 +42,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     return res;
   }, [accessToken]);
+
+  // Silently refresh the access token using the httpOnly refresh cookie.
+  // Schedules itself to run again 1 minute before the next token expires (14m).
+  const silentRefresh = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/auth/refresh`, {
+        method: "POST",
+        credentials: "include",
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setAccessToken(data.accessToken);
+        // Schedule the next refresh for 14 minutes from now (token lives 15m)
+        if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+        refreshTimerRef.current = setTimeout(silentRefresh, 14 * 60 * 1000);
+      } else {
+        // Refresh token expired — log the user out
+        setUser(null);
+        setAccessToken(null);
+      }
+    } catch {
+      // Network error — retry in 30s
+      if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+      refreshTimerRef.current = setTimeout(silentRefresh, 30 * 1000);
+    }
+  }, []);
 
   // Try to refresh token on mount
   useEffect(() => {
@@ -60,6 +87,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (profileRes.ok) {
             setUser(await profileRes.json());
           }
+          // Schedule proactive refresh before this token expires
+          if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+          refreshTimerRef.current = setTimeout(silentRefresh, 14 * 60 * 1000);
         }
       } catch {
         // No valid session
@@ -67,7 +97,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsLoading(false);
       }
     })();
-  }, []);
+
+    return () => {
+      if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+    };
+  }, [silentRefresh]);
 
   const login = async (code: string) => {
     const res = await fetch(`${API_URL}/api/auth/google`, {
@@ -86,10 +120,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setAccessToken(data.accessToken);
     setUser(data.user);
 
+    // Schedule proactive refresh before this token expires
+    if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+    refreshTimerRef.current = setTimeout(silentRefresh, 14 * 60 * 1000);
+
     return { needsPhoneVerification: data.needsPhoneVerification };
   };
 
   const logout = async () => {
+    if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
     await fetch(`${API_URL}/api/auth/logout`, {
       method: "POST",
       credentials: "include",

@@ -532,7 +532,7 @@ export default function CreatePostPage() {
                       : "border-gray-200 text-gray-600 hover:border-gray-300"
                   }`}
                 >
-                  {pt === "fixed" ? "Fixed Price" : pt === "free" ? "Free" : "Trade"}
+                  {pt === "fixed" ? "Fixed Price" : pt === "free" ? "Free" : "Negotiable"}
                 </button>
               ))}
             </div>
@@ -1063,7 +1063,7 @@ export default function CreatePostPage() {
                     payload.marketplace.priceType === "free"
                       ? "Free"
                       : payload.marketplace.priceType === "trade"
-                        ? "Trade"
+                        ? "Negotiable"
                         : `$${(payload.marketplace.priceAmount ?? 0).toFixed(2)}`
                   }
                 />

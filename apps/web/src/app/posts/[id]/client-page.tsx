@@ -114,7 +114,7 @@ function formatDate(dateStr: string): string {
 function formatPrice(post: Post): string {
   if (post.marketplace) {
     if (post.marketplace.priceType === "free") return "Free";
-    if (post.marketplace.priceType === "trade") return "Trade";
+    if (post.marketplace.priceType === "trade") return "Negotiable";
     if (post.marketplace.priceAmount != null) {
       return `$${post.marketplace.priceAmount.toFixed(2)}`;
     }
@@ -377,7 +377,7 @@ function MarketplaceDetailsSection({ details }: { details: MarketplaceDetails })
       {details.tradeDescription && (
         <div>
           <dt className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-            Trade Description
+            Negotiation Notes
           </dt>
           <dd className="mt-1 text-sm text-gray-900">{details.tradeDescription}</dd>
         </div>

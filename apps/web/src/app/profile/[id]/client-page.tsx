@@ -94,7 +94,7 @@ interface UserProfile {
 function formatPrice(post: Post): string {
   if (post.type === "marketplace" && post.marketplace) {
     if (post.marketplace.priceType === "free") return "Free";
-    if (post.marketplace.priceType === "trade") return "Trade";
+    if (post.marketplace.priceType === "trade") return "Negotiable";
     if (post.marketplace.priceAmount != null) return `$${post.marketplace.priceAmount.toFixed(2)}`;
     return "Price TBD";
   }

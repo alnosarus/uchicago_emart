@@ -337,7 +337,7 @@ function MarketplaceFields({
         options={[
           { value: "fixed", label: "Fixed" },
           { value: "free", label: "Free" },
-          { value: "trade", label: "Trade" },
+          { value: "trade", label: "Negotiable" },
         ]}
         selected={state.priceType}
         onSelect={(priceType) =>

@@ -60,7 +60,7 @@ interface Post {
 function formatPrice(post: Post): { text: string; isFree: boolean } {
   if (post.type === "marketplace" && post.marketplace) {
     if (post.marketplace.priceType === "free") return { text: "Free", isFree: true };
-    if (post.marketplace.priceType === "trade") return { text: "Trade", isFree: false };
+    if (post.marketplace.priceType === "trade") return { text: "Negotiable", isFree: false };
     if (post.marketplace.priceAmount != null) {
       return { text: `$${post.marketplace.priceAmount.toFixed(2)}`, isFree: false };
     }

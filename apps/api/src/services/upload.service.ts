@@ -4,7 +4,7 @@ import { getStorage } from "firebase-admin/storage";
 import { randomUUID } from "crypto";
 import { HttpError } from "../utils/errors";
 
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/heic"];
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"];
 const MAX_SIZE = 10 * 1024 * 1024; // 10MB
 const BUCKET_NAME = process.env.FIREBASE_STORAGE_BUCKET || "";
 
@@ -21,7 +21,14 @@ export async function uploadImage(
   originalName: string,
   postId: string
 ): Promise<UploadResult> {
-  if (!ALLOWED_TYPES.includes(mimeType)) {
+  // iOS Safari sometimes sends HEIC as application/octet-stream or empty — fall back to extension
+  const ext = originalName.split(".").pop()?.toLowerCase();
+  const resolvedMimeType =
+    !ALLOWED_TYPES.includes(mimeType) && (ext === "heic" || ext === "heif")
+      ? `image/${ext}`
+      : mimeType;
+
+  if (!ALLOWED_TYPES.includes(resolvedMimeType)) {
     throw new HttpError(400, `Invalid file type: ${mimeType}. Allowed: ${ALLOWED_TYPES.join(", ")}`);
   }
   if (fileBuffer.length > MAX_SIZE) {
@@ -39,11 +46,11 @@ export async function uploadImage(
   const isAnimated = metadata.pages && metadata.pages > 1;
 
   // Original
-  const ext = mimeType.split("/")[1] === "jpeg" ? "jpg" : mimeType.split("/")[1];
-  const originalPath = `posts/${postId}/original/${uuid}.${ext}`;
+  const fileExt = resolvedMimeType.split("/")[1] === "jpeg" ? "jpg" : resolvedMimeType.split("/")[1];
+  const originalPath = `posts/${postId}/original/${uuid}.${fileExt}`;
   const originalFile = bucket.file(originalPath);
   await originalFile.save(rotatedBuffer, {
-    metadata: { contentType: mimeType, metadata: { originalName } },
+    metadata: { contentType: resolvedMimeType, metadata: { originalName } },
   });
   await originalFile.makePublic();
   const url = `https://storage.googleapis.com/${BUCKET_NAME}/${originalPath}`;

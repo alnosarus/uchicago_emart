@@ -105,7 +105,7 @@ function SortableImage({
 
 // --- Main Component ---
 
-const ACCEPTED_TYPES = "image/jpeg,image/png,image/webp,image/heic";
+const ACCEPTED_TYPES = "image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif";
 
 export function ImageUploadGrid({
   images,
@@ -128,7 +128,7 @@ export function ImageUploadGrid({
 
       // Validate types
       const validFiles = fileArray.filter((f) =>
-        ["image/jpeg", "image/png", "image/webp", "image/heic"].includes(f.type)
+        ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"].includes(f.type) || /\.(heic|heif)$/i.test(f.name)
       );
       if (validFiles.length === 0) return;
 

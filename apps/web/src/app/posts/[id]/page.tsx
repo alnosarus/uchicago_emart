@@ -16,7 +16,7 @@ function buildAutoDescription(post: any): string {
       post.marketplace.priceType === "free"
         ? "Free"
         : post.marketplace.priceType === "trade"
-          ? "Trade"
+          ? "Negotiable"
           : post.marketplace.priceAmount != null
             ? `$${post.marketplace.priceAmount.toFixed(2)}`
             : "";
