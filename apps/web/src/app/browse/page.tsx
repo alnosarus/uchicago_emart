@@ -7,6 +7,7 @@ import { Blurhash } from "react-blurhash";
 import { useAuth } from "@/lib/auth-context";
 import { NotificationBell } from "@/components/NotificationBell";
 import { MessageBell } from "@/components/MessageBell";
+import { SearchAutocomplete } from "@/components/SearchAutocomplete";
 
 // ── Constants ────────────────────────────────────
 
@@ -971,12 +972,12 @@ function BrowseContent() {
             <svg className="w-5 h-5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
-            <input
-              type="text"
+            <SearchAutocomplete
               value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
+              onChange={setSearchInput}
+              onSubmit={(q) => setFilter("q", q)}
               placeholder="Search listings..."
-              className="flex-1 border-none text-sm text-gray-800 bg-transparent outline-none min-w-0"
+              inputClassName="flex-1 border-none text-sm text-gray-800 bg-transparent outline-none min-w-0"
             />
             {searchInput && (
               <button

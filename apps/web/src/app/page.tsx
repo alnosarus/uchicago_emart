@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { NotificationBell } from "@/components/NotificationBell";
 import { MessageBell } from "@/components/MessageBell";
+import { SearchAutocomplete } from "@/components/SearchAutocomplete";
 import { useState, useEffect, useRef, useCallback } from "react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
@@ -172,12 +173,12 @@ export default function Home() {
           className="max-w-xl mx-auto flex bg-white rounded-full shadow-2xl overflow-hidden p-1 sm:p-1.5 pl-4 sm:pl-6 gap-1.5 sm:gap-2 items-center relative z-10"
         >
           <svg className="w-5 h-5 shrink-0 opacity-40" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>
-          <input
-            type="text"
+          <SearchAutocomplete
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={setSearchQuery}
+            onSubmit={(q) => router.push(q ? `/browse?q=${encodeURIComponent(q)}` : "/browse")}
             placeholder="Search listings, storage..."
-            className="flex-1 border-none text-sm sm:text-base text-gray-800 bg-transparent outline-none min-w-0"
+            inputClassName="flex-1 border-none text-sm sm:text-base text-gray-800 bg-transparent outline-none min-w-0"
           />
           <button type="submit" className="bg-gradient-to-br from-maroon-600 to-maroon-700 text-white text-xs sm:text-sm font-semibold px-4 sm:px-6 py-2 sm:py-2.5 rounded-full shadow-md shrink-0">
             Browse
