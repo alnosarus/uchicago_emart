@@ -31,6 +31,17 @@ export async function createReview(input: CreateReviewInput) {
     },
   });
 
+  // Notify the reviewee
+  const post = await prisma.post.findUnique({ where: { id: postId }, select: { title: true } });
+  const { createNotification } = await import("./notification.service");
+  await createNotification(
+    revieweeId,
+    "review",
+    "New Review",
+    `${review.reviewer.name} left you a ${rating}-star review on "${post?.title || "your post"}"`,
+    `/posts/${postId}`
+  ).catch(() => {}); // Don't fail the review if notification fails
+
   return review;
 }
 
