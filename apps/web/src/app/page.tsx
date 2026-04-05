@@ -1,7 +1,6 @@
 "use client";
 
 import { useAuth } from "@/lib/auth-context";
-import { NotificationBell } from "@/components/NotificationBell";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -52,7 +51,6 @@ export default function Home() {
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
                 Post
               </Link>
-              <NotificationBell />
               {/* Avatar + dropdown */}
               <div className="relative">
                 {menuOpen && <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />}
@@ -105,9 +103,9 @@ export default function Home() {
       {/* Hero */}
       <section className="bg-gradient-to-br from-maroon-900 via-maroon-700 to-maroon-500 px-4 sm:px-8 py-14 sm:py-24 text-center relative overflow-hidden">
         <img src="/images/phoenix.png" alt="" aria-hidden="true" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-full w-auto opacity-15 pointer-events-none select-none" />
-        <h1 className="text-white mb-3 sm:mb-4 relative z-10">
-          <span className="block text-5xl sm:text-6xl md:text-7xl font-bold tracking-[.18em] uppercase" style={{ fontFamily: "'Oswald', sans-serif" }}>UChicago</span>
-          <span className="block text-3xl sm:text-4xl md:text-5xl font-light tracking-[.2em] uppercase opacity-85 mt-3 sm:mt-4" style={{ fontFamily: "'Raleway', sans-serif" }}>E-mart</span>
+        <h1 className="mb-3 sm:mb-4 relative z-10">
+          <span className="block text-3xl sm:text-4xl md:text-5xl font-bold tracking-[.18em] uppercase opacity-85 text-white/70 mb-1" style={{ fontFamily: "'Oswald', sans-serif" }}>UChicago</span>
+          <span className="block text-5xl sm:text-6xl md:text-7xl font-light tracking-[.2em] uppercase text-white" style={{ fontFamily: "'Raleway', sans-serif" }}>E-mart</span>
         </h1>
         <form
           onSubmit={(e) => {
