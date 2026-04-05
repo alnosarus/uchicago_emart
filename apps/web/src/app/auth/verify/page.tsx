@@ -23,8 +23,6 @@ export default function VerifyPhonePage() {
   useEffect(() => {
     if (!user) {
       router.push("/auth");
-    } else if (user.isVerified) {
-      router.push("/");
     }
   }, [user, router]);
 
@@ -176,6 +174,13 @@ export default function VerifyPhonePage() {
             </form>
           )}
         </div>
+
+        <button
+          onClick={() => router.push("/")}
+          className="w-full text-center text-sm text-gray-400 hover:text-gray-600 mt-4 transition-colors"
+        >
+          Skip for now
+        </button>
 
         {/* Invisible reCAPTCHA container */}
         <div ref={recaptchaRef} />

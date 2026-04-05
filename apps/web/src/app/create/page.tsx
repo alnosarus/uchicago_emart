@@ -143,6 +143,41 @@ export default function CreatePostPage() {
 
   if (!user) return null;
 
+  // --- Verification gate ---
+  if (!user.isVerified) {
+    return (
+      <div className="min-h-screen flex flex-col bg-gray-50">
+        <nav className="bg-white border-b border-gray-200 px-4 sm:px-8 h-14 sm:h-16 flex items-center justify-between sticky top-0 z-50 shadow-sm">
+          <Link href="/" className="flex items-center shrink-0">
+            <img src="/logos/emart-logo.svg" alt="UChicago E-mart" className="h-10 sm:h-11" />
+          </Link>
+        </nav>
+        <div className="flex-1 flex items-center justify-center px-4">
+          <div className="max-w-md text-center">
+            <div className="w-16 h-16 bg-maroon-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-maroon-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Phone Verification Required</h2>
+            <p className="text-sm text-gray-500 mb-6">
+              To create posts, you need to verify your phone number first. This helps keep the UChicago marketplace safe and trustworthy.
+            </p>
+            <Link
+              href="/auth/verify"
+              className="inline-block bg-gradient-to-br from-maroon-600 to-maroon-700 text-white text-sm font-semibold px-6 py-3 rounded-lg shadow-md hover:from-maroon-700 hover:to-maroon-800 transition-all"
+            >
+              Verify Phone Number
+            </Link>
+            <Link href="/" className="block text-sm text-gray-400 hover:text-gray-600 mt-4 transition-colors">
+              Go back
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // --- Step validation ---
 
   function canProceedToStep2() {

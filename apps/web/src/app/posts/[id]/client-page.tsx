@@ -760,6 +760,10 @@ export default function PostDetailPage() {
       router.push("/auth");
       return;
     }
+    if (!user.isVerified) {
+      router.push("/auth/verify");
+      return;
+    }
     try {
       const res = await fetch(`${API_URL}/api/conversations`, {
         method: "POST",

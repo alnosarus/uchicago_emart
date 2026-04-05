@@ -1,7 +1,7 @@
 import { Router } from "express";
 import type { Response, NextFunction } from "express";
 import multer from "multer";
-import { requireAuth, optionalAuth, type AuthRequest } from "../middleware/auth";
+import { requireAuth, requireVerified, optionalAuth, type AuthRequest } from "../middleware/auth";
 import { validate } from "../middleware/validate";
 import { createPostSchema, updatePostSchema, postQuerySchema } from "@uchicago-marketplace/shared";
 import {
@@ -24,7 +24,7 @@ function param(req: AuthRequest, name: string): string {
 }
 
 // POST /api/posts — Create a new post
-router.post("/", requireAuth, validate(createPostSchema), async (req: AuthRequest, res: Response, next: NextFunction) => {
+router.post("/", requireAuth, requireVerified, validate(createPostSchema), async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const post = await createPost({ ...req.body, authorId: req.userId! });
     res.status(201).json(post);

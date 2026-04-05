@@ -1,6 +1,6 @@
 import { Router } from "express";
 import type { Response, NextFunction } from "express";
-import { requireAuth, type AuthRequest } from "../middleware/auth";
+import { requireAuth, requireVerified, type AuthRequest } from "../middleware/auth";
 import { validate } from "../middleware/validate";
 import {
   createConversationSchema,
@@ -37,7 +37,7 @@ router.get("/unread-count", requireAuth, async (req: AuthRequest, res: Response,
 });
 
 // POST /api/conversations
-router.post("/", requireAuth, validate(createConversationSchema), async (req: AuthRequest, res: Response, next: NextFunction) => {
+router.post("/", requireAuth, requireVerified, validate(createConversationSchema), async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { postId } = req.body;
     const { conversation, created } = await createConversation(req.userId!, postId);
@@ -75,7 +75,7 @@ router.get("/:id/messages", requireAuth, validate(messagesPaginationSchema, "que
 });
 
 // POST /api/conversations/:id/messages
-router.post("/:id/messages", requireAuth, validate(sendMessageSchema), async (req: AuthRequest, res: Response, next: NextFunction) => {
+router.post("/:id/messages", requireAuth, requireVerified, validate(sendMessageSchema), async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { body } = req.body;
     const { message, recipientId } = await sendMessage(req.params.id as string, req.userId!, body);

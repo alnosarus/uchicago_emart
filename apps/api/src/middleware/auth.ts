@@ -24,6 +24,27 @@ export function requireAuth(req: AuthRequest, res: Response, next: NextFunction)
   }
 }
 
+export function requireVerified(req: AuthRequest, res: Response, next: NextFunction) {
+  // Must be used AFTER requireAuth
+  if (!req.userId) {
+    res.status(401).json({ message: "Authentication required" });
+    return;
+  }
+
+  prisma.user
+    .findUnique({ where: { id: req.userId }, select: { isVerified: true } })
+    .then((user) => {
+      if (!user || !user.isVerified) {
+        res.status(403).json({ message: "Phone verification required", code: "VERIFICATION_REQUIRED" });
+        return;
+      }
+      next();
+    })
+    .catch(() => {
+      res.status(500).json({ message: "Internal server error" });
+    });
+}
+
 export function optionalAuth(req: AuthRequest, _res: Response, next: NextFunction) {
   const header = req.headers.authorization;
   if (!header?.startsWith("Bearer ")) {
