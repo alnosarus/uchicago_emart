@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, Suspense } from "react";
+import { useState, useEffect, useCallback, useRef, Suspense } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { Blurhash } from "react-blurhash";
@@ -326,69 +326,6 @@ function PostCard({ post }: { post: Post }) {
   );
 }
 
-function Pagination({
-  pagination,
-  onPageChange,
-}: {
-  pagination: Pagination;
-  onPageChange: (page: number) => void;
-}) {
-  if (pagination.totalPages <= 1) return null;
-
-  const pages: (number | "...")[] = [];
-  const { page, totalPages } = pagination;
-
-  // Build page number array with ellipsis
-  if (totalPages <= 7) {
-    for (let i = 1; i <= totalPages; i++) pages.push(i);
-  } else {
-    pages.push(1);
-    if (page > 3) pages.push("...");
-    for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) {
-      pages.push(i);
-    }
-    if (page < totalPages - 2) pages.push("...");
-    pages.push(totalPages);
-  }
-
-  return (
-    <div className="flex items-center justify-center gap-1.5 mt-8">
-      <button
-        onClick={() => onPageChange(page - 1)}
-        disabled={page <= 1}
-        className="px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-      >
-        Prev
-      </button>
-      {pages.map((p, i) =>
-        p === "..." ? (
-          <span key={`ellipsis-${i}`} className="px-2 text-gray-400">
-            ...
-          </span>
-        ) : (
-          <button
-            key={p}
-            onClick={() => onPageChange(p)}
-            className={`w-9 h-9 text-sm font-medium rounded-lg transition-colors ${
-              p === page
-                ? "bg-maroon-600 text-white shadow-sm"
-                : "border border-gray-200 text-gray-600 hover:bg-gray-50"
-            }`}
-          >
-            {p}
-          </button>
-        )
-      )}
-      <button
-        onClick={() => onPageChange(page + 1)}
-        disabled={page >= totalPages}
-        className="px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-      >
-        Next
-      </button>
-    </div>
-  );
-}
 
 function EmptyState({ hasFilters }: { hasFilters: boolean }) {
   return (
@@ -769,7 +706,6 @@ function BrowseContent() {
   const activePriceMax = searchParams.get("priceMax") || "";
   const activeSort = searchParams.get("sort") || "recent";
   const activeQ = searchParams.get("q") || "";
-  const activePage = parseInt(searchParams.get("page") || "1", 10);
 
   const [posts, setPosts] = useState<Post[]>([]);
   const [pagination, setPagination] = useState<Pagination | null>(null);
@@ -781,6 +717,26 @@ function BrowseContent() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
+
+  // Infinite scroll state
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  // Track searchParams changes to reset pagination
+  const paramsString = searchParams.toString();
+  const prevParamsRef = useRef(paramsString);
+
+  useEffect(() => {
+    if (prevParamsRef.current !== paramsString) {
+      prevParamsRef.current = paramsString;
+      setPosts([]);
+      setPage(1);
+      setHasMore(true);
+    }
+  }, [paramsString]);
 
   // Build URL with updated params
   const buildUrl = useCallback(
@@ -820,12 +776,16 @@ function BrowseContent() {
     [router, buildUrl, searchParams]
   );
 
-  // Fetch posts when search params change
+  // Fetch posts — runs when filters change (page resets to 1) or page increments
   useEffect(() => {
     let cancelled = false;
 
     async function fetchPosts() {
-      setIsLoading(true);
+      if (page === 1) {
+        setIsLoading(true);
+      } else {
+        setLoadingMore(true);
+      }
       setError(null);
 
       const params = new URLSearchParams();
@@ -843,7 +803,7 @@ function BrowseContent() {
       if (activePriceMax) params.set("priceMax", activePriceMax);
       if (activeSort && activeSort !== "recent") params.set("sort", activeSort);
       if (activeQ) params.set("q", activeQ);
-      if (activePage > 1) params.set("page", String(activePage));
+      if (page > 1) params.set("page", String(page));
       params.set("limit", "20");
 
       try {
@@ -851,15 +811,23 @@ function BrowseContent() {
         if (!res.ok) throw new Error("Failed to load posts");
         const data: PostsResponse = await res.json();
         if (!cancelled) {
-          setPosts(data.posts);
+          if (page === 1) {
+            setPosts(data.posts);
+          } else {
+            setPosts((prev) => [...prev, ...data.posts]);
+          }
           setPagination(data.pagination);
+          setHasMore(data.pagination.page < data.pagination.totalPages);
         }
       } catch (err) {
         if (!cancelled) {
           setError(err instanceof Error ? err.message : "Something went wrong");
         }
       } finally {
-        if (!cancelled) setIsLoading(false);
+        if (!cancelled) {
+          setIsLoading(false);
+          setLoadingMore(false);
+        }
       }
     }
 
@@ -868,7 +836,29 @@ function BrowseContent() {
       cancelled = true;
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams.toString(), activePage]);
+  }, [paramsString, page]);
+
+  // IntersectionObserver: load next page when sentinel enters viewport
+  useEffect(() => {
+    if (observerRef.current) observerRef.current.disconnect();
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isLoading && !loadingMore) {
+          setPage((prev) => prev + 1);
+        }
+      },
+      { rootMargin: "200px" }
+    );
+
+    if (sentinelRef.current) {
+      observerRef.current.observe(sentinelRef.current);
+    }
+
+    return () => {
+      observerRef.current?.disconnect();
+    };
+  }, [hasMore, isLoading, loadingMore]);
 
   // Sync local search input when URL changes externally
   useEffect(() => {
@@ -1297,15 +1287,12 @@ function BrowseContent() {
               <EmptyState hasFilters={hasFilters} />
             )}
 
-            {/* Pagination */}
-            {!isLoading && pagination && (
-              <Pagination
-                pagination={pagination}
-                onPageChange={(page) => {
-                  router.push(buildUrl({ page: page === 1 ? "" : String(page) }));
-                  window.scrollTo({ top: 0, behavior: "smooth" });
-                }}
-              />
+            {/* Infinite scroll sentinel */}
+            <div ref={sentinelRef} className="h-1" />
+            {loadingMore && (
+              <div className="flex justify-center py-6">
+                <div className="w-6 h-6 border-2 border-maroon-600 border-t-transparent rounded-full animate-spin" />
+              </div>
             )}
           </div>
         </div>
