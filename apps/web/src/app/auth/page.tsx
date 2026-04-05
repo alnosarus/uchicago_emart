@@ -11,6 +11,7 @@ export default function AuthPage() {
   const router = useRouter();
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [agreed, setAgreed] = useState(false);
 
   // If already logged in, redirect
   useEffect(() => {
@@ -66,9 +67,34 @@ export default function AuthPage() {
             </div>
           )}
 
+          <label className="flex items-start gap-3 mb-5 cursor-pointer group">
+            <div className="relative mt-0.5 shrink-0">
+              <input
+                type="checkbox"
+                checked={agreed}
+                onChange={(e) => setAgreed(e.target.checked)}
+                className="sr-only"
+              />
+              <div className={`w-4.5 h-4.5 rounded border-2 flex items-center justify-center transition-all ${agreed ? "bg-maroon-600 border-maroon-600" : "border-gray-300 group-hover:border-maroon-400"}`}>
+                {agreed && (
+                  <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                )}
+              </div>
+            </div>
+            <span className="text-xs text-gray-600 leading-relaxed">
+              I agree to the{" "}
+              <Link href="/terms" onClick={(e) => e.stopPropagation()} className="text-maroon-600 underline hover:text-maroon-700">Terms of Service</Link>
+              {" "}and{" "}
+              <Link href="/privacy" onClick={(e) => e.stopPropagation()} className="text-maroon-600 underline hover:text-maroon-700">Privacy Policy</Link>.
+              I understand that fraudulent listings, scams, or misuse of this platform will result in a permanent ban.
+            </span>
+          </label>
+
           <button
             onClick={() => googleLogin()}
-            disabled={isLoading}
+            disabled={isLoading || !agreed}
             className="w-full border border-gray-300 text-gray-700 text-sm font-semibold py-3 rounded-lg hover:bg-gray-50 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? (
@@ -93,9 +119,6 @@ export default function AuthPage() {
           </div>
         </div>
 
-        <p className="text-center text-xs text-gray-400 mt-6">
-          By signing in, you agree to our Terms of Service and Privacy Policy.
-        </p>
       </div>
     </div>
   );
