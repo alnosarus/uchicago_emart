@@ -3,7 +3,7 @@ import type { Response, NextFunction } from "express";
 import multer from "multer";
 import { requireAuth, optionalAuth, type AuthRequest } from "../middleware/auth";
 import { validate } from "../middleware/validate";
-import { createPostSchema, postQuerySchema } from "@uchicago-marketplace/shared";
+import { createPostSchema, updatePostSchema, postQuerySchema } from "@uchicago-marketplace/shared";
 import {
   createPost,
   listPosts,
@@ -48,7 +48,7 @@ router.get("/:id", optionalAuth, async (req: AuthRequest, res: Response, next: N
 });
 
 // PATCH /api/posts/:id — Update a post (owner only)
-router.patch("/:id", requireAuth, async (req: AuthRequest, res: Response, next: NextFunction) => {
+router.patch("/:id", requireAuth, validate(updatePostSchema), async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const post = await updatePost(param(req, "id"), req.userId!, req.body);
     res.json(post);
