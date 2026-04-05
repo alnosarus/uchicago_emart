@@ -332,7 +332,7 @@ function MessagesPageInner() {
   const loadOlder = () => {
     if (!activeConvId || messages.length === 0) return;
     const oldest = messages[0];
-    fetchMessages(activeConvId, typeof oldest.createdAt === "string" ? oldest.createdAt : new Date(oldest.createdAt).toISOString());
+    fetchMessages(activeConvId, oldest.id);
   };
 
   // ── Loading state ──

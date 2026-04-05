@@ -13,18 +13,15 @@ import {
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { io, type Socket } from "socket.io-client";
 import type {
   ConversationWithDetails,
   Message,
   ServerToClientEvents,
-  ClientToServerEvents,
 } from "@uchicago-marketplace/shared";
 import { colors } from "@/constants/colors";
 import { api } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
-
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
+import { useSocket } from "@/lib/socket-context";
 
 /* ── Helpers ── */
 
@@ -51,7 +48,7 @@ export default function ChatScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { user, getToken } = useAuth();
+  const { user } = useAuth();
 
   const [conversation, setConversation] = useState<ConversationWithDetails | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -60,7 +57,7 @@ export default function ChatScreen() {
   const [isSending, setIsSending] = useState(false);
   const [readAt, setReadAt] = useState<string | null>(null);
 
-  const socketRef = useRef<Socket<ServerToClientEvents, ClientToServerEvents> | null>(null);
+  const socket = useSocket();
   const flatListRef = useRef<FlatList<Message>>(null);
 
   /* ── Fetch data ── */
@@ -93,15 +90,9 @@ export default function ChatScreen() {
 
   /* ── Socket.IO ── */
   useEffect(() => {
-    if (!id) return;
-    const token = getToken();
+    if (!id || !socket) return;
 
-    const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(API_BASE_URL, {
-      auth: { token },
-      transports: ["websocket"],
-    });
-
-    socket.on("new_message", (payload) => {
+    const handleNewMessage: ServerToClientEvents["new_message"] = (payload) => {
       if (payload.conversationId !== id) return;
       setMessages((prev) => {
         // avoid duplicates
@@ -110,21 +101,22 @@ export default function ChatScreen() {
       });
       // mark as read immediately when we receive a message in this chat
       api.conversations.markRead(id).catch(() => {});
-    });
+    };
 
-    socket.on("messages_read", (payload) => {
+    const handleMessagesRead: ServerToClientEvents["messages_read"] = (payload) => {
       if (payload.conversationId !== id) return;
       // Only track read receipts for messages we sent
       setReadAt(payload.readAt);
-    });
+    };
 
-    socketRef.current = socket;
+    socket.on("new_message", handleNewMessage);
+    socket.on("messages_read", handleMessagesRead);
 
     return () => {
-      socket.disconnect();
-      socketRef.current = null;
+      socket.off("new_message", handleNewMessage);
+      socket.off("messages_read", handleMessagesRead);
     };
-  }, [id, getToken]);
+  }, [id, socket]);
 
   /* ── Send message ── */
   const handleSend = useCallback(async () => {
