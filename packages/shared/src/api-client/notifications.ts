@@ -1,7 +1,7 @@
 import type { Notification } from "../types/notification";
 import type { ApiClient } from "./client";
 
-interface NotificationsResponse {
+export interface NotificationsResponse {
   data: Notification[];
   pagination: {
     page: number;
