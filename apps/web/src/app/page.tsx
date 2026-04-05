@@ -277,7 +277,12 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="bg-gray-900 text-gray-500 text-center py-6 text-sm mt-auto">
-        &copy; 2026 UChicago E-mart &middot; Made for Maroons, by Maroons
+        <p>&copy; 2026 UChicago E-mart &middot; Made for Maroons, by Maroons</p>
+        <p className="mt-2">
+          <Link href="/privacy" className="hover:text-gray-300 transition-colors">Privacy Policy</Link>
+          {" · "}
+          <Link href="/terms" className="hover:text-gray-300 transition-colors">Terms of Service</Link>
+        </p>
       </footer>
     </>
   );
