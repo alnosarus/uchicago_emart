@@ -6,6 +6,10 @@ import { z } from "zod";
 import { validate } from "../middleware/validate";
 import { getReviewsForUser } from "../services/review.service";
 import { getUserTransactionCount } from "../services/transaction.service";
+import multer from "multer";
+import sharp from "sharp";
+import { getStorage } from "firebase-admin/storage";
+import { randomUUID } from "crypto";
 
 const router = Router();
 
@@ -106,6 +110,54 @@ router.get("/me/profile", requireAuth, async (req: AuthRequest, res: Response, n
     next(err);
   }
 });
+
+// POST /api/users/me/avatar — Upload avatar image
+const avatarUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+});
+
+router.post(
+  "/me/avatar",
+  requireAuth,
+  avatarUpload.single("avatar"),
+  async (req: AuthRequest, res: Response, next) => {
+    try {
+      if (!req.file) {
+        res.status(400).json({ message: "No file provided" });
+        return;
+      }
+
+      const bucketName = process.env.FIREBASE_STORAGE_BUCKET || "";
+      const bucket = getStorage().bucket(bucketName);
+      const uuid = randomUUID();
+
+      // Resize to 400x400 cover, convert to webp
+      const processed = await sharp(req.file.buffer)
+        .rotate()
+        .resize(400, 400, { fit: "cover" })
+        .webp({ quality: 80 })
+        .toBuffer();
+
+      const path = `avatars/${req.userId}/${uuid}.webp`;
+      const file = bucket.file(path);
+      await file.save(processed, { contentType: "image/webp" });
+      await file.makePublic();
+
+      const url = `https://storage.googleapis.com/${bucketName}/${path}`;
+
+      // Update user's avatarUrl
+      await prisma.user.update({
+        where: { id: req.userId },
+        data: { avatarUrl: url },
+      });
+
+      res.json({ url });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
 
 // PATCH /api/users/me — Update profile
 const updateProfileSchema = z.object({
