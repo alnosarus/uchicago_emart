@@ -4,6 +4,8 @@ import { useAuth } from "@/lib/auth-context";
 import Link from "next/link";
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { NotificationBell } from "@/components/NotificationBell";
+import { MessageBell } from "@/components/MessageBell";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
@@ -104,6 +106,8 @@ export default function HistoryPage() {
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
                 Post
               </Link>
+              <NotificationBell />
+              <MessageBell />
               <div className="relative">
                 {menuOpen && <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />}
                 <button onClick={() => setMenuOpen(!menuOpen)} className="w-8 h-8 rounded-full bg-gradient-to-br from-maroon-500 to-maroon-700 flex items-center justify-center text-white text-xs font-bold shrink-0 relative z-50">
