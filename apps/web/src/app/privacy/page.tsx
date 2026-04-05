@@ -125,10 +125,10 @@ export default function PrivacyPage() {
               any time by contacting us. To request account deletion or data export, email us
               at{" "}
               <a
-                href="mailto:privacy@uchicagoemart.com"
+                href="mailto:noh@uchicago.edu"
                 className="text-maroon-600 hover:text-maroon-700 underline"
               >
-                privacy@uchicagoemart.com
+                noh@uchicago.edu / junseo@uchicago.edu
               </a>
               .
             </p>
@@ -139,10 +139,10 @@ export default function PrivacyPage() {
             <p>
               Questions about this policy? Reach out at{" "}
               <a
-                href="mailto:privacy@uchicagoemart.com"
+                href="mailto:noh@uchicago.edu"
                 className="text-maroon-600 hover:text-maroon-700 underline"
               >
-                privacy@uchicagoemart.com
+                noh@uchicago.edu / junseo@uchicago.edu
               </a>
               .
             </p>

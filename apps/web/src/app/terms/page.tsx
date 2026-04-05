@@ -138,10 +138,10 @@ export default function TermsPage() {
             <p>
               Questions or concerns? Reach us at{" "}
               <a
-                href="mailto:privacy@uchicagoemart.com"
+                href="mailto:noh@uchicago.edu"
                 className="text-maroon-600 hover:text-maroon-700 underline"
               >
-                privacy@uchicagoemart.com
+                noh@uchicago.edu / junseo@uchicago.edu
               </a>
               .
             </p>
