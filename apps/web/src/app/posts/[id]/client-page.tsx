@@ -755,6 +755,29 @@ export default function PostDetailPage() {
     }
   };
 
+  const handleMessage = async () => {
+    if (!accessToken || !user || !post) {
+      router.push("/auth");
+      return;
+    }
+    try {
+      const res = await fetch(`${API_URL}/api/conversations`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ postId: post.id }),
+      });
+      if (res.ok) {
+        const conversation = await res.json();
+        router.push(`/messages?conversation=${conversation.id}`);
+      }
+    } catch {
+      // ignore
+    }
+  };
+
   const handleMarkSoldOpen = () => {
     setSearchQuery("");
     setSearchResults([]);
@@ -1015,12 +1038,14 @@ export default function PostDetailPage() {
 
             {/* Action buttons */}
             <div className="flex flex-wrap gap-3">
-              <button
-                disabled
-                className="flex-1 min-w-[120px] sm:min-w-[140px] bg-gradient-to-br from-maroon-600 to-maroon-700 text-white text-sm font-semibold py-3 rounded-lg shadow-md opacity-50 cursor-not-allowed"
-              >
-                Message Seller
-              </button>
+              {!isOwner && post.status === "active" && (
+                <button
+                  onClick={handleMessage}
+                  className="flex-1 min-w-[120px] sm:min-w-[140px] bg-gradient-to-br from-maroon-600 to-maroon-700 text-white text-sm font-semibold py-3 rounded-lg shadow-md hover:shadow-lg transition-shadow"
+                >
+                  Message Seller
+                </button>
+              )}
               {!isOwner && (
                 <button
                   onClick={handleToggleSave}
