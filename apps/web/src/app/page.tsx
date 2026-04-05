@@ -3,6 +3,8 @@
 import { useAuth } from "@/lib/auth-context";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { NotificationBell } from "@/components/NotificationBell";
+import { MessageBell } from "@/components/MessageBell";
 import { useState, useEffect } from "react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
@@ -51,6 +53,8 @@ export default function Home() {
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
                 Post
               </Link>
+              <NotificationBell />
+              <MessageBell />
               {/* Avatar + dropdown */}
               <div className="relative">
                 {menuOpen && <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />}

@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import "react-native-reanimated";
 import { useColorScheme } from "@/components/useColorScheme";
 import { AuthProvider } from "@/hooks/useAuth";
+import { SocketProvider } from "@/lib/socket-context";
 
 export { ErrorBoundary } from "expo-router";
 export const unstable_settings = { initialRouteName: "(tabs)" };
@@ -21,6 +22,7 @@ function RootLayoutNav() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="posts/[id]" options={{ headerShown: false, presentation: "card" }} />
         <Stack.Screen name="notifications" options={{ headerShown: false, presentation: "card" }} />
+        <Stack.Screen name="messages/[id]" options={{ headerShown: false, presentation: "card" }} />
       </Stack>
     </ThemeProvider>
   );
@@ -34,5 +36,5 @@ export default function RootLayout() {
   useEffect(() => { if (error) throw error; }, [error]);
   useEffect(() => { if (loaded) SplashScreen.hideAsync(); }, [loaded]);
   if (!loaded) return null;
-  return <AuthProvider><RootLayoutNav /></AuthProvider>;
+  return <AuthProvider><SocketProvider><RootLayoutNav /></SocketProvider></AuthProvider>;
 }
