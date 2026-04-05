@@ -31,7 +31,10 @@
       "Bash(mv logos/logo-version2.svg logos/emart-logo-v1.svg)",
       "Bash(mv icons/search-interface-symbol.png icons/search.png)",
       "Bash(mv icons/package-box.png icons/package.png)",
-      "Bash(mv icons/shopping-cart.png icons/cart.png)"
+      "Bash(mv icons/shopping-cart.png icons/cart.png)",
+      "Bash(pnpm add:*)",
+      "Bash(python3 -)",
+      "Bash(node navbar-update.js)"
     ]
   }
 }

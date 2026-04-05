@@ -127,6 +127,10 @@ export async function createPost(input: CreatePostInput) {
 
 // ── List ───────────────────────────────────────
 
+function splitParam(val?: string): string[] {
+  return val ? val.split(",").filter(Boolean) : [];
+}
+
 interface ListPostsInput {
   type?: string;
   side?: string;
@@ -138,8 +142,11 @@ interface ListPostsInput {
   priceMax?: number;
   condition?: string;
   subtype?: string;
-  bedrooms?: number;
-  bathrooms?: number;
+  bedrooms?: string;
+  bathrooms?: string;
+  priceType?: string;
+  hasPhotos?: boolean;
+  moveInMonth?: string;
   sort?: string;
   page?: number;
   limit?: number;
@@ -151,16 +158,26 @@ export async function listPosts(input: ListPostsInput) {
     type, side, q, category, size, locationType,
     priceMin, priceMax, condition,
     subtype, bedrooms, bathrooms,
+    priceType, hasPhotos, moveInMonth,
     sort = "recent",
     page = 1,
     limit = 20,
     userId,
   } = input;
 
-  // Build marketplace filter as single object to avoid spread overwrites
+  const categories = splitParam(category);
+  const conditions = splitParam(condition);
+  const subtypes = splitParam(subtype);
+  const bedroomVals = splitParam(bedrooms);
+  const sizes = splitParam(size);
+  const locationTypes = splitParam(locationType);
+  const priceTypes = splitParam(priceType);
+
+  // Build marketplace filter
   const marketplaceWhere: Record<string, any> = {};
-  if (category) marketplaceWhere.category = category;
-  if (condition) marketplaceWhere.condition = mapCondition(condition);
+  if (categories.length) marketplaceWhere.category = { in: categories };
+  if (conditions.length) marketplaceWhere.condition = { in: conditions.map(mapCondition) };
+  if (priceTypes.length) marketplaceWhere.priceType = { in: priceTypes };
   if (priceMin !== undefined || priceMax !== undefined) {
     marketplaceWhere.priceAmount = {
       ...(priceMin !== undefined && { gte: priceMin }),
@@ -168,10 +185,10 @@ export async function listPosts(input: ListPostsInput) {
     };
   }
 
-  // Build storage filter as single object
+  // Build storage filter
   const storageWhere: Record<string, any> = {};
-  if (size) storageWhere.size = size;
-  if (locationType) storageWhere.locationType = locationType;
+  if (sizes.length) storageWhere.size = { in: sizes };
+  if (locationTypes.length) storageWhere.locationType = { in: locationTypes };
   if (priceMin !== undefined || priceMax !== undefined) {
     storageWhere.priceMonthly = {
       ...(priceMin !== undefined && { gte: priceMin }),
@@ -189,20 +206,32 @@ export async function listPosts(input: ListPostsInput) {
         { description: { contains: q, mode: "insensitive" } },
       ],
     }),
+    ...(hasPhotos && { images: { some: {} } }),
     ...(Object.keys(marketplaceWhere).length > 0 && { marketplace: marketplaceWhere }),
     ...(Object.keys(storageWhere).length > 0 && { storage: storageWhere }),
   };
 
   // Build housing filter
-  if (subtype || bedrooms || bathrooms || (type === "housing" && (priceMin !== undefined || priceMax !== undefined))) {
+  const needsHousingFilter = subtypes.length || bedroomVals.length || bathrooms ||
+    moveInMonth ||
+    (type === "housing" && (priceMin !== undefined || priceMax !== undefined));
+
+  if (needsHousingFilter) {
     const housingWhere: Record<string, unknown> = {};
-    if (subtype) housingWhere.subtype = subtype;
-    if (bedrooms) housingWhere.bedrooms = bedrooms;
+    if (subtypes.length) housingWhere.subtype = { in: subtypes };
+    if (bedroomVals.length) housingWhere.bedrooms = { in: bedroomVals };
     if (bathrooms) housingWhere.bathrooms = bathrooms;
     if (priceMin !== undefined || priceMax !== undefined) {
       housingWhere.monthlyRent = {
         ...(priceMin !== undefined && { gte: priceMin }),
         ...(priceMax !== undefined && { lte: priceMax }),
+      };
+    }
+    if (moveInMonth) {
+      const [year, month] = moveInMonth.split("-").map(Number);
+      housingWhere.moveInDate = {
+        gte: new Date(year, month - 1, 1),
+        lt: new Date(year, month, 1),
       };
     }
     if (Object.keys(housingWhere).length > 0) {
