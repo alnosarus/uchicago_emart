@@ -157,8 +157,14 @@ export default function NotificationsPage() {
               <MessageBell />
               <div className="relative">
                 {menuOpen && <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />}
-                <button onClick={() => setMenuOpen(!menuOpen)} className="w-8 h-8 rounded-full bg-gradient-to-br from-maroon-500 to-maroon-700 flex items-center justify-center text-white text-xs font-bold shrink-0 relative z-50">
-                  {user.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
+                <button onClick={() => setMenuOpen(!menuOpen)} className="w-8 h-8 rounded-full overflow-hidden shrink-0 relative z-50">
+                  {user.avatarUrl ? (
+                    <img src={user.avatarUrl} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-maroon-500 to-maroon-700 flex items-center justify-center text-white text-xs font-bold">
+                      {user.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
+                    </div>
+                  )}
                 </button>
                 {menuOpen && (
                   <div className="absolute right-0 top-10 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-1.5 z-50">
