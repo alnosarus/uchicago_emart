@@ -16,7 +16,6 @@ export default function SettingsPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -32,7 +31,6 @@ export default function SettingsPage() {
     }
     if (user) {
       setName(user.name);
-      setPhone(user.phone || "");
       setAvatarPreview(user.avatarUrl);
     }
   }, [user, isLoading, router]);
@@ -120,7 +118,6 @@ export default function SettingsPage() {
         },
         body: JSON.stringify({
           name: trimmedName,
-          phone: phone.trim() || null,
         }),
       });
 
@@ -267,17 +264,21 @@ export default function SettingsPage() {
 
           {/* Phone */}
           <div>
-            <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 mb-2">
-              Phone <span className="text-gray-400 font-normal">(optional)</span>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Phone Number
             </label>
-            <input
-              id="phone"
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-maroon-500 focus:border-transparent transition-shadow"
-              placeholder="e.g. 773-555-0123"
-            />
+            <div className="flex items-center gap-3">
+              <div className="flex-1 px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-700">
+                {user.phone || <span className="text-gray-400">Not verified</span>}
+              </div>
+              <Link
+                href="/auth/verify"
+                className="text-sm font-medium text-maroon-600 hover:text-maroon-700 whitespace-nowrap transition-colors"
+              >
+                {user.phone ? "Change" : "Verify"}
+              </Link>
+            </div>
+            <p className="text-xs text-gray-400 mt-1.5">Phone number is verified via SMS and kept private.</p>
           </div>
 
           {/* Error */}
