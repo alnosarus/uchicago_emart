@@ -14,7 +14,7 @@ import {
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FontAwesome } from "@expo/vector-icons";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import type {
   PostWithDetails,
   HousingDetails,
@@ -320,6 +320,22 @@ export default function PostDetailScreen() {
   const isActive = post?.status === "active";
   const isSoldOrCompleted =
     post?.status === "sold" || post?.status === "completed";
+
+  /* ── Message button state ── */
+  const [isMessaging, setIsMessaging] = useState(false);
+
+  const handleMessage = useCallback(async () => {
+    if (!post || isMessaging) return;
+    setIsMessaging(true);
+    try {
+      const conversation = await api.conversations.create(post.id);
+      router.push(`/messages/${conversation.id}` as never);
+    } catch {
+      Alert.alert("Error", "Failed to start conversation. Please try again.");
+    } finally {
+      setIsMessaging(false);
+    }
+  }, [post, isMessaging, router]);
 
   /* NavBar */
   const navBar = (
@@ -675,18 +691,38 @@ export default function PostDetailScreen() {
 
           {/* CTA Buttons */}
           <View style={styles.ctaRow}>
-            <Pressable
-              style={[styles.ctaPrimary, { backgroundColor: accent, opacity: 0.5 }]}
-              disabled
-            >
-              <FontAwesome
-                name="comment-o"
-                size={16}
-                color={colors.white}
-                style={styles.ctaIcon}
-              />
-              <Text style={styles.ctaPrimaryText}>Message</Text>
-            </Pressable>
+            {!isAuthor && isActive ? (
+              <Pressable
+                style={[styles.ctaPrimary, { backgroundColor: accent }, isMessaging && styles.ctaDisabled]}
+                onPress={handleMessage}
+                disabled={isMessaging}
+              >
+                {isMessaging ? (
+                  <ActivityIndicator size="small" color={colors.white} style={styles.ctaIcon} />
+                ) : (
+                  <FontAwesome
+                    name="comment-o"
+                    size={16}
+                    color={colors.white}
+                    style={styles.ctaIcon}
+                  />
+                )}
+                <Text style={styles.ctaPrimaryText}>Message</Text>
+              </Pressable>
+            ) : (
+              <Pressable
+                style={[styles.ctaPrimary, { backgroundColor: accent, opacity: 0.35 }]}
+                disabled
+              >
+                <FontAwesome
+                  name="comment-o"
+                  size={16}
+                  color={colors.white}
+                  style={styles.ctaIcon}
+                />
+                <Text style={styles.ctaPrimaryText}>Message</Text>
+              </Pressable>
+            )}
             <Pressable
               style={[styles.ctaOutline, { borderColor: accent }]}
               onPress={() => toggleSave(post.id)}
@@ -932,6 +968,9 @@ const styles = StyleSheet.create({
   },
   ctaIcon: {
     marginRight: 8,
+  },
+  ctaDisabled: {
+    opacity: 0.6,
   },
   /* Modal */
   modalOverlay: {

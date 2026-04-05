@@ -72,6 +72,7 @@ export default function TabLayout() {
         <Tabs.Screen name="storage" options={{ title: "Storage", tabBarIcon: ({ color }) => <TabIcon name="archive" color={color} /> }} />
         <Tabs.Screen name="create" options={{ title: "Post", tabBarIcon: () => <CreateTabIcon />, tabBarLabel: () => null }} />
         <Tabs.Screen name="housing" options={{ title: "Housing", tabBarIcon: ({ color }) => <TabIcon name="home" color={color} /> }} />
+        <Tabs.Screen name="messages" options={{ title: "Messages", tabBarIcon: ({ color }) => <TabIcon name="comment-o" color={color} /> }} />
         <Tabs.Screen name="profile" options={{ title: "Profile", tabBarIcon: ({ color }) => <TabIcon name="user" color={color} /> }} />
       </Tabs>
 

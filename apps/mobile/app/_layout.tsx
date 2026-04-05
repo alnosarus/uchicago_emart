@@ -21,6 +21,7 @@ function RootLayoutNav() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="posts/[id]" options={{ headerShown: false, presentation: "card" }} />
         <Stack.Screen name="notifications" options={{ headerShown: false, presentation: "card" }} />
+        <Stack.Screen name="messages/[id]" options={{ headerShown: false, presentation: "card" }} />
       </Stack>
     </ThemeProvider>
   );
