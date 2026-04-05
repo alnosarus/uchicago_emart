@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/lib/auth-context";
+import { NotificationBell } from "@/components/NotificationBell";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -63,9 +64,7 @@ export default function Home() {
               <Link href="/history" className="hidden sm:inline-flex text-sm font-medium text-gray-600 hover:text-maroon-600 px-3 py-1.5 rounded-md transition-colors">
                 History
               </Link>
-              <Link href="/notifications" className="text-lg sm:text-xl px-1.5 sm:px-2 py-1 rounded-full hover:bg-gray-100 transition-colors">
-                🔔
-              </Link>
+              <NotificationBell />
               <button
                 onClick={logout}
                 className="hidden sm:inline-flex text-sm font-semibold text-gray-700 border border-gray-300 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full hover:bg-gray-100 transition-colors"
