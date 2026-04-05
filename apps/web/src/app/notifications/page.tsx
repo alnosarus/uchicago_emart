@@ -80,7 +80,7 @@ function timeAgo(dateString: string): string {
 }
 
 export default function NotificationsPage() {
-  const { user, accessToken, isLoading, logout } = useAuth();
+  const { user, accessToken, isLoading } = useAuth();
   const router = useRouter();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [pagination, setPagination] = useState<Pagination | null>(null);
@@ -232,7 +232,7 @@ export default function NotificationsPage() {
                       {notification.type === "expiring" && postId && !notification.body.includes("has been renewed") && (
                         <button
                           onClick={(e) => handleRenew(postId, e)}
-                          className="mt-2 text-xs font-semibold text-white bg-maroon-600 hover:bg-maroon-700 px-3 py-1.5 rounded-lg transition-colors"
+                          className="mt-2 text-xs font-semibold text-white bg-maroon-600 hover:bg-maroon-700 px-3 py-2 sm:py-1.5 rounded-lg transition-colors"
                         >
                           Renew Post
                         </button>
