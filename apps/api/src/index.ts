@@ -12,6 +12,7 @@ import postRoutes from "./routes/posts";
 import transactionRoutes from "./routes/transactions";
 import reviewRoutes from "./routes/reviews";
 import savedRoutes from "./routes/saved";
+import notificationRoutes from "./routes/notifications";
 
 const app = express();
 
@@ -38,6 +39,7 @@ app.use("/api/posts", postRoutes);
 app.use("/api/transactions", transactionRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/saved", savedRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 // Error handler (must be last)
 app.use(errorHandler);

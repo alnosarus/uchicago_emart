@@ -76,7 +76,8 @@ model Post {
   description String?
   createdAt   DateTime   @default(now()) @map("created_at")
   updatedAt   DateTime   @updatedAt @map("updated_at")
-  expiresAt   DateTime?  @map("expires_at")
+  expiresAt           DateTime?  @map("expires_at")
+  expirationNotified  Boolean    @default(false) @map("expiration_notified")
 
   author        User                @relation(fields: [authorId], references: [id])
   images        PostImage[]

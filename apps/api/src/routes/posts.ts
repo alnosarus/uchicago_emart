@@ -63,6 +63,15 @@ router.delete("/:id", requireAuth, async (req: AuthRequest, res: Response, next:
   } catch (err) { next(err); }
 });
 
+// PATCH /api/posts/:id/renew — Renew a post
+router.patch("/:id/renew", requireAuth, async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const { renewPost } = await import("../services/notification.service");
+    const post = await renewPost(param(req, "id"), req.userId!);
+    res.json(post);
+  } catch (err) { next(err); }
+});
+
 // POST /api/posts/:id/images — Upload images to a post
 router.post("/:id/images", requireAuth, upload.array("images", 8), async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {

@@ -68,5 +68,11 @@ export function createPostsApi(client: ApiClient) {
         body: { imageIds },
       });
     },
+
+    renew(postId: string) {
+      return client.request<unknown>(`/api/posts/${postId}/renew`, {
+        method: "PATCH",
+      });
+    },
   };
 }

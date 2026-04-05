@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/lib/auth-context";
+import { NotificationBell } from "@/components/NotificationBell";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -51,6 +52,7 @@ export default function Home() {
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
                 Post
               </Link>
+              <NotificationBell />
               {/* Avatar + dropdown */}
               <div className="relative">
                 {menuOpen && <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />}

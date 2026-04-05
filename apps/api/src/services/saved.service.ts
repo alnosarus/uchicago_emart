@@ -6,6 +6,22 @@ export async function savePost(userId: string, postId: string) {
     update: {},
     create: { userId, postId },
   });
+
+  // Notify the post author (don't notify if saving own post)
+  const post = await prisma.post.findUnique({
+    where: { id: postId },
+    select: { authorId: true, title: true },
+  });
+  if (post && post.authorId !== userId) {
+    const { createNotification } = await import("./notification.service");
+    await createNotification(
+      post.authorId,
+      "save",
+      "Post Saved",
+      `Someone saved your post "${post.title}"`,
+      `/posts/${postId}`
+    ).catch(() => {}); // Don't fail the save if notification fails
+  }
 }
 
 export async function unsavePost(userId: string, postId: string) {
