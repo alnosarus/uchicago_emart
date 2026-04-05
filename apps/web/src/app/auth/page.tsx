@@ -52,7 +52,7 @@ export default function AuthPage() {
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 sm:p-8">
           <h1 className="text-xl font-extrabold text-gray-900 text-center mb-1">
             Welcome to UChicago E-mart
           </h1>

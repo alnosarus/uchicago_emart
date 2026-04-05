@@ -302,13 +302,17 @@ function PostCard({ post }: { post: Post }) {
             onClick={(e) => e.stopPropagation()}
             className="flex items-center gap-1.5 min-w-0 hover:opacity-75 transition-opacity"
           >
-            <div className="w-5 h-5 rounded-full bg-gradient-to-br from-maroon-400 to-maroon-600 flex items-center justify-center text-white text-[10px] font-bold shrink-0">
-              {post.author.name
-                .split(" ")
-                .map((n) => n[0])
-                .join("")
-                .slice(0, 2)}
-            </div>
+            {post.author.avatarUrl ? (
+              <img src={post.author.avatarUrl} alt="" className="w-5 h-5 rounded-full object-cover shrink-0" />
+            ) : (
+              <div className="w-5 h-5 rounded-full bg-gradient-to-br from-maroon-400 to-maroon-600 flex items-center justify-center text-white text-[10px] font-bold shrink-0">
+                {post.author.name
+                  .split(" ")
+                  .map((n) => n[0])
+                  .join("")
+                  .slice(0, 2)}
+              </div>
+            )}
             <span className="text-xs text-gray-600 truncate">{post.author.name}</span>
             {post.author.isVerified && (
               <svg className="w-3.5 h-3.5 text-blue-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -394,11 +398,13 @@ function CheckItem({
   checked,
   onChange,
   accent = "maroon",
+  name,
 }: {
   label: string;
   checked: boolean;
   onChange: () => void;
   accent?: "maroon" | "indigo";
+  name?: string;
 }) {
   const accentClass = accent === "indigo"
     ? "text-indigo-600 border-indigo-500"
@@ -420,7 +426,7 @@ function CheckItem({
       <span className={`text-sm transition-colors ${checked ? (accent === "indigo" ? "text-indigo-700 font-medium" : "text-maroon-700 font-medium") : "text-gray-600"}`}>
         {label}
       </span>
-      <input type="checkbox" className="sr-only" checked={checked} onChange={onChange} />
+      <input type="checkbox" className="sr-only" checked={checked} onChange={onChange} name={name} />
     </label>
   );
 }
@@ -509,6 +515,7 @@ function FilterSidebarContent({
         label="Has photos"
         checked={activeHasPhotos}
         onChange={() => setFilter("hasPhotos", activeHasPhotos ? "" : "1")}
+        name="hasPhotos"
       />
 
       {/* Price Range */}
@@ -516,6 +523,8 @@ function FilterSidebarContent({
         <div className="flex items-center gap-1.5">
           <input
             type="number"
+            id="price-min"
+            name="priceMin"
             min={0}
             placeholder="Min"
             value={priceMinInput}
@@ -527,6 +536,8 @@ function FilterSidebarContent({
           <span className="text-gray-400 text-xs shrink-0">–</span>
           <input
             type="number"
+            id="price-max"
+            name="priceMax"
             min={0}
             placeholder="Max"
             value={priceMaxInput}
@@ -548,6 +559,7 @@ function FilterSidebarContent({
                 label={o.label}
                 checked={activePriceTypes.includes(o.value)}
                 onChange={() => toggleFilter("priceType", o.value)}
+                name={`priceType-${o.value}`}
               />
             ))}
           </div>
@@ -564,6 +576,7 @@ function FilterSidebarContent({
                 label={c}
                 checked={activeCategories.includes(c)}
                 onChange={() => toggleFilter("category", c)}
+                name={`category-${c}`}
               />
             ))}
           </div>
@@ -580,6 +593,7 @@ function FilterSidebarContent({
                 label={c.label}
                 checked={activeConditions.includes(c.value)}
                 onChange={() => toggleFilter("condition", c.value)}
+                name={`condition-${c.value}`}
               />
             ))}
           </div>
@@ -596,6 +610,7 @@ function FilterSidebarContent({
                 label={o.label}
                 checked={activeSizes.includes(o.value)}
                 onChange={() => toggleFilter("size", o.value)}
+                name={`size-${o.value}`}
               />
             ))}
           </div>
@@ -612,6 +627,7 @@ function FilterSidebarContent({
                 label={o.label}
                 checked={activeLocationTypes.includes(o.value)}
                 onChange={() => toggleFilter("locationType", o.value)}
+                name={`locationType-${o.value}`}
               />
             ))}
           </div>
@@ -632,6 +648,7 @@ function FilterSidebarContent({
                 checked={activeSubtypes.includes(o.value)}
                 onChange={() => toggleFilter("subtype", o.value)}
                 accent="indigo"
+                name={`subtype-${o.value}`}
               />
             ))}
           </div>
@@ -649,6 +666,7 @@ function FilterSidebarContent({
                 checked={activeBedrooms.includes(o.value)}
                 onChange={() => toggleFilter("bedrooms", o.value)}
                 accent="indigo"
+                name={`bedrooms-${o.value}`}
               />
             ))}
           </div>
@@ -659,6 +677,8 @@ function FilterSidebarContent({
       {activeType === "housing" && (activeSubtypes.length === 0 || activeSubtypes.includes("sublet")) && (
         <FilterSection title="Move-in Month">
           <select
+            id="move-in-month"
+            name="moveInMonth"
             value={activeMoveInMonth}
             onChange={(e) => setFilter("moveInMonth", e.target.value)}
             className="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-sm text-gray-600 outline-none focus:border-indigo-400 transition-colors cursor-pointer"
@@ -1055,7 +1075,7 @@ function BrowseContent() {
                   <span className="hidden sm:inline text-xs">{SORT_OPTIONS.find(o => o.value === activeSort)?.label}</span>
                 </button>
                 {sortOpen && (
-                  <div className="absolute right-0 top-full mt-1 w-44 bg-white rounded-xl shadow-lg border border-gray-100 py-1.5 z-50">
+                  <div className="absolute right-0 top-full mt-1 w-40 sm:w-44 bg-white rounded-xl shadow-lg border border-gray-100 py-1.5 z-50">
                     {SORT_OPTIONS.map((o) => (
                       <button
                         key={o.value}
@@ -1098,7 +1118,7 @@ function BrowseContent() {
 
       {/* Content */}
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-8 py-6">
-        <div className="flex gap-6 items-start">
+        <div className="flex gap-4 sm:gap-6 items-start">
 
           {/* ── Filter Sidebar ── */}
           <aside className="w-52 shrink-0 bg-white rounded-xl border border-gray-100 shadow-sm p-4 hidden sm:block sticky top-28 max-h-[calc(100vh-8rem)] overflow-y-auto">
@@ -1133,7 +1153,7 @@ function BrowseContent() {
                 className="fixed inset-0 bg-black/30 z-40 sm:hidden"
                 onClick={() => setFiltersOpen(false)}
               />
-              <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl z-50 p-5 shadow-xl sm:hidden max-h-[80vh] overflow-y-auto">
+              <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl z-50 p-5 shadow-xl sm:hidden max-h-[70vh] overflow-y-auto">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="font-semibold text-gray-900">Filters</h2>
                   <button onClick={() => setFiltersOpen(false)} className="text-gray-400 hover:text-gray-600">

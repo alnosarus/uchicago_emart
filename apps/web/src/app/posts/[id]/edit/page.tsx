@@ -294,13 +294,13 @@ export default function EditPostPage() {
             {post.type === "marketplace" && (
               <div>
                 <label className={labelClass}>Price Type</label>
-                <div className="flex gap-2 mb-3">
+                <div className="flex flex-wrap gap-2 mb-3">
                   {(["fixed", "free", "trade"] as const).map((pt) => (
                     <button
                       key={pt}
                       type="button"
                       onClick={() => setPriceType(pt)}
-                      className={`px-4 py-2 rounded-full text-sm font-medium border transition-all ${
+                      className={`px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium border transition-all ${
                         priceType === pt
                           ? "bg-maroon-600 text-white border-maroon-600"
                           : "bg-white text-gray-600 border-gray-300 hover:border-gray-400"
@@ -387,10 +387,10 @@ export default function EditPostPage() {
             <ImageUploadGrid images={images} onImagesChange={setImages} />
           </div>
 
-          <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-200">
+          <div className="flex flex-col-reverse sm:flex-row items-center justify-between gap-3 mt-8 pt-6 border-t border-gray-200">
             <Link
               href={`/posts/${postId}`}
-              className="text-sm font-semibold text-gray-600 border border-gray-300 px-5 py-2.5 rounded-full hover:bg-gray-50 transition-colors"
+              className="text-sm font-semibold text-gray-600 border border-gray-300 px-5 py-2.5 rounded-full hover:bg-gray-50 transition-colors w-full sm:w-auto text-center"
             >
               Cancel
             </Link>
@@ -398,7 +398,7 @@ export default function EditPostPage() {
               type="button"
               onClick={handleSave}
               disabled={submitting || !title.trim()}
-              className="text-sm font-semibold text-white bg-gradient-to-br from-maroon-600 to-maroon-700 px-6 py-2.5 rounded-full shadow-md hover:from-maroon-700 hover:to-maroon-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="text-sm font-semibold text-white bg-gradient-to-br from-maroon-600 to-maroon-700 px-6 py-2.5 rounded-full shadow-md hover:from-maroon-700 hover:to-maroon-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 w-full sm:w-auto"
             >
               {submitting ? (
                 <>

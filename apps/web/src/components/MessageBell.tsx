@@ -5,36 +5,33 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { useSocket } from "@/lib/socket-context";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-
 export function MessageBell() {
-  const { accessToken } = useAuth();
+  const { accessToken, fetchAuth } = useAuth();
   const socket = useSocket();
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     if (!accessToken) return;
 
+    let stopped = false;
+
     async function fetchCount() {
-      try {
-        const res = await fetch(`${API_URL}/api/conversations/unread-count`, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setUnreadCount(data.count);
-        }
-      } catch {
-        // ignore
+      if (stopped) return;
+      const res = await fetchAuth("/api/conversations/unread-count");
+      if (!res || stopped) return;
+      if (res.ok) {
+        const data = await res.json();
+        setUnreadCount(data.count);
       }
     }
 
     fetchCount();
-
-    // Also poll every 30s as a fallback
     const interval = setInterval(fetchCount, 30_000);
-    return () => clearInterval(interval);
-  }, [accessToken]);
+    return () => {
+      stopped = true;
+      clearInterval(interval);
+    };
+  }, [accessToken, fetchAuth]);
 
   // Real-time updates
   useEffect(() => {

@@ -161,8 +161,8 @@ export default function Home() {
       <section className="bg-gradient-to-br from-maroon-900 via-maroon-700 to-maroon-500 px-4 sm:px-8 py-14 sm:py-24 text-center relative overflow-hidden">
         <img src="/images/phoenix.png" alt="" aria-hidden="true" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-full w-auto opacity-15 pointer-events-none select-none" />
         <h1 className="mb-3 sm:mb-4 relative z-10">
-          <span className="block text-3xl sm:text-4xl md:text-5xl font-bold tracking-[.18em] uppercase opacity-85 text-white/70 mb-1" style={{ fontFamily: "'Oswald', sans-serif" }}>UChicago</span>
-          <span className="block text-5xl sm:text-6xl md:text-7xl font-light tracking-[.2em] uppercase text-white" style={{ fontFamily: "'Raleway', sans-serif" }}>E-mart</span>
+          <span className="block text-2xl sm:text-4xl md:text-5xl font-bold tracking-[.18em] uppercase opacity-85 text-white/70 mb-1" style={{ fontFamily: "'Oswald', sans-serif" }}>UChicago</span>
+          <span className="block text-4xl sm:text-6xl md:text-7xl font-light tracking-[.15em] sm:tracking-[.2em] uppercase text-white" style={{ fontFamily: "'Raleway', sans-serif" }}>E-mart</span>
         </h1>
         <form
           onSubmit={(e) => {
@@ -226,7 +226,7 @@ export default function Home() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {recentPosts.map(post => (
               <Link key={post.id} href={`/posts/${post.id}`} className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
-                <div className="h-40 bg-gray-100 flex items-center justify-center">
+                <div className="h-36 sm:h-40 bg-gray-100 flex items-center justify-center">
                   {post.images[0] ? (
                     <img src={post.images[0].url} alt={post.title} className="w-full h-full object-cover" />
                   ) : (

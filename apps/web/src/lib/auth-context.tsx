@@ -18,6 +18,7 @@ interface AuthContextValue {
   login: (code: string) => Promise<{ needsPhoneVerification: boolean }>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
+  fetchAuth: (path: string, options?: RequestInit) => Promise<Response | null>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -29,6 +30,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tokenRef = useRef<string | null>(null);
+  const refreshPromiseRef = useRef<Promise<string | null> | null>(null);
+
+  // Keep ref in sync so callbacks always see the latest token
+  useEffect(() => { tokenRef.current = accessToken; }, [accessToken]);
 
   const fetchWithAuth = useCallback(async (path: string, options: RequestInit = {}) => {
     const res = await fetch(`${API_URL}${path}`, {
@@ -43,31 +49,82 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return res;
   }, [accessToken]);
 
-  // Silently refresh the access token using the httpOnly refresh cookie.
-  // Schedules itself to run again 1 minute before the next token expires (14m).
-  const silentRefresh = useCallback(async () => {
-    try {
-      const res = await fetch(`${API_URL}/api/auth/refresh`, {
-        method: "POST",
-        credentials: "include",
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setAccessToken(data.accessToken);
-        // Schedule the next refresh for 14 minutes from now (token lives 15m)
-        if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
-        refreshTimerRef.current = setTimeout(silentRefresh, 14 * 60 * 1000);
-      } else {
-        // Refresh token expired — log the user out
-        setUser(null);
-        setAccessToken(null);
+  // Deduplicated token refresh — returns the new token or null.
+  // Multiple callers hitting 401 at the same time will share one refresh request.
+  const doRefresh = useCallback(async (): Promise<string | null> => {
+    if (refreshPromiseRef.current) return refreshPromiseRef.current;
+    refreshPromiseRef.current = (async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/auth/refresh`, {
+          method: "POST",
+          credentials: "include",
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setAccessToken(data.accessToken);
+          tokenRef.current = data.accessToken;
+          if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+          refreshTimerRef.current = setTimeout(silentRefresh, 14 * 60 * 1000);
+          return data.accessToken as string;
+        } else {
+          setUser(null);
+          setAccessToken(null);
+          tokenRef.current = null;
+          return null;
+        }
+      } catch {
+        return null;
+      } finally {
+        refreshPromiseRef.current = null;
       }
-    } catch {
+    })();
+    return refreshPromiseRef.current;
+  }, []);
+
+  // Silently refresh the access token using the httpOnly refresh cookie.
+  const silentRefresh = useCallback(async () => {
+    const token = await doRefresh();
+    if (!token) {
       // Network error — retry in 30s
       if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
-      refreshTimerRef.current = setTimeout(silentRefresh, 30 * 1000);
+      // Only retry if we still have a user (i.e. it was a network error, not a revoked refresh token)
+      if (tokenRef.current !== null) {
+        refreshTimerRef.current = setTimeout(silentRefresh, 30 * 1000);
+      }
     }
-  }, []);
+  }, [doRefresh]);
+
+  // Authenticated fetch: on 401, refresh the token once and retry.
+  // Returns null if the user is logged out or refresh fails.
+  const fetchAuth = useCallback(async (path: string, options: RequestInit = {}): Promise<Response | null> => {
+    const token = tokenRef.current;
+    if (!token) return null;
+    try {
+      const res = await fetch(`${API_URL}${path}`, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+          ...options.headers,
+        },
+      });
+      if (res.status === 401) {
+        const newToken = await doRefresh();
+        if (!newToken) return null;
+        return fetch(`${API_URL}${path}`, {
+          ...options,
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${newToken}`,
+            ...options.headers,
+          },
+        });
+      }
+      return res;
+    } catch {
+      return null;
+    }
+  }, [doRefresh]);
 
   // Try to refresh token on mount
   useEffect(() => {
@@ -146,7 +203,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, accessToken, isLoading, login, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, accessToken, isLoading, login, logout, refreshUser, fetchAuth }}>
       {children}
     </AuthContext.Provider>
   );

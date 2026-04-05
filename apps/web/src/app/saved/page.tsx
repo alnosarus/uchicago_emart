@@ -126,7 +126,7 @@ function SavedPostCard({
         }}
         disabled={unsaving}
         title="Remove from saved"
-        className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm hover:bg-red-50 transition-colors disabled:opacity-50"
+        className="absolute top-2 right-2 z-10 w-8 h-8 sm:w-7 sm:h-7 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm hover:bg-red-50 transition-colors disabled:opacity-50"
         aria-label="Remove from saved"
       >
         <svg className="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
@@ -182,13 +182,17 @@ function SavedPostCard({
           </h3>
           <div className="flex items-center justify-between mt-2.5 pt-2.5 border-t border-gray-100">
             <div className="flex items-center gap-1.5 min-w-0">
-              <div className="w-5 h-5 rounded-full bg-gradient-to-br from-maroon-400 to-maroon-600 flex items-center justify-center text-white text-[10px] font-bold shrink-0">
-                {post.author.name
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")
-                  .slice(0, 2)}
-              </div>
+              {post.author.avatarUrl ? (
+                <img src={post.author.avatarUrl} alt="" className="w-5 h-5 rounded-full object-cover shrink-0" />
+              ) : (
+                <div className="w-5 h-5 rounded-full bg-gradient-to-br from-maroon-400 to-maroon-600 flex items-center justify-center text-white text-[10px] font-bold shrink-0">
+                  {post.author.name
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")
+                    .slice(0, 2)}
+                </div>
+              )}
               <span className="text-xs text-gray-600 truncate">{post.author.name}</span>
             </div>
             <span className="text-xs text-gray-400 shrink-0">{timeAgo(post.createdAt)}</span>

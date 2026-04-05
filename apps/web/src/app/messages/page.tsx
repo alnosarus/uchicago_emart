@@ -414,7 +414,7 @@ function MessagesPageInner() {
         <div
           className={`${
             showChat ? "hidden md:flex" : "flex"
-          } flex-col w-full md:w-[35%] md:min-w-[300px] md:max-w-[400px] border-r border-gray-200 bg-white overflow-hidden`}
+          } flex-col w-full md:w-[35%] md:min-w-[280px] md:max-w-[400px] border-r border-gray-200 bg-white overflow-hidden`}
         >
           {/* List header */}
           <div className="px-4 py-3 border-b border-gray-100">
@@ -614,7 +614,7 @@ function MessagesPageInner() {
                   <button
                     onClick={handleSend}
                     disabled={sending || !inputText.trim()}
-                    className="shrink-0 w-9 h-9 flex items-center justify-center rounded-full bg-maroon-600 text-white hover:bg-maroon-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="shrink-0 w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-full bg-maroon-600 text-white hover:bg-maroon-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />

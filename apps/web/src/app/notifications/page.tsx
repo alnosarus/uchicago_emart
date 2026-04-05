@@ -252,7 +252,7 @@ export default function NotificationsPage() {
                       {notification.type === "expiring" && postId && !notification.body.includes("has been renewed") && (
                         <button
                           onClick={(e) => handleRenew(postId, e)}
-                          className="mt-2 text-xs font-semibold text-white bg-maroon-600 hover:bg-maroon-700 px-3 py-1.5 rounded-lg transition-colors"
+                          className="mt-2 text-xs font-semibold text-white bg-maroon-600 hover:bg-maroon-700 px-3 py-2 sm:py-1.5 rounded-lg transition-colors"
                         >
                           Renew Post
                         </button>

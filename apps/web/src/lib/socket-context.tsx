@@ -23,15 +23,10 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     const s = io(SOCKET_URL, {
       auth: { token: accessToken },
       transports: ["websocket", "polling"],
+      reconnectionAttempts: 5,
+      reconnectionDelay: 2000,
+      reconnectionDelayMax: 30000,
     }) as TypedSocket;
-
-    s.on("connect", () => {
-      console.log("Socket connected");
-    });
-
-    s.on("disconnect", (reason) => {
-      console.log("Socket disconnected:", reason);
-    });
 
     setSocket(s);
 

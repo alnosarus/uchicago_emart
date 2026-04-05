@@ -216,10 +216,10 @@ export default function SettingsPage() {
                 <img
                   src={avatarPreview}
                   alt="Avatar"
-                  className="w-[200px] h-[200px] rounded-full object-cover border-4 border-gray-100 shadow-sm group-hover:border-maroon-200 transition-colors"
+                  className="w-36 h-36 sm:w-[200px] sm:h-[200px] rounded-full object-cover border-4 border-gray-100 shadow-sm group-hover:border-maroon-200 transition-colors"
                 />
               ) : (
-                <div className="w-[200px] h-[200px] rounded-full bg-gradient-to-br from-maroon-500 to-maroon-700 flex items-center justify-center text-white text-5xl font-bold border-4 border-gray-100 shadow-sm group-hover:border-maroon-200 transition-colors">
+                <div className="w-36 h-36 sm:w-[200px] sm:h-[200px] rounded-full bg-gradient-to-br from-maroon-500 to-maroon-700 flex items-center justify-center text-white text-4xl sm:text-5xl font-bold border-4 border-gray-100 shadow-sm group-hover:border-maroon-200 transition-colors">
                   {initials}
                 </div>
               )}

@@ -443,7 +443,7 @@ export default function ProfilePage() {
                             clipRule="evenodd"
                           />
                         </svg>
-                        UChicago Verified
+                        Phone Verified
                       </span>
                     )}
                     {isOwnProfile && (

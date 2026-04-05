@@ -395,11 +395,11 @@ export default function CreatePostPage() {
       <div>
         <h2 className="text-lg font-extrabold text-gray-900 mb-1">What would you like to post?</h2>
         <p className="text-sm text-gray-500 mb-6">Choose the type of listing you want to create.</p>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
           <button
             type="button"
             onClick={() => setPostType("marketplace")}
-            className={`p-6 rounded-xl border-2 text-left transition-all ${
+            className={`p-4 sm:p-6 rounded-xl border-2 text-left transition-all ${
               postType === "marketplace"
                 ? "border-maroon-600 bg-maroon-50 shadow-md"
                 : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm"
@@ -412,7 +412,7 @@ export default function CreatePostPage() {
           <button
             type="button"
             onClick={() => setPostType("storage")}
-            className={`p-6 rounded-xl border-2 text-left transition-all ${
+            className={`p-4 sm:p-6 rounded-xl border-2 text-left transition-all ${
               postType === "storage"
                 ? "border-amber-500 bg-amber-50 shadow-md"
                 : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm"
@@ -425,7 +425,7 @@ export default function CreatePostPage() {
           <button
             type="button"
             onClick={() => setPostType("housing")}
-            className={`p-6 rounded-xl border-2 text-left transition-all ${
+            className={`p-4 sm:p-6 rounded-xl border-2 text-left transition-all ${
               postType === "housing"
                 ? "border-indigo-500 bg-indigo-50 shadow-md"
                 : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm"
@@ -555,13 +555,13 @@ export default function CreatePostPage() {
           {/* Price type */}
           <div>
             <label className={labelClass}>Pricing</label>
-            <div className="grid grid-cols-3 gap-2 sm:gap-3">
+            <div className="grid grid-cols-3 gap-1.5 sm:gap-3">
               {(["fixed", "free", "trade"] as const).map((pt) => (
                 <button
                   key={pt}
                   type="button"
                   onClick={() => setMarketplace((p) => ({ ...p, priceType: pt }))}
-                  className={`py-2.5 rounded-lg text-sm font-semibold border-2 transition-all capitalize ${
+                  className={`py-2.5 rounded-lg text-xs sm:text-sm font-semibold border-2 transition-all capitalize ${
                     marketplace.priceType === pt
                       ? "border-maroon-600 bg-maroon-50 text-maroon-700"
                       : "border-gray-200 text-gray-600 hover:border-gray-300"
