@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "UChicago E-mart",
     locale: "en_US",
-    images: [{ url: "/og-default.png", width: 1200, height: 630, alt: "UChicago E-mart" }],
+    images: [{ url: "/opengraph.png", width: 1200, height: 630, alt: "UChicago E-mart" }],
   },
   twitter: {
     card: "summary_large_image",

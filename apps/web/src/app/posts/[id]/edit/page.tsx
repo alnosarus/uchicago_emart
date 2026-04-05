@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { ImageUploadGrid, type ImageItem } from "@/components/ImageUploadGrid";
+import { Navbar } from "@/components/Navbar";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
@@ -238,17 +239,7 @@ export default function EditPostPage() {
 
   return (
     <>
-      <nav className="bg-white border-b border-gray-200 px-4 sm:px-8 h-14 sm:h-16 flex items-center justify-between sticky top-0 z-50 shadow-sm">
-        <Link href="/" className="flex items-center">
-          <img src="/logos/emart-logo.svg" alt="UChicago E-mart" className="h-10 sm:h-11" />
-        </Link>
-        <Link
-          href={`/posts/${postId}`}
-          className="text-sm font-medium text-gray-600 hover:text-maroon-600 transition-colors"
-        >
-          Cancel
-        </Link>
-      </nav>
+      <Navbar />
 
       <main className="flex-1 max-w-2xl mx-auto w-full px-4 sm:px-8 py-8">
         <h1 className="text-2xl font-extrabold text-gray-900 mb-2">Edit Post</h1>

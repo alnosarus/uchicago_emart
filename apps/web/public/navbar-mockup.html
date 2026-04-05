@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Navbar Mockups</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f3f4f6; font-family: system-ui, sans-serif; padding: 32px 24px; display: flex; flex-direction: column; gap: 28px; }
+    .label { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #6b7280; margin-bottom: 8px; }
+
+    nav {
+      background: white;
+      border-bottom: 1px solid #e5e7eb;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.06);
+      border-radius: 12px;
+    }
+    .logo { font-size: 20px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; color: #6b0000; }
+    .logo span { color: #b83232; font-weight: 400; font-size: 13px; letter-spacing: .1em; margin-left: 6px; }
+    .right { display: flex; align-items: center; gap: 4px; }
+
+    .icon-btn {
+      width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 999px;
+      color: #4b5563;
+      cursor: pointer;
+      border: none; background: transparent;
+      transition: background .15s;
+    }
+    .icon-btn:hover { background: #f3f4f6; }
+    .icon-btn svg { width: 22px; height: 22px; }
+
+    .divider { width: 1px; height: 22px; background: #e5e7eb; margin: 0 6px; }
+
+    .avatar {
+      width: 32px; height: 32px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #9b1212, #6b0000);
+      color: white; font-size: 11px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      margin-left: 4px;
+    }
+
+    /* Labels variant */
+    .icon-labeled {
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      padding: 4px 10px;
+      border-radius: 10px;
+      color: #4b5563;
+      cursor: pointer;
+      transition: background .15s;
+      font-size: 10px; font-weight: 600; letter-spacing: .02em;
+    }
+    .icon-labeled:hover { background: #f3f4f6; color: #6b0000; }
+    .icon-labeled svg { width: 20px; height: 20px; }
+
+    /* Pill button variant */
+    .post-pill {
+      display: flex; align-items: center; gap: 6px;
+      background: linear-gradient(135deg, #800000, #6b0000);
+      color: white; font-size: 13px; font-weight: 600;
+      padding: 6px 14px; border-radius: 999px;
+      border: none; cursor: pointer;
+    }
+    .post-pill svg { width: 16px; height: 16px; }
+
+    /* Dropdown variant */
+    .menu-btn {
+      width: 36px; height: 36px;
+      display: flex; align-items: center; justify-center: center;
+      border-radius: 999px;
+      color: #4b5563;
+      cursor: pointer;
+      border: none; background: transparent;
+    }
+    .menu-btn:hover { background: #f3f4f6; }
+    .menu-btn svg { width: 22px; height: 22px; }
+  </style>
+</head>
+<body>
+
+  <!-- Current state -->
+  <div>
+    <div class="label">Current — 4 icons in a row</div>
+    <nav>
+      <div class="logo">UChicago <span>E-MART</span></div>
+      <div class="right">
+        <!-- plus, heart, clock, bell, logout, avatar -->
+        <button class="icon-btn">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+        </button>
+        <button class="icon-btn">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/></svg>
+        </button>
+        <button class="icon-btn">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+        </button>
+        <button class="icon-btn">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/></svg>
+        </button>
+        <div class="avatar">KJ</div>
+      </div>
+    </nav>
+  </div>
+
+  <!-- Option 1: Remove History -->
+  <div>
+    <div class="label">1 — Remove History (3 icons)</div>
+    <nav>
+      <div class="logo">UChicago <span>E-MART</span></div>
+      <div class="right">
+        <button class="icon-btn">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+        </button>
+        <button class="icon-btn">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/></svg>
+        </button>
+        <button class="icon-btn">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/></svg>
+        </button>
+        <div class="avatar">KJ</div>
+      </div>
+    </nav>
+  </div>
+
+  <!-- Option 2: Divider between nav icons and bell -->
+  <div>
+    <div class="label">2 — Divider separating bell from nav icons</div>
+    <nav>
+      <div class="logo">UChicago <span>E-MART</span></div>
+      <div class="right">
+        <button class="icon-btn">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+        </button>
+        <button class="icon-btn">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/></svg>
+        </button>
+        <button class="icon-btn">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+        </button>
+        <div class="divider"></div>
+        <button class="icon-btn">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/></svg>
+        </button>
+        <div class="avatar">KJ</div>
+      </div>
+    </nav>
+  </div>
+
+  <!-- Option 3: Labels under icons -->
+  <div>
+    <div class="label">3 — Labels under each icon</div>
+    <nav>
+      <div class="logo">UChicago <span>E-MART</span></div>
+      <div class="right" style="gap:0">
+        <div class="icon-labeled">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+          Post
+        </div>
+        <div class="icon-labeled">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/></svg>
+          Saved
+        </div>
+        <div class="icon-labeled">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+          History
+        </div>
+        <div class="icon-labeled">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/></svg>
+          Alerts
+        </div>
+        <div class="avatar" style="margin-left:8px">KJ</div>
+      </div>
+    </nav>
+  </div>
+
+  <!-- Option 4: Post as maroon pill, rest as icons -->
+  <div>
+    <div class="label">4 — Post as maroon pill button, saved/history/bell as icons</div>
+    <nav>
+      <div class="logo">UChicago <span>E-MART</span></div>
+      <div class="right">
+        <button class="icon-btn">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/></svg>
+        </button>
+        <button class="icon-btn">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+        </button>
+        <button class="icon-btn">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/></svg>
+        </button>
+        <button class="post-pill">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+          Post
+        </button>
+        <div class="avatar">KJ</div>
+      </div>
+    </nav>
+  </div>
+
+</body>
+</html>

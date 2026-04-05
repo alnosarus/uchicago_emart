@@ -1,5 +1,5 @@
-@import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Raleway:wght@300&display=swap');
+@import "tailwindcss";
 
 @theme inline {
   /* Maroon — primary brand */

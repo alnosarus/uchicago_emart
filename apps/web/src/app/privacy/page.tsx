@@ -5,8 +5,10 @@ export default function PrivacyPage() {
     <div className="min-h-screen flex flex-col bg-gray-50">
       {/* Navbar */}
       <nav className="bg-white border-b border-gray-200 px-4 sm:px-8 h-14 sm:h-16 flex items-center justify-between sticky top-0 z-50 shadow-sm">
-        <Link href="/" className="flex items-center shrink-0">
-          <img src="/logos/emart-logo.svg" alt="UChicago E-mart" className="h-10 sm:h-11" />
+        <Link href="/" className="flex items-center gap-3 shrink-0">
+          <img src="/logos/logover3.svg" alt="UChicago E-mart" className="h-11 sm:h-12" />
+          <div className="w-px h-7 bg-gray-300" />
+          <img src="/logos/Gothic_UChicago_Wordmark_1Color_Maroon_RGB.svg" alt="UChicago" className="h-8 sm:h-9" />
         </Link>
         <Link
           href="/"

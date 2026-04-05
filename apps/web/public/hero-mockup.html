@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hero Mockups</title>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Raleway:wght@300&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #e5e7eb; font-family: system-ui, sans-serif; padding: 32px 24px; display: flex; flex-direction: column; gap: 40px; }
+
+    .label { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
+
+    /* ── shared search bar ── */
+    .search-bar {
+      max-width: 520px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: white;
+      border-radius: 999px;
+      padding: 6px 6px 6px 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.18);
+    }
+    .search-bar svg { opacity: .4; flex-shrink: 0; width: 18px; height: 18px; }
+    .search-bar input {
+      flex: 1; border: none; outline: none;
+      font-size: 14px; color: #374151; background: transparent;
+      min-width: 0;
+    }
+    .search-bar input::placeholder { color: #9ca3af; }
+    .search-btn {
+      background: linear-gradient(135deg, #800000, #6b0000);
+      color: white; font-size: 13px; font-weight: 600;
+      padding: 8px 22px; border-radius: 999px;
+      border: none; cursor: pointer; white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* ── 1: Maroon bg, white logo ── */
+    .hero-1 {
+      background: #800000;
+      padding: 64px 32px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      border-radius: 16px;
+    }
+    .hero-1 .phoenix {
+      position: absolute; left: 50%; top: 50%;
+      transform: translate(-50%, -50%);
+      height: 100%; width: auto;
+      opacity: .1; pointer-events: none;
+    }
+    .hero-1 .content { position: relative; z-index: 1; }
+    .hero-1 .logo-wrap { margin-bottom: 28px; display: flex; justify-content: center; }
+    .hero-1 .logo-wrap img { height: 80px; }
+
+    /* ── 2: White bg, normal long logo ── */
+    .hero-2 {
+      background: #ffffff;
+      padding: 64px 32px;
+      text-align: center;
+      border-radius: 16px;
+      border: 1px solid #e5e7eb;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-2 .content { position: relative; z-index: 1; }
+    .hero-2 .logo-wrap { margin-bottom: 28px; display: flex; justify-content: center; }
+    .hero-2 .logo-wrap img { height: 72px; }
+    .hero-2 .tagline {
+      font-size: 15px; color: #6b7280; font-weight: 400;
+      margin-bottom: 28px; letter-spacing: .02em;
+    }
+    .hero-2 .search-bar input::placeholder { color: #9ca3af; }
+    .hero-2 .search-bar { box-shadow: 0 4px 20px rgba(0,0,0,.1); border: 1px solid #e5e7eb; }
+
+    /* ── 3: White bg, long logo, maroon outlined phoenix ── */
+    .hero-3 {
+      background: #ffffff;
+      padding: 64px 32px;
+      text-align: center;
+      border-radius: 16px;
+      border: 1px solid #e5e7eb;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-3 .phoenix {
+      position: absolute; left: 50%; top: 50%;
+      transform: translate(-50%, -50%);
+      height: 100%; width: auto;
+      opacity: .12; pointer-events: none;
+    }
+    .hero-3 .content { position: relative; z-index: 1; }
+    .hero-3 .logo-wrap { margin-bottom: 28px; display: flex; justify-content: center; }
+    .hero-3 .logo-wrap img { height: 72px; }
+    .hero-3 .tagline {
+      font-size: 15px; color: #6b7280; font-weight: 400;
+      margin-bottom: 28px; letter-spacing: .02em;
+    }
+    .hero-3 .search-bar { box-shadow: 0 4px 20px rgba(0,0,0,.1); border: 1px solid #e5e7eb; }
+
+    /* ── 4: Maroon bg, white logo, no phoenix ── */
+    .hero-4 {
+      background: #800000;
+      padding: 64px 32px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      border-radius: 16px;
+    }
+    .hero-4 .content { position: relative; z-index: 1; }
+    .hero-4 .logo-wrap { margin-bottom: 28px; display: flex; justify-content: center; }
+    .hero-4 .logo-wrap img { height: 80px; }
+
+    /* search bar dark variant for hero-1 */
+    .search-bar-dark {
+      max-width: 520px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: white;
+      border-radius: 999px;
+      padding: 6px 6px 6px 20px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.4);
+    }
+    .search-bar-dark svg { opacity: .35; flex-shrink: 0; width: 18px; height: 18px; }
+    .search-bar-dark input {
+      flex: 1; border: none; outline: none;
+      font-size: 14px; color: #374151; background: transparent;
+      min-width: 0;
+    }
+    .search-bar-dark input::placeholder { color: #9ca3af; }
+  </style>
+</head>
+<body>
+
+  <!-- Version 1: Maroon bg, white text logo -->
+  <div>
+    <div class="label">1 — Maroon background, white text logo</div>
+    <div class="hero-1">
+      <img class="phoenix" src="images/phoenix.png" alt="" />
+      <div class="content">
+        <div class="logo-wrap">
+          <img src="logos/logo-white.svg" alt="UChicago E-mart" />
+        </div>
+        <div class="search-bar-dark">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+          <input type="text" placeholder="Search listings, storage..." />
+          <button class="search-btn">Browse</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Version 2: White bg, long logo -->
+  <div>
+    <div class="label">2 — White background, long logo</div>
+    <div class="hero-2">
+      <div class="content">
+        <div class="logo-wrap">
+          <img src="logos/emart-logo-long.svg" alt="UChicago E-mart" />
+        </div>
+        <p class="tagline">Buy, sell, and connect with fellow Maroons</p>
+        <div class="search-bar">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+          <input type="text" placeholder="Search listings, storage..." />
+          <button class="search-btn">Browse</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Version 3: White bg, long logo, maroon outlined phoenix -->
+  <div>
+    <div class="label">3 — White background, long logo, maroon outlined phoenix</div>
+    <div class="hero-3">
+      <img class="phoenix" src="images/UChicago_Phoenix_Outlined_1Color_Maroon_RGB.svg" alt="" />
+      <div class="content">
+        <div class="logo-wrap">
+          <img src="logos/emart-logo-long.svg" alt="UChicago E-mart" />
+        </div>
+        <p class="tagline">Buy, sell, and connect with fellow Maroons</p>
+        <div class="search-bar">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+          <input type="text" placeholder="Search listings, storage..." />
+          <button class="search-btn">Browse</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Version 4: Maroon bg, white logo, no phoenix -->
+  <div>
+    <div class="label">4 — Maroon background, white logo, no phoenix</div>
+    <div class="hero-4">
+      <div class="content">
+        <div class="logo-wrap">
+          <img src="logos/logo-white.svg" alt="UChicago E-mart" />
+        </div>
+        <div class="search-bar-dark">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+          <input type="text" placeholder="Search listings, storage..." />
+          <button class="search-btn">Browse</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

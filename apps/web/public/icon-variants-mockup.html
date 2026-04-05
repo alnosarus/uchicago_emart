@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Icon Variants — Notification & Message</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f3f4f6; font-family: system-ui, sans-serif; padding: 32px 24px; display: flex; flex-direction: column; gap: 40px; }
+
+    h1 { font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #6b7280; }
+
+    /* ── nav shell ── */
+    nav {
+      background: white;
+      border-bottom: 1px solid #e5e7eb;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.06);
+      border-radius: 12px;
+    }
+    .logo { font-size: 20px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; color: #6b0000; }
+    .logo span { color: #b83232; font-weight: 400; font-size: 13px; letter-spacing: .1em; margin-left: 6px; }
+    .right { display: flex; align-items: center; gap: 4px; }
+    .avatar {
+      width: 32px; height: 32px; border-radius: 999px;
+      background: linear-gradient(135deg, #9b1212, #6b0000);
+      color: white; font-size: 11px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      margin-left: 4px;
+    }
+
+    /* ── base icon button ── */
+    .icon-btn {
+      position: relative;
+      width: 38px; height: 38px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 999px;
+      color: #4b5563;
+      cursor: pointer;
+      border: none; background: transparent;
+      transition: background .15s, color .15s;
+    }
+    .icon-btn:hover { background: #f3f4f6; }
+    .icon-btn svg { width: 24px; height: 24px; }
+
+    /* badge */
+    .badge {
+      position: absolute; top: 2px; right: 2px;
+      min-width: 16px; height: 16px;
+      display: flex; align-items: center; justify-content: center;
+      background: #ef4444; color: white;
+      font-size: 9px; font-weight: 700;
+      border-radius: 999px; padding: 0 3px;
+      border: 2px solid white;
+    }
+    .badge-maroon { background: #800000; }
+
+    /* ── variant modifiers ── */
+
+    /* filled icons */
+    .filled svg { fill: currentColor; stroke: none; }
+
+    /* maroon tint on hover */
+    .maroon-hover:hover { background: #fdf5f5; color: #800000; }
+
+    /* active/selected state */
+    .active { color: #800000; background: #fdf5f5; }
+
+    /* square rounded btn */
+    .square { border-radius: 10px; }
+
+    /* ghost border */
+    .ghost-border { border: 1.5px solid #e5e7eb; }
+    .ghost-border:hover { border-color: #d1d5db; background: #f9fafb; }
+
+    /* pill with label */
+    .pill-labeled {
+      display: flex; align-items: center; gap: 5px;
+      padding: 0 12px; height: 36px;
+      border-radius: 999px;
+      color: #4b5563; font-size: 12px; font-weight: 600;
+      cursor: pointer; border: none; background: transparent;
+      transition: background .15s, color .15s;
+    }
+    .pill-labeled:hover { background: #f3f4f6; }
+    .pill-labeled svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .pill-labeled .badge { position: static; border: none; font-size: 9px; min-width: 16px; height: 16px; }
+
+    /* duo-tone (filled bg, outline icon) */
+    .duotone { background: #f5e0e0; color: #800000; }
+    .duotone:hover { background: #e8b8b8; }
+
+    .section { display: flex; flex-direction: column; gap: 10px; }
+    .row-label { font-size: 11px; color: #9ca3af; font-weight: 600; padding-left: 4px; }
+
+    .divider-v { width: 1px; height: 22px; background: #e5e7eb; margin: 0 4px; }
+  </style>
+</head>
+<body>
+
+  <h1>Notification &amp; Message Icon Variants</h1>
+
+  <!-- A: Current (outline, plain) -->
+  <div class="section">
+    <div class="row-label">A — Current: outline, plain hover</div>
+    <nav>
+      <div class="logo">UChicago <span>E-MART</span></div>
+      <div class="right">
+        <button class="icon-btn">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+          <span class="badge badge-maroon">3</span>
+        </button>
+        <button class="icon-btn">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+          <span class="badge">5</span>
+        </button>
+        <div class="avatar">KJ</div>
+      </div>
+    </nav>
+  </div>
+
+  <!-- B: Outline + maroon hover tint -->
+  <div class="section">
+    <div class="row-label">B — Outline + maroon tint on hover</div>
+    <nav>
+      <div class="logo">UChicago <span>E-MART</span></div>
+      <div class="right">
+        <button class="icon-btn maroon-hover">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+          <span class="badge badge-maroon">3</span>
+        </button>
+        <button class="icon-btn maroon-hover">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+          <span class="badge">5</span>
+        </button>
+        <div class="avatar">KJ</div>
+      </div>
+    </nav>
+  </div>
+
+  <!-- C: Filled icons -->
+  <div class="section">
+    <div class="row-label">C — Filled icons</div>
+    <nav>
+      <div class="logo">UChicago <span>E-MART</span></div>
+      <div class="right">
+        <button class="icon-btn filled maroon-hover">
+          <svg viewBox="0 0 24 24"><path d="M20.598 11.197c-.41-3.977-3.75-7.065-7.759-7.158A8.001 8.001 0 003 12c0 1.418.38 2.749 1.037 3.9L3 20l4.338-1.004A8 8 0 0021 12c0-.272-.013-.542-.039-.808l.039-.803c0-.064-.001-.128-.004-.192H20.6l-.002.001zM8 13a1 1 0 110-2 1 1 0 010 2zm4 0a1 1 0 110-2 1 1 0 010 2zm4 0a1 1 0 110-2 1 1 0 010 2z"/></svg>
+          <span class="badge badge-maroon">3</span>
+        </button>
+        <button class="icon-btn filled maroon-hover">
+          <svg viewBox="0 0 24 24"><path d="M18 10a6 6 0 00-12 0v4.586l-1.707 1.707A1 1 0 005 18h14a1 1 0 00.707-1.707L18 14.586V10zm-6 12a3 3 0 01-3-3h6a3 3 0 01-3 3z"/></svg>
+          <span class="badge">5</span>
+        </button>
+        <div class="avatar">KJ</div>
+      </div>
+    </nav>
+  </div>
+
+  <!-- D: Ghost border -->
+  <div class="section">
+    <div class="row-label">D — Ghost border buttons</div>
+    <nav>
+      <div class="logo">UChicago <span>E-MART</span></div>
+      <div class="right">
+        <button class="icon-btn ghost-border maroon-hover">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+          <span class="badge badge-maroon">3</span>
+        </button>
+        <button class="icon-btn ghost-border maroon-hover">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+          <span class="badge">5</span>
+        </button>
+        <div class="avatar">KJ</div>
+      </div>
+    </nav>
+  </div>
+
+  <!-- E: Duotone (maroon bg) -->
+  <div class="section">
+    <div class="row-label">E — Duotone: maroon tint background</div>
+    <nav>
+      <div class="logo">UChicago <span>E-MART</span></div>
+      <div class="right">
+        <button class="icon-btn duotone">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+          <span class="badge badge-maroon">3</span>
+        </button>
+        <button class="icon-btn duotone">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+          <span class="badge">5</span>
+        </button>
+        <div class="avatar">KJ</div>
+      </div>
+    </nav>
+  </div>
+
+  <!-- F: Pill with label -->
+  <div class="section">
+    <div class="row-label">F — Pill with text label + count</div>
+    <nav>
+      <div class="logo">UChicago <span>E-MART</span></div>
+      <div class="right">
+        <button class="pill-labeled">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+          Messages
+          <span class="badge badge-maroon" style="position:static;border:none">3</span>
+        </button>
+        <div class="divider-v"></div>
+        <button class="pill-labeled">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+          Alerts
+          <span class="badge" style="position:static;border:none">5</span>
+        </button>
+        <div class="avatar">KJ</div>
+      </div>
+    </nav>
+  </div>
+
+  <!-- G: Rounded square -->
+  <div class="section">
+    <div class="row-label">G — Rounded square buttons</div>
+    <nav>
+      <div class="logo">UChicago <span>E-MART</span></div>
+      <div class="right">
+        <button class="icon-btn square maroon-hover">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+          <span class="badge badge-maroon">3</span>
+        </button>
+        <button class="icon-btn square maroon-hover">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+          <span class="badge">5</span>
+        </button>
+        <div class="avatar">KJ</div>
+      </div>
+    </nav>
+  </div>
+
+</body>
+</html>

@@ -98,7 +98,7 @@ export default function VerifyPhonePage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <img src="/logos/emart-logo.svg" alt="UChicago E-mart" className="h-12 mx-auto" />
+          <img src="/logos/emart-logo-long.svg" alt="UChicago E-mart" className="h-12 mx-auto" />
         </div>
 
         <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">

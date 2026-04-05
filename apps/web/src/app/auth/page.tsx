@@ -47,7 +47,7 @@ export default function AuthPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-block">
-            <img src="/logos/emart-logo.svg" alt="UChicago E-mart" className="h-12" />
+            <img src="/logos/emart-logo-long.svg" alt="UChicago E-mart" className="h-12" />
           </Link>
         </div>
 

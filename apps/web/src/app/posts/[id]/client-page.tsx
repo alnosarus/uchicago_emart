@@ -3,6 +3,7 @@
 import { useAuth } from "@/lib/auth-context";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { Navbar } from "@/components/Navbar";
 import { useState, useEffect, useCallback } from "react";
 import { Blurhash } from "react-blurhash";
 import {
@@ -852,6 +853,7 @@ export default function PostDetailPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Navbar />
       {/* Breadcrumb */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-4 sm:pt-6">
         <nav className="flex items-center gap-2 text-sm text-gray-500 min-w-0">
