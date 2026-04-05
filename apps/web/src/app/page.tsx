@@ -170,7 +170,7 @@ export default function Home() {
             const q = searchQuery.trim();
             router.push(q ? `/browse?q=${encodeURIComponent(q)}` : "/browse");
           }}
-          className="max-w-xl mx-auto flex bg-white rounded-full shadow-2xl overflow-hidden p-1 sm:p-1.5 pl-4 sm:pl-6 gap-1.5 sm:gap-2 items-center relative z-10"
+          className="max-w-xl mx-auto flex bg-white rounded-full shadow-2xl p-1 sm:p-1.5 pl-4 sm:pl-6 gap-1.5 sm:gap-2 items-center relative z-10"
         >
           <svg className="w-5 h-5 shrink-0 opacity-40" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>
           <SearchAutocomplete
