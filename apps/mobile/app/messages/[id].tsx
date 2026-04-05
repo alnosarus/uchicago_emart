@@ -189,9 +189,11 @@ export default function ChatScreen() {
             <Text style={styles.navName} numberOfLines={1}>
               {conversation.otherParticipant.name}
             </Text>
-            <Text style={styles.navPostTitle} numberOfLines={1}>
-              {conversation.post.title}
-            </Text>
+            <Pressable onPress={() => router.push(`/posts/${conversation.postId}`)}>
+              <Text style={styles.navPostTitle} numberOfLines={1}>
+                {conversation.post.title}
+              </Text>
+            </Pressable>
           </View>
         </View>
       ) : (
@@ -247,7 +249,7 @@ export default function ChatScreen() {
           value={messageText}
           onChangeText={setMessageText}
           multiline
-          maxLength={1000}
+          maxLength={2000}
           returnKeyType="default"
           blurOnSubmit={false}
         />
