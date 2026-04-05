@@ -63,6 +63,12 @@ export default function EditPostPage() {
   const [description, setDescription] = useState("");
   const [images, setImages] = useState<ImageItem[]>([]);
   const [originalImageIds, setOriginalImageIds] = useState<string[]>([]);
+  // Price state
+  const [priceType, setPriceType] = useState<"fixed" | "free" | "trade">("fixed");
+  const [priceAmount, setPriceAmount] = useState("");
+  const [priceMonthly, setPriceMonthly] = useState("");
+  const [storageFree, setStorageFree] = useState(false);
+  const [monthlyRent, setMonthlyRent] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -79,6 +85,19 @@ export default function EditPostPage() {
         setPost(data);
         setTitle(data.title);
         setDescription(data.description || "");
+
+        // Initialize price state from post data
+        if (data.marketplace) {
+          setPriceType(data.marketplace.priceType as "fixed" | "free" | "trade");
+          setPriceAmount(data.marketplace.priceAmount != null ? String(data.marketplace.priceAmount) : "");
+        }
+        if (data.storage) {
+          setPriceMonthly(data.storage.priceMonthly != null ? String(data.storage.priceMonthly) : "");
+          setStorageFree(data.storage.isFree);
+        }
+        if (data.housing) {
+          setMonthlyRent(data.housing.monthlyRent != null ? String(data.housing.monthlyRent) : "");
+        }
 
         // Convert existing images to ImageItem format
         const existingImages: ImageItem[] = data.images
@@ -110,7 +129,28 @@ export default function EditPostPage() {
     setError("");
 
     try {
-      // 1. Update post text fields
+      // 1. Update post fields including price
+      const patchBody: Record<string, unknown> = {
+        title: title.trim(),
+        description: description.trim() || null,
+      };
+
+      if (post.type === "marketplace") {
+        patchBody.marketplace = {
+          priceType,
+          priceAmount: priceType === "fixed" ? parseFloat(priceAmount) || 0 : null,
+        };
+      } else if (post.type === "storage") {
+        patchBody.storage = {
+          priceMonthly: storageFree ? null : parseFloat(priceMonthly) || null,
+          isFree: storageFree,
+        };
+      } else if (post.type === "housing") {
+        patchBody.housing = {
+          monthlyRent: parseFloat(monthlyRent) || 0,
+        };
+      }
+
       await fetch(`${API_URL}/api/posts/${postId}`, {
         method: "PATCH",
         credentials: "include",
@@ -118,7 +158,7 @@ export default function EditPostPage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ title: title.trim(), description: description.trim() || null }),
+        body: JSON.stringify(patchBody),
       });
 
       // 2. Delete removed images
@@ -174,7 +214,7 @@ export default function EditPostPage() {
     } finally {
       setSubmitting(false);
     }
-  }, [accessToken, post, postId, title, description, images, originalImageIds, router]);
+  }, [accessToken, post, postId, title, description, images, originalImageIds, router, priceType, priceAmount, priceMonthly, storageFree, monthlyRent]);
 
   const labelClass = "block text-sm font-semibold text-gray-700 mb-1.5";
   const inputClass =
@@ -249,6 +289,98 @@ export default function EditPostPage() {
                 className={inputClass + " resize-none"}
               />
             </div>
+
+            {/* Price editing */}
+            {post.type === "marketplace" && (
+              <div>
+                <label className={labelClass}>Price Type</label>
+                <div className="flex gap-2 mb-3">
+                  {(["fixed", "free", "trade"] as const).map((pt) => (
+                    <button
+                      key={pt}
+                      type="button"
+                      onClick={() => setPriceType(pt)}
+                      className={`px-4 py-2 rounded-full text-sm font-medium border transition-all ${
+                        priceType === pt
+                          ? "bg-maroon-600 text-white border-maroon-600"
+                          : "bg-white text-gray-600 border-gray-300 hover:border-gray-400"
+                      }`}
+                    >
+                      {pt === "fixed" ? "Fixed Price" : pt === "free" ? "Free" : "Trade"}
+                    </button>
+                  ))}
+                </div>
+                {priceType === "fixed" && (
+                  <div>
+                    <label htmlFor="priceAmount" className={labelClass}>
+                      Price ($) <span className="text-maroon-500">*</span>
+                    </label>
+                    <input
+                      id="priceAmount"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={priceAmount}
+                      onChange={(e) => setPriceAmount(e.target.value)}
+                      className={inputClass}
+                      placeholder="0.00"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+
+            {post.type === "storage" && (
+              <div>
+                <div className="flex items-center gap-3 mb-3">
+                  <input
+                    id="storageFree"
+                    type="checkbox"
+                    checked={storageFree}
+                    onChange={(e) => setStorageFree(e.target.checked)}
+                    className="w-4 h-4 rounded border-gray-300 text-maroon-600 focus:ring-maroon-500"
+                  />
+                  <label htmlFor="storageFree" className="text-sm font-medium text-gray-700">
+                    Free storage
+                  </label>
+                </div>
+                {!storageFree && (
+                  <div>
+                    <label htmlFor="priceMonthly" className={labelClass}>
+                      Monthly Price ($)
+                    </label>
+                    <input
+                      id="priceMonthly"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={priceMonthly}
+                      onChange={(e) => setPriceMonthly(e.target.value)}
+                      className={inputClass}
+                      placeholder="0.00"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+
+            {post.type === "housing" && (
+              <div>
+                <label htmlFor="monthlyRent" className={labelClass}>
+                  Monthly Rent ($) <span className="text-maroon-500">*</span>
+                </label>
+                <input
+                  id="monthlyRent"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={monthlyRent}
+                  onChange={(e) => setMonthlyRent(e.target.value)}
+                  className={inputClass}
+                  placeholder="0.00"
+                />
+              </div>
+            )}
 
             <div className="border-t border-gray-200 my-6" />
 
