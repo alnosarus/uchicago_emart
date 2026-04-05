@@ -915,16 +915,16 @@ function BrowseContent() {
       {/* Navbar */}
       <nav className="bg-white border-b border-gray-200 px-4 sm:px-8 h-14 sm:h-16 flex items-center justify-between sticky top-0 z-50 shadow-sm">
         <Link href="/" className="flex items-center shrink-0">
-          <img src="/logos/emart-logo.svg" alt="UChicago E-mart" className="h-10 sm:h-11" />
+          <img src="/logos/emart-logo.svg" alt="UChicago E-mart" className="h-8 sm:h-11" />
         </Link>
         <div className="flex items-center gap-2 sm:gap-3">
           {authLoading ? (
             <div className="w-16 sm:w-20 h-8 bg-gray-100 rounded-full animate-pulse" />
           ) : user ? (
             <>
-              <Link href="/create" className="flex items-center gap-1.5 bg-gradient-to-br from-maroon-600 to-maroon-700 text-white text-sm font-semibold px-4 py-1 rounded-full shadow-sm hover:from-maroon-700 hover:to-maroon-800 transition-all">
+              <Link href="/create" className="flex items-center gap-1.5 bg-gradient-to-br from-maroon-600 to-maroon-700 text-white text-sm font-semibold px-2.5 sm:px-4 py-1.5 sm:py-1 rounded-full shadow-sm hover:from-maroon-700 hover:to-maroon-800 transition-all">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-                Post
+                <span className="hidden sm:inline">Post</span>
               </Link>
               <NotificationBell />
               <MessageBell />

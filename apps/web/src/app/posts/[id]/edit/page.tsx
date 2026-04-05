@@ -240,7 +240,7 @@ export default function EditPostPage() {
     <>
       <nav className="bg-white border-b border-gray-200 px-4 sm:px-8 h-14 sm:h-16 flex items-center justify-between sticky top-0 z-50 shadow-sm">
         <Link href="/" className="flex items-center">
-          <img src="/logos/emart-logo.svg" alt="UChicago E-mart" className="h-10 sm:h-11" />
+          <img src="/logos/emart-logo.svg" alt="UChicago E-mart" className="h-8 sm:h-11" />
         </Link>
         <Link
           href={`/posts/${postId}`}
