@@ -38,7 +38,7 @@ const roommateTypeEnum = z.enum(["solo", "shared"]);
 export const housingDetailsSchema = z.object({
   subtype: housingSubtypeEnum,
   side: housingSideEnum,
-  monthlyRent: z.number().min(0),
+  monthlyRent: z.number().min(0).nullable(),
   bedrooms: bedroomsEnum,
   bathrooms: bathroomsEnum,
   neighborhood: z.string().nullable().optional(),
@@ -97,5 +97,14 @@ export const postQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(50).default(20),
 });
 
+export const updatePostSchema = z.object({
+  title: z.string().min(1).max(80).optional(),
+  description: z.string().nullable().optional(),
+  marketplace: marketplaceDetailsSchema.partial().optional(),
+  storage: storageDetailsSchema.partial().optional(),
+  housing: housingDetailsSchema.partial().optional(),
+});
+
 export type CreatePostInput = z.infer<typeof createPostSchema>;
+export type UpdatePostInput = z.infer<typeof updatePostSchema>;
 export type PostQueryInput = z.infer<typeof postQuerySchema>;
