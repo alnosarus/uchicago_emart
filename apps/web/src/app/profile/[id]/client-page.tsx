@@ -402,27 +402,33 @@ export default function ProfilePage() {
               {/* Stats row */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-6 border-t border-gray-100">
                 {/* Rating */}
-                <div className="flex flex-col items-center gap-1">
+                <button
+                  onClick={() => setActiveTab("reviews")}
+                  className="flex flex-col items-center gap-1 group cursor-pointer"
+                >
                   {profile.stats.averageRating != null ? (
                     <>
                       <div className="flex items-center gap-1.5">
                         <StarDisplay rating={profile.stats.averageRating} size="md" />
                       </div>
-                      <p className="text-lg font-bold text-gray-900">
+                      <p className="text-lg font-bold text-gray-900 group-hover:text-maroon-700 transition-colors">
                         {profile.stats.averageRating.toFixed(1)}
                       </p>
                     </>
                   ) : (
                     <p className="text-lg font-bold text-gray-400">—</p>
                   )}
-                  <p className="text-xs text-gray-400">Avg Rating</p>
-                </div>
+                  <p className="text-xs text-gray-400 group-hover:text-maroon-600 transition-colors">Avg Rating</p>
+                </button>
 
                 {/* Review count */}
-                <div className="flex flex-col items-center gap-1">
-                  <p className="text-lg font-bold text-gray-900">{profile.stats.reviewCount}</p>
-                  <p className="text-xs text-gray-400">Reviews</p>
-                </div>
+                <button
+                  onClick={() => setActiveTab("reviews")}
+                  className="flex flex-col items-center gap-1 group cursor-pointer"
+                >
+                  <p className="text-lg font-bold text-gray-900 group-hover:text-maroon-700 transition-colors">{profile.stats.reviewCount}</p>
+                  <p className="text-xs text-gray-400 group-hover:text-maroon-600 transition-colors">Reviews</p>
+                </button>
 
                 {/* Transactions */}
                 <div className="flex flex-col items-center gap-1">
