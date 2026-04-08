@@ -17,6 +17,8 @@ model User {
   address    String?
   avatarUrl  String?  @map("avatar_url")
   isVerified Boolean  @default(false) @map("is_verified")
+  isAdmin    Boolean  @default(false) @map("is_admin")
+  isBanned   Boolean  @default(false) @map("is_banned")
   googleId   String   @unique @map("google_id")
   cnetId     String   @unique @map("cnet_id")
   createdAt  DateTime @default(now()) @map("created_at")
@@ -32,6 +34,8 @@ model User {
   messagesSent       Message[]
   transactionsSold   Transaction[]  @relation("TransactionsSold")
   transactionsBought Transaction[]  @relation("TransactionsBought")
+  reportsSent        Report[]       @relation("ReportsSent")
+  reportsResolved    Report[]       @relation("ReportsResolved")
 
   @@map("users")
 }
@@ -89,6 +93,7 @@ model Post {
   reviews       Review[]
   conversations Conversation[]
   transaction   Transaction?
+  reports       Report[]
 
   @@index([type, status])
   @@index([authorId])
@@ -327,4 +332,42 @@ model Transaction {
   @@index([sellerId])
   @@index([buyerId])
   @@map("transactions")
+}
+
+// ── Reports ───────────────────────────────────
+
+enum ReportCategory {
+  spam
+  scam
+  prohibited_item
+  harassment
+  misleading
+  other
+}
+
+enum ReportStatus {
+  open
+  dismissed
+  actioned
+}
+
+model Report {
+  id          String         @id @default(uuid())
+  postId      String         @map("post_id")
+  reporterId  String         @map("reporter_id")
+  category    ReportCategory
+  detail      String?
+  status      ReportStatus   @default(open)
+  resolvedBy  String?        @map("resolved_by")
+  resolvedAt  DateTime?      @map("resolved_at")
+  actionTaken String?        @map("action_taken")
+  createdAt   DateTime       @default(now()) @map("created_at")
+
+  post     Post  @relation(fields: [postId], references: [id])
+  reporter User  @relation("ReportsSent", fields: [reporterId], references: [id])
+  resolver User? @relation("ReportsResolved", fields: [resolvedBy], references: [id])
+
+  @@unique([postId, reporterId])
+  @@index([status, createdAt])
+  @@map("reports")
 }

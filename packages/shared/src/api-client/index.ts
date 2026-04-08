@@ -7,6 +7,7 @@ import { createReviewsApi } from "./reviews";
 import { createSavedApi } from "./saved";
 import { createNotificationsApi } from "./notifications";
 import { createConversationsApi } from "./conversations";
+import { createReportsApi } from "./reports";
 
 export { ApiClient, ApiError } from "./client";
 export type { ReviewEligibility } from "./reviews";
@@ -24,6 +25,7 @@ export function createApi(baseUrl: string, getToken: () => string | null) {
     saved: createSavedApi(client),
     notifications: createNotificationsApi(client),
     conversations: createConversationsApi(client),
+    reports: createReportsApi(client),
   };
 }
 

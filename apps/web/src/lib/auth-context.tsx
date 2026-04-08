@@ -10,6 +10,7 @@ interface User {
   address: string | null;
   avatarUrl: string | null;
   isVerified: boolean;
+  isAdmin: boolean;
 }
 
 interface AuthContextValue {
