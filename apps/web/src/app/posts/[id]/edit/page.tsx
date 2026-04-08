@@ -6,6 +6,9 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { ImageUploadGrid, type ImageItem } from "@/components/ImageUploadGrid";
 import { Navbar } from "@/components/Navbar";
+import { AddressAutocomplete, type SelectedPlace } from "@/components/housing/AddressAutocomplete";
+import { PropertyMap } from "@/components/housing/PropertyMap";
+import { useGoogleMaps } from "@/components/housing/GoogleMapsLoader";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
@@ -48,6 +51,10 @@ interface PostData {
     moveOutDate: string | null;
     leaseStartDate: string | null;
     leaseDurationMonths: number | null;
+    address: string | null;
+    latitude: number | null;
+    longitude: number | null;
+    placeId: string | null;
   } | null;
   images: { id: string; url: string; thumbUrl: string | null; fullUrl: string | null; order: number }[];
 }
@@ -70,6 +77,13 @@ export default function EditPostPage() {
   const [priceMonthly, setPriceMonthly] = useState("");
   const [storageFree, setStorageFree] = useState(false);
   const [monthlyRent, setMonthlyRent] = useState("");
+  // Housing address verification state
+  const [housingPlaceId, setHousingPlaceId] = useState("");
+  const [housingAddressLabel, setHousingAddressLabel] = useState("");
+  const [housingAddressError, setHousingAddressError] = useState<string | null>(null);
+  const [originalPlaceId, setOriginalPlaceId] = useState<string | null>(null);
+  const [previewCoords, setPreviewCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const { isLoaded: isMapsLoaded } = useGoogleMaps();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -98,6 +112,12 @@ export default function EditPostPage() {
         }
         if (data.housing) {
           setMonthlyRent(data.housing.monthlyRent != null ? String(data.housing.monthlyRent) : "");
+          setHousingPlaceId(data.housing.placeId ?? "");
+          setHousingAddressLabel(data.housing.address ?? "");
+          setOriginalPlaceId(data.housing.placeId ?? null);
+          if (data.housing.latitude != null && data.housing.longitude != null) {
+            setPreviewCoords({ lat: data.housing.latitude, lng: data.housing.longitude });
+          }
         }
 
         // Convert existing images to ImageItem format
@@ -124,6 +144,41 @@ export default function EditPostPage() {
     if (post && user && post.authorId !== user.id) router.push(`/posts/${postId}`);
   }, [authLoading, user, post, postId, router]);
 
+  function handleAddressSelect(place: SelectedPlace | null) {
+    if (!place) {
+      setHousingPlaceId("");
+      setHousingAddressLabel("");
+      setHousingAddressError(null);
+      setPreviewCoords(null);
+      return;
+    }
+
+    setHousingPlaceId(place.placeId);
+    setHousingAddressLabel(place.formattedAddress);
+    setHousingAddressError(null);
+
+    // Fetch client-side preview coords for the map pin.
+    if (!isMapsLoaded) return;
+    try {
+      const svc = new google.maps.places.PlacesService(document.createElement("div"));
+      svc.getDetails(
+        { placeId: place.placeId, fields: ["geometry"] },
+        (details, status) => {
+          if (status === google.maps.places.PlacesServiceStatus.OK && details?.geometry?.location) {
+            setPreviewCoords({
+              lat: details.geometry.location.lat(),
+              lng: details.geometry.location.lng(),
+            });
+          } else {
+            setPreviewCoords(null);
+          }
+        },
+      );
+    } catch {
+      setPreviewCoords(null);
+    }
+  }
+
   const handleSave = useCallback(async () => {
     if (!accessToken || !post) return;
     setSubmitting(true);
@@ -147,12 +202,25 @@ export default function EditPostPage() {
           isFree: storageFree,
         };
       } else if (post.type === "housing") {
-        patchBody.housing = {
+        // Block submit if placeId required (legacy post or cleared)
+        if (!housingPlaceId) {
+          setHousingAddressError(
+            "Please select a verified address from the dropdown before saving.",
+          );
+          setSubmitting(false);
+          return;
+        }
+        const housingPatch: Record<string, unknown> = {
           monthlyRent: parseFloat(monthlyRent) || 0,
         };
+        // Only send placeId if it changed (server skips re-verify when unchanged)
+        if (housingPlaceId !== originalPlaceId) {
+          housingPatch.placeId = housingPlaceId;
+        }
+        patchBody.housing = housingPatch;
       }
 
-      await fetch(`${API_URL}/api/posts/${postId}`, {
+      const patchRes = await fetch(`${API_URL}/api/posts/${postId}`, {
         method: "PATCH",
         credentials: "include",
         headers: {
@@ -161,6 +229,14 @@ export default function EditPostPage() {
         },
         body: JSON.stringify(patchBody),
       });
+      if (!patchRes.ok) {
+        const data = await patchRes.json().catch(() => null);
+        const message = data?.message || `Request failed (${patchRes.status})`;
+        if (post.type === "housing" && /address|street|place|chicago/i.test(message)) {
+          setHousingAddressError(message);
+        }
+        throw new Error(message);
+      }
 
       // 2. Delete removed images
       const currentRemoteIds = images
@@ -215,7 +291,7 @@ export default function EditPostPage() {
     } finally {
       setSubmitting(false);
     }
-  }, [accessToken, post, postId, title, description, images, originalImageIds, router, priceType, priceAmount, priceMonthly, storageFree, monthlyRent]);
+  }, [accessToken, post, postId, title, description, images, originalImageIds, router, priceType, priceAmount, priceMonthly, storageFree, monthlyRent, housingPlaceId, originalPlaceId]);
 
   const labelClass = "block text-sm font-semibold text-gray-700 mb-1.5";
   const inputClass =
@@ -356,21 +432,54 @@ export default function EditPostPage() {
             )}
 
             {post.type === "housing" && (
-              <div>
-                <label htmlFor="monthlyRent" className={labelClass}>
-                  Monthly Rent ($) <span className="text-maroon-500">*</span>
-                </label>
-                <input
-                  id="monthlyRent"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={monthlyRent}
-                  onChange={(e) => setMonthlyRent(e.target.value)}
-                  className={inputClass}
-                  placeholder="0.00"
-                />
-              </div>
+              <>
+                <div>
+                  <label htmlFor="monthlyRent" className={labelClass}>
+                    Monthly Rent ($) <span className="text-maroon-500">*</span>
+                  </label>
+                  <input
+                    id="monthlyRent"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={monthlyRent}
+                    onChange={(e) => setMonthlyRent(e.target.value)}
+                    className={inputClass}
+                    placeholder="0.00"
+                  />
+                </div>
+
+                {!originalPlaceId && (
+                  <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+                    Please add a verified address to continue editing this listing. This is required to keep the listing active.
+                  </div>
+                )}
+
+                <div>
+                  <label className={labelClass}>
+                    Address <span className="text-maroon-500">*</span>
+                  </label>
+                  <p className="text-xs text-gray-500 mb-2">
+                    Select a specific street address. This is shown on your listing and verified against Google.
+                  </p>
+                  <AddressAutocomplete
+                    onSelect={handleAddressSelect}
+                    initialValue={housingAddressLabel || undefined}
+                    error={housingAddressError}
+                  />
+                  {previewCoords && housingPlaceId && (
+                    <div className="mt-3">
+                      <p className="mb-1 text-xs text-gray-500">Preview</p>
+                      <PropertyMap
+                        latitude={previewCoords.lat}
+                        longitude={previewCoords.lng}
+                        address={housingAddressLabel}
+                        height={220}
+                      />
+                    </div>
+                  )}
+                </div>
+              </>
             )}
 
             <div className="border-t border-gray-200 my-6" />
