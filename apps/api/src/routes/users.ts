@@ -65,6 +65,7 @@ router.get("/me/profile", requireAuth, async (req: AuthRequest, res: Response, n
           phone: true,
           avatarUrl: true,
           isVerified: true,
+          isAdmin: true,
           createdAt: true,
         },
       }),
