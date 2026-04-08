@@ -34,7 +34,14 @@
       "Bash(mv icons/shopping-cart.png icons/cart.png)",
       "Bash(pnpm add:*)",
       "Bash(python3 -)",
-      "Bash(node navbar-update.js)"
+      "Bash(node navbar-update.js)",
+      "Bash(ls c:/Users/Kenneth/Desktop/Kenneth/uchicago_emart/apps/web/.env*)",
+      "Bash(ls c:/Users/Kenneth/Desktop/Kenneth/uchicago_emart/.env*)",
+      "Bash(sc query:*)",
+      "Bash(powershell.exe -Command \"Get-Service -Name 'postgresql*' -ErrorAction SilentlyContinue | Select-Object Name, Status\")",
+      "Bash(powershell.exe -Command \"& 'C:\\\\Program Files\\\\PostgreSQL\\\\17\\\\bin\\\\psql.exe' -U postgres -c '\\\\l'\")",
+      "Bash(powershell.exe -Command \"echo 'test'\")",
+      "Bash(powershell.exe -Command \"& 'C:\\\\\\\\Program Files\\\\\\\\PostgreSQL\\\\\\\\17\\\\\\\\bin\\\\\\\\psql.exe' -U postgres -tc '\\\\\\\\l'\")"
     ]
   }
 }

@@ -257,10 +257,13 @@ function ImageGallery({ images }: { images: PostImage[] }) {
 
   const sorted = [...images].sort((a, b) => a.order - b.order);
 
+  const prev = () => setActiveIndex((i) => (i - 1 + sorted.length) % sorted.length);
+  const next = () => setActiveIndex((i) => (i + 1) % sorted.length);
+
   return (
     <div className="space-y-3">
       {/* Main image */}
-      <div className="relative aspect-square bg-gray-100 rounded-2xl overflow-hidden border border-gray-200">
+      <div className="relative aspect-square bg-gray-100 rounded-2xl overflow-hidden border border-gray-200 group">
         {sorted[activeIndex].blurHash && (
           <div className="absolute inset-0">
             <Blurhash hash={sorted[activeIndex].blurHash!} width="100%" height="100%" />
@@ -271,6 +274,34 @@ function ImageGallery({ images }: { images: PostImage[] }) {
           alt={`Image ${activeIndex + 1}`}
           className="relative w-full h-full object-cover"
         />
+        {sorted.length > 1 && (
+          <>
+            <button
+              onClick={prev}
+              className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/65 text-white rounded-full w-9 h-9 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
+              aria-label="Previous image"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+            </button>
+            <button
+              onClick={next}
+              className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/65 text-white rounded-full w-9 h-9 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
+              aria-label="Next image"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+            </button>
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+              {sorted.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setActiveIndex(i)}
+                  className={`w-2 h-2 rounded-full transition-colors ${i === activeIndex ? "bg-white" : "bg-white/40 hover:bg-white/70"}`}
+                  aria-label={`Go to image ${i + 1}`}
+                />
+              ))}
+            </div>
+          </>
+        )}
       </div>
 
       {/* Thumbnails */}

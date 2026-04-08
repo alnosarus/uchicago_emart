@@ -12,7 +12,8 @@ router.get("/history", requireAuth, async (req: AuthRequest, res: Response, next
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 20;
-    const result = await getUserTransactions(req.userId!, page, limit);
+    const withUserId = req.query.with as string | undefined;
+    const result = await getUserTransactions(req.userId!, page, limit, withUserId);
     res.json(result);
   } catch (err) { next(err); }
 });

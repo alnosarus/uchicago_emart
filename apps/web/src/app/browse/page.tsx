@@ -179,7 +179,19 @@ function conditionLabel(condition: string): string {
 
 function PostCard({ post }: { post: Post }) {
   const price = formatPrice(post);
-  const imageUrl = post.images.length > 0 ? (post.images[0].thumbUrl || post.images[0].url) : null;
+  const [imgIdx, setImgIdx] = useState(0);
+  const images = post.images;
+  const currentImage = images[imgIdx] ?? null;
+  const imageUrl = currentImage ? (currentImage.thumbUrl || currentImage.url) : null;
+
+  const prevImg = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setImgIdx((i) => (i - 1 + images.length) % images.length);
+  };
+  const nextImg = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setImgIdx((i) => (i + 1) % images.length);
+  };
 
   return (
     <Link
@@ -190,9 +202,9 @@ function PostCard({ post }: { post: Post }) {
       <div className="relative aspect-[4/3] bg-gray-100 overflow-hidden">
         {imageUrl ? (
           <>
-            {post.images[0]?.blurHash && (
+            {currentImage?.blurHash && (
               <div className="absolute inset-0">
-                <Blurhash hash={post.images[0].blurHash} width="100%" height="100%" />
+                <Blurhash hash={currentImage.blurHash} width="100%" height="100%" />
               </div>
             )}
             <img
@@ -213,6 +225,31 @@ function PostCard({ post }: { post: Post }) {
               />
             </svg>
           </div>
+        )}
+
+        {/* Arrow navigation */}
+        {images.length > 1 && (
+          <>
+            <button
+              onClick={prevImg}
+              className="absolute left-1.5 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
+              aria-label="Previous image"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+            </button>
+            <button
+              onClick={nextImg}
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
+              aria-label="Next image"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+            </button>
+            <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 flex gap-1 z-10">
+              {images.map((_, i) => (
+                <span key={i} className={`w-1.5 h-1.5 rounded-full ${i === imgIdx ? "bg-white" : "bg-white/40"}`} />
+              ))}
+            </div>
+          </>
         )}
 
         {/* Type badge */}

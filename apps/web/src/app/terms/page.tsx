@@ -101,6 +101,18 @@ export default function TermsPage() {
           </section>
 
           <section>
+            <h2 className="text-xl font-bold text-gray-900 mb-3">Reviews &amp; Ratings</h2>
+            <p>
+              After completing a transaction, both parties may leave a review for the other.
+              Reviews are <strong>permanent and cannot be edited or deleted</strong> once
+              submitted. Please ensure your review is honest, accurate, and respectful before
+              submitting. Reviews that violate our community standards (e.g., harassment,
+              defamation, or spam) may be removed by our team. By submitting a review, you
+              confirm that it reflects your genuine experience with the transaction.
+            </p>
+          </section>
+
+          <section>
             <h2 className="text-xl font-bold text-gray-900 mb-3">
               Limitation of Liability
             </h2>

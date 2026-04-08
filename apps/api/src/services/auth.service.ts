@@ -58,8 +58,8 @@ export async function loginWithGoogle(code: string, redirectUri?: string) {
     payload = ticket.getPayload() as GoogleUserInfo;
   }
 
-  // Enforce UChicago domain
-  if (payload.hd !== env.ALLOWED_EMAIL_DOMAIN) {
+  // Enforce UChicago domain (skipped in development)
+  if (env.NODE_ENV !== "development" && payload.hd !== env.ALLOWED_EMAIL_DOMAIN) {
     throw new HttpError(403, "Only @uchicago.edu accounts are allowed");
   }
 
