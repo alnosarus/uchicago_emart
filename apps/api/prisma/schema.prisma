@@ -218,6 +218,13 @@ model HousingDetails {
   leaseStartDate      DateTime?      @map("lease_start_date")
   leaseDurationMonths Int?           @map("lease_duration_months")
 
+  // Address verification (added 2026-04-08)
+  address             String?
+  latitude            Float?
+  longitude           Float?
+  placeId             String?        @map("place_id")
+
+  @@index([latitude, longitude])
   @@map("housing_details")
 }
 
