@@ -786,7 +786,12 @@ function BrowseContent() {
     if (activeView !== "map" || !isHousingType) return;
     setMapLoading(true);
     setMapError(null);
-    fetch(`${API_URL}/api/posts/housing/map`)
+    // Forward current filters to the map endpoint. `view` is stripped by the
+    // schema; `page`/`limit` are ignored because the map has its own 500 cap.
+    const mapParams = new URLSearchParams(searchParams.toString());
+    mapParams.delete("view");
+    const qs = mapParams.toString();
+    fetch(`${API_URL}/api/posts/housing/map${qs ? `?${qs}` : ""}`)
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json();
@@ -798,7 +803,7 @@ function BrowseContent() {
         setMapError(err instanceof Error ? err.message : "Failed to load map");
       })
       .finally(() => setMapLoading(false));
-  }, [activeView, isHousingType]);
+  }, [activeView, isHousingType, paramsString]);
 
   // Build URL with updated params
   const buildUrl = useCallback(

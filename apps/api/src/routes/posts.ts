@@ -42,9 +42,9 @@ router.get("/", optionalAuth, validate(postQuerySchema, "query"), async (req: Au
 
 // GET /api/posts/housing/map — Lightweight projection of housing posts with coordinates
 // Must be registered BEFORE /:id so it isn't swallowed by the dynamic segment
-router.get("/housing/map", optionalAuth, async (_req: AuthRequest, res: Response, next: NextFunction) => {
+router.get("/housing/map", optionalAuth, validate(postQuerySchema, "query"), async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const result = await listHousingMapPosts();
+    const result = await listHousingMapPosts(req.query as any);
     res.json(result);
   } catch (err) { next(err); }
 });

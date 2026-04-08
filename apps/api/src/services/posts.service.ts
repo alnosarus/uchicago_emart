@@ -152,7 +152,7 @@ function splitParam(val?: string): string[] {
   return val ? val.split(",").filter(Boolean) : [];
 }
 
-interface ListPostsInput {
+interface PostFilters {
   type?: string;
   side?: string;
   q?: string;
@@ -168,22 +168,21 @@ interface ListPostsInput {
   priceType?: string;
   hasPhotos?: boolean;
   moveInMonth?: string;
+}
+
+interface ListPostsInput extends PostFilters {
   sort?: string;
   page?: number;
   limit?: number;
   userId?: string;
 }
 
-export async function listPosts(input: ListPostsInput) {
+function buildPostsWhere(input: PostFilters): Prisma.PostWhereInput {
   const {
     type, side, q, category, size, locationType,
     priceMin, priceMax, condition,
     subtype, bedrooms, bathrooms,
     priceType, hasPhotos, moveInMonth,
-    sort = "recent",
-    page = 1,
-    limit = 20,
-    userId,
   } = input;
 
   const categories = splitParam(category);
@@ -260,6 +259,19 @@ export async function listPosts(input: ListPostsInput) {
     }
   }
 
+  return where;
+}
+
+export async function listPosts(input: ListPostsInput) {
+  const {
+    sort = "recent",
+    page = 1,
+    limit = 20,
+    userId,
+  } = input;
+
+  const where = buildPostsWhere(input);
+
   const orderBy: Prisma.PostOrderByWithRelationInput =
     sort === "price_asc" ? { marketplace: { priceAmount: "asc" } } :
     sort === "price_desc" ? { marketplace: { priceAmount: "desc" } } :
@@ -305,16 +317,24 @@ export async function listPosts(input: ListPostsInput) {
 
 // ── Housing Map View ──────────────────────────
 
-export async function listHousingMapPosts() {
-  const posts = await prisma.post.findMany({
-    where: {
-      type: "housing",
-      status: "active",
-      housing: {
-        latitude: { not: null },
-        longitude: { not: null },
-      },
+export async function listHousingMapPosts(filters: PostFilters = {}) {
+  // Force type=housing and require coordinates; merge with user filters.
+  const baseWhere = buildPostsWhere({ ...filters, type: "housing" });
+  const existingHousing =
+    (baseWhere.housing && typeof baseWhere.housing === "object"
+      ? (baseWhere.housing as Record<string, unknown>)
+      : {});
+  const where: Prisma.PostWhereInput = {
+    ...baseWhere,
+    housing: {
+      ...existingHousing,
+      latitude: { not: null },
+      longitude: { not: null },
     },
+  };
+
+  const posts = await prisma.post.findMany({
+    where,
     include: {
       housing: true,
       images: { orderBy: { order: "asc" }, take: 1 },
