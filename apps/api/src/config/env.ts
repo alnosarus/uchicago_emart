@@ -16,6 +16,11 @@ const envSchema = z.object({
   FIREBASE_SERVICE_ACCOUNT: z.string().min(1),
   FIREBASE_STORAGE_BUCKET: z.string().optional(),
   ALLOWED_EMAIL_DOMAIN: z.string().default("uchicago.edu"),
+
+  // Google Places address verification (added 2026-04-08)
+  GOOGLE_PLACES_SERVER_KEY: z.string().min(1),
+  // Chicago bounding box: minLat,minLng,maxLat,maxLng
+  GEOCODING_CHICAGO_BBOX: z.string().default("41.6,-87.9,42.1,-87.5"),
 });
 
 const parsed = envSchema.safeParse(process.env);
