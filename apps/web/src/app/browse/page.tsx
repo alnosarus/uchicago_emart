@@ -744,7 +744,7 @@ function BrowseContent() {
   const activePriceMax = searchParams.get("priceMax") || "";
   const activeSort = searchParams.get("sort") || "recent";
   const activeQ = searchParams.get("q") || "";
-  const activeView = searchParams.get("view") === "map" ? "map" : "list";
+  const activeView = searchParams.get("view") === "list" ? "list" : "map";
   const isHousingType = activeType === "housing";
 
   const [posts, setPosts] = useState<Post[]>([]);
@@ -1267,7 +1267,7 @@ function BrowseContent() {
                 <div className="inline-flex rounded-md border border-gray-300 bg-white p-1 ml-auto">
                   <button
                     type="button"
-                    onClick={() => setFilter("view", "")}
+                    onClick={() => setFilter("view", "list")}
                     className={`rounded px-4 py-1.5 text-sm font-medium transition ${
                       activeView === "list" ? "bg-maroon-600 text-white" : "text-gray-700 hover:bg-gray-100"
                     }`}
@@ -1276,7 +1276,7 @@ function BrowseContent() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setFilter("view", "map")}
+                    onClick={() => setFilter("view", "")}
                     className={`rounded px-4 py-1.5 text-sm font-medium transition ${
                       activeView === "map" ? "bg-maroon-600 text-white" : "text-gray-700 hover:bg-gray-100"
                     }`}

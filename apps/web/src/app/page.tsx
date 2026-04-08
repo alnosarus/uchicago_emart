@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/Navbar";
 import { SearchAutocomplete } from "@/components/SearchAutocomplete";
+import { HousingMapView, type HousingMapPost } from "@/components/housing/HousingMapView";
 import { useState, useEffect, useRef } from "react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
@@ -118,12 +119,17 @@ export default function Home() {
   const [recentPosts, setRecentPosts] = useState<PostCard[]>([]);
   const [activeTab, setActiveTab] = useState("marketplace");
   const [searchQuery, setSearchQuery] = useState("");
+  const [housingView, setHousingView] = useState<"map" | "list">("map");
+  const [mapPosts, setMapPosts] = useState<HousingMapPost[]>([]);
+  const [mapLoading, setMapLoading] = useState(false);
+  const [mapError, setMapError] = useState<string | null>(null);
 
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const showHousingMap = activeTab === "housing" && housingView === "map";
 
   // Reset when tab changes
   useEffect(() => {
@@ -155,6 +161,31 @@ export default function Home() {
 
     return () => { cancelled = true; };
   }, [activeTab, page]);
+
+  // Fetch housing map data when viewing map
+  useEffect(() => {
+    if (!showHousingMap) return;
+    let cancelled = false;
+    setMapLoading(true);
+    setMapError(null);
+    fetch(`${API_URL}/api/posts/housing/map`)
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then((data: { posts: HousingMapPost[] }) => {
+        if (cancelled) return;
+        setMapPosts(data.posts);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setMapError(err instanceof Error ? err.message : "Failed to load map");
+      })
+      .finally(() => {
+        if (!cancelled) setMapLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, [showHousingMap]);
 
   // IntersectionObserver
   useEffect(() => {
@@ -243,8 +274,49 @@ export default function Home() {
               {activeTab === "marketplace" ? "Buy and sell items with fellow Maroons" : activeTab === "storage" ? "Find or offer storage space" : "Sublets and passdowns for Maroons"}
             </p>
           </div>
+          {activeTab === "housing" && (
+            <div className="inline-flex rounded-md border border-gray-300 bg-white p-1">
+              <button
+                type="button"
+                onClick={() => setHousingView("list")}
+                className={`rounded px-4 py-1.5 text-sm font-medium transition ${
+                  housingView === "list" ? "bg-maroon-600 text-white" : "text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                List
+              </button>
+              <button
+                type="button"
+                onClick={() => setHousingView("map")}
+                className={`rounded px-4 py-1.5 text-sm font-medium transition ${
+                  housingView === "map" ? "bg-maroon-600 text-white" : "text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                Map
+              </button>
+            </div>
+          )}
         </div>
-        {recentPosts.length > 0 ? (
+        {showHousingMap ? (
+          <>
+            {mapLoading && (
+              <div className="flex h-[600px] items-center justify-center rounded-md border border-gray-200 bg-gray-50">
+                <div className="w-6 h-6 border-2 border-maroon-600 border-t-transparent rounded-full animate-spin" />
+              </div>
+            )}
+            {mapError && (
+              <div className="rounded-md border border-red-300 bg-red-50 p-4 text-sm text-red-700">
+                Failed to load map: {mapError}
+              </div>
+            )}
+            {!mapLoading && !mapError && (
+              <HousingMapView
+                posts={mapPosts}
+                onPinClick={(postId) => router.push(`/posts/${postId}`)}
+              />
+            )}
+          </>
+        ) : recentPosts.length > 0 ? (
           <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {recentPosts.map(post => (
