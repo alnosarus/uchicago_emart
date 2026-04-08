@@ -63,6 +63,7 @@ router.get("/me/profile", requireAuth, async (req: AuthRequest, res: Response, n
           name: true,
           cnetId: true,
           phone: true,
+          address: true,
           avatarUrl: true,
           isVerified: true,
           createdAt: true,
@@ -163,6 +164,7 @@ router.post(
 const updateProfileSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   phone: z.string().nullable().optional(),
+  address: z.string().max(255).nullable().optional(),
   avatarUrl: z.string().url().optional(),
 });
 
@@ -180,6 +182,7 @@ router.patch(
           email: true,
           name: true,
           phone: true,
+          address: true,
           avatarUrl: true,
           isVerified: true,
           createdAt: true,

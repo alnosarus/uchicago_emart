@@ -16,6 +16,7 @@ export default function SettingsPage() {
 
   const [name, setName] = useState("");
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [address, setAddress] = useState<string>("");
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -29,6 +30,7 @@ export default function SettingsPage() {
     }
     if (user) {
       setName(user.name);
+      setAddress(user.address || "");
       setAvatarPreview(user.avatarUrl);
     }
   }, [user, isLoading, router]);
@@ -98,6 +100,7 @@ export default function SettingsPage() {
     if (!accessToken) return;
 
     const trimmedName = name.trim();
+    const trimmedAddress = address.trim();
     if (!trimmedName) {
       setError("Name is required");
       return;
@@ -116,6 +119,7 @@ export default function SettingsPage() {
         },
         body: JSON.stringify({
           name: trimmedName,
+          address: trimmedAddress || null,
         }),
       });
 
@@ -209,6 +213,22 @@ export default function SettingsPage() {
               className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-maroon-500 focus:border-transparent transition-shadow"
               placeholder="Your full name"
             />
+          </div>
+
+          {/* Address */}
+          <div>
+            <label htmlFor="address" className="block text-sm font-semibold text-gray-700 mb-2">
+              Address
+            </label>
+            <input
+              id="address"
+              type="text"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-maroon-500 focus:border-transparent transition-shadow"
+              placeholder="Optional address"
+            />
+            <p className="text-xs text-gray-400 mt-1.5">This is stored privately on your profile.</p>
           </div>
 
           {/* Phone */}

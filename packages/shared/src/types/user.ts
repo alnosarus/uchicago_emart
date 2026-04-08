@@ -52,4 +52,5 @@ export interface UserProfile {
 export interface UserProfilePrivate extends UserProfile {
   email: string;
   phone: string | null;
+  address: string | null;
 }

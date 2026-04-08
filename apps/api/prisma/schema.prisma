@@ -14,6 +14,7 @@ model User {
   email      String   @unique
   name       String
   phone      String?
+  address    String?
   avatarUrl  String?  @map("avatar_url")
   isVerified Boolean  @default(false) @map("is_verified")
   googleId   String   @unique @map("google_id")
