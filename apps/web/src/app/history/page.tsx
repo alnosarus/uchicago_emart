@@ -294,7 +294,6 @@ function TransactionRow({
               title="Rate this transaction"
             >
               <StarPicker value={0} readOnly />
-              <span className="text-xs text-gray-400 group-hover/stars:text-maroon-600 transition-colors">Rate</span>
             </button>
           )}
         </div>
