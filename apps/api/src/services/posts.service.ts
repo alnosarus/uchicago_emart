@@ -2,6 +2,7 @@ import { prisma } from "../config/database";
 import { HttpError } from "../utils/errors";
 import type { UploadResult } from "./upload.service";
 import type { Prisma } from "@prisma/client";
+import { verifyPlaceId, PlaceVerificationError } from "./geocoding.service";
 
 // Prisma enum uses "new_item" but the API/schema uses "new"
 function mapCondition(condition: string): string {
@@ -50,12 +51,27 @@ interface CreatePostInput {
     moveOutDate?: string | null;
     leaseStartDate?: string | null;
     leaseDurationMonths?: number | null;
+    placeId: string;  // NEW — required by shared schema for housing posts
   };
   imageUrls?: string[];
 }
 
 export async function createPost(input: CreatePostInput) {
   const { authorId, type, side, title, description, marketplace, storage, housing, imageUrls } = input;
+
+  // Resolve housing address via Google Place Details BEFORE creating the post.
+  // Client-submitted lat/lng is never stored — only Google-authoritative values.
+  let verifiedHousing: Awaited<ReturnType<typeof verifyPlaceId>> | null = null;
+  if (housing) {
+    try {
+      verifiedHousing = await verifyPlaceId(housing.placeId);
+    } catch (err) {
+      if (err instanceof PlaceVerificationError) {
+        throw new HttpError(400, err.message);
+      }
+      throw err;
+    }
+  }
 
   return prisma.post.create({
     data: {
@@ -90,7 +106,7 @@ export async function createPost(input: CreatePostInput) {
           },
         },
       }),
-      ...(housing && {
+      ...(housing && verifiedHousing && {
         housing: {
           create: {
             subtype: housing.subtype as any,
@@ -106,6 +122,11 @@ export async function createPost(input: CreatePostInput) {
             moveOutDate: housing.moveOutDate ? new Date(housing.moveOutDate) : null,
             leaseStartDate: housing.leaseStartDate ? new Date(housing.leaseStartDate) : null,
             leaseDurationMonths: housing.leaseDurationMonths ?? null,
+            // Server-authoritative address fields (NEVER from client)
+            address: verifiedHousing.address,
+            latitude: verifiedHousing.latitude,
+            longitude: verifiedHousing.longitude,
+            placeId: verifiedHousing.placeId,
           },
         },
       }),
