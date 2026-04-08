@@ -303,6 +303,39 @@ export async function listPosts(input: ListPostsInput) {
   };
 }
 
+// ── Housing Map View ──────────────────────────
+
+export async function listHousingMapPosts() {
+  const posts = await prisma.post.findMany({
+    where: {
+      type: "housing",
+      status: "active",
+      housing: {
+        latitude: { not: null },
+        longitude: { not: null },
+      },
+    },
+    include: {
+      housing: true,
+      images: { orderBy: { order: "asc" }, take: 1 },
+    },
+    take: 500, // hard cap to prevent runaway payloads
+  });
+
+  return {
+    posts: posts
+      .filter((p) => p.housing?.latitude != null && p.housing?.longitude != null)
+      .map((p) => ({
+        id: p.id,
+        title: p.title,
+        thumbnailUrl: p.images[0]?.url ?? null,
+        monthlyRent: p.housing!.monthlyRent,
+        latitude: p.housing!.latitude!,
+        longitude: p.housing!.longitude!,
+      })),
+  };
+}
+
 // ── Get Detail ────────────────────────────────
 
 export async function getPostById(postId: string, userId?: string) {

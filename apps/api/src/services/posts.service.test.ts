@@ -36,7 +36,7 @@ vi.mock("../config/database", () => ({
 }));
 
 // Import AFTER mocks are set up
-import { createPost, updatePost } from "./posts.service";
+import { createPost, updatePost, listHousingMapPosts } from "./posts.service";
 import { HttpError } from "../utils/errors";
 
 const baseHousingInput = {
@@ -249,5 +249,40 @@ describe("updatePost — housing address verification", () => {
       message: "Address must be in the Chicago area",
     });
     expect(postUpdateMock).not.toHaveBeenCalled();
+  });
+});
+
+describe("listHousingMapPosts", () => {
+  beforeEach(() => {
+    postFindManyMock.mockReset();
+  });
+
+  it("returns only housing posts with non-null lat/lng", async () => {
+    postFindManyMock.mockResolvedValue([
+      {
+        id: "p1",
+        title: "Sublet A",
+        images: [{ url: "https://img/a.jpg" }],
+        housing: { monthlyRent: 1200, latitude: 41.79, longitude: -87.59 },
+      },
+    ]);
+
+    const result = await listHousingMapPosts();
+
+    expect(result.posts).toHaveLength(1);
+    expect(result.posts[0]).toEqual({
+      id: "p1",
+      title: "Sublet A",
+      thumbnailUrl: "https://img/a.jpg",
+      monthlyRent: 1200,
+      latitude: 41.79,
+      longitude: -87.59,
+    });
+
+    // Verify the Prisma where clause filtered by coords
+    const findManyArg = postFindManyMock.mock.calls[0][0];
+    expect(findManyArg.where.type).toBe("housing");
+    expect(findManyArg.where.status).toBe("active");
+    expect(findManyArg.where.housing.latitude).toEqual({ not: null });
   });
 });
