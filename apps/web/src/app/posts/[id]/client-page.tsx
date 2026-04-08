@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
 import { ReportPostModal } from "@/components/posts/ReportPostModal";
+import { PropertyMap } from "@/components/housing/PropertyMap";
 import { useState, useEffect, useCallback } from "react";
 import { Blurhash } from "react-blurhash";
 import {
@@ -68,6 +69,10 @@ interface HousingDetails {
   moveOutDate: string | null;
   leaseStartDate: string | null;
   leaseDurationMonths: number | null;
+  address: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  placeId: string | null;
 }
 
 interface Post {
@@ -623,6 +628,29 @@ function HousingDetailsSection({ details }: { details: HousingDetails }) {
               </span>
             ))}
           </dd>
+        </div>
+      )}
+
+      {/* Verified location */}
+      {details.latitude != null && details.longitude != null ? (
+        <div>
+          <dt className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+            Location
+          </dt>
+          <PropertyMap
+            latitude={details.latitude}
+            longitude={details.longitude}
+            address={details.address ?? undefined}
+            height={320}
+          />
+          {details.address && (
+            <p className="mt-2 text-sm text-gray-600">{details.address}</p>
+          )}
+        </div>
+      ) : (
+        <div className="rounded-md bg-gray-50 p-3 text-xs text-gray-500">
+          Exact location not available for this listing.
+          {details.neighborhood && ` Neighborhood: ${details.neighborhood}.`}
         </div>
       )}
     </div>
