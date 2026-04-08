@@ -7,7 +7,7 @@ export interface AuthRequest extends Request {
   userId?: string;
 }
 
-export function requireAuth(req: AuthRequest, res: Response, next: NextFunction) {
+export async function requireAuth(req: AuthRequest, res: Response, next: NextFunction) {
   const header = req.headers.authorization;
   if (!header?.startsWith("Bearer ")) {
     res.status(401).json({ message: "Missing or invalid authorization header" });
@@ -15,12 +15,35 @@ export function requireAuth(req: AuthRequest, res: Response, next: NextFunction)
   }
 
   const token = header.slice(7);
+  let userId: string;
   try {
     const payload = jwt.verify(token, JWT_CONFIG.accessSecret) as { userId: string };
-    req.userId = payload.userId;
-    next();
+    userId = payload.userId;
   } catch {
     res.status(401).json({ message: "Invalid or expired token" });
+    return;
+  }
+
+  // Check ban status on every authenticated request.
+  // One cheap indexed PK lookup; ensures bans take effect immediately
+  // without waiting for JWT expiry.
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { isBanned: true },
+    });
+    if (!user) {
+      res.status(401).json({ message: "Account not found" });
+      return;
+    }
+    if (user.isBanned) {
+      res.status(403).json({ message: "Account banned", code: "ACCOUNT_BANNED" });
+      return;
+    }
+    req.userId = userId;
+    next();
+  } catch (err) {
+    next(err);
   }
 }
 

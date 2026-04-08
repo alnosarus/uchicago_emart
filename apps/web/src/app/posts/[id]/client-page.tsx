@@ -4,6 +4,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
+import { ReportPostModal } from "@/components/posts/ReportPostModal";
 import { useState, useEffect, useCallback } from "react";
 import { Blurhash } from "react-blurhash";
 import {
@@ -641,6 +642,7 @@ export default function PostDetailPage() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
+  const [showReportModal, setShowReportModal] = useState(false);
 
   // Save/unsave
   const [isSaved, setIsSaved] = useState(false);
@@ -1026,6 +1028,19 @@ export default function PostDetailPage() {
               </div>
             </Link>
 
+            {user && post.author.id !== user.id && (
+              <div className="flex justify-end -mt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowReportModal(true)}
+                  className="text-xs text-gray-400 hover:text-red-600 underline underline-offset-2"
+                  aria-label="Report this post"
+                >
+                  ⚐ Report this post
+                </button>
+              </div>
+            )}
+
             <hr className="border-gray-200" />
 
             {/* Description */}
@@ -1182,6 +1197,13 @@ export default function PostDetailPage() {
           isDeleting={isDeleting}
         />
       )}
+
+      {/* Report post modal */}
+      <ReportPostModal
+        open={showReportModal}
+        postId={post.id}
+        onClose={() => setShowReportModal(false)}
+      />
 
       {/* Mark as Sold/Completed modal */}
       {showMarkSold && (

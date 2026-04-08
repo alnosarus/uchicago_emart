@@ -5,3 +5,4 @@ export * from "./message";
 export * from "./notification";
 export * from "./transaction";
 export * from "./socket";
+export * from "./report";

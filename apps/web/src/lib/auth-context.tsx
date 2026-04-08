@@ -9,6 +9,7 @@ interface User {
   phone: string | null;
   avatarUrl: string | null;
   isVerified: boolean;
+  isAdmin: boolean;
 }
 
 interface AuthContextValue {
