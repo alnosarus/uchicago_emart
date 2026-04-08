@@ -41,7 +41,8 @@
       "Bash(powershell.exe -Command \"Get-Service -Name 'postgresql*' -ErrorAction SilentlyContinue | Select-Object Name, Status\")",
       "Bash(powershell.exe -Command \"& 'C:\\\\Program Files\\\\PostgreSQL\\\\17\\\\bin\\\\psql.exe' -U postgres -c '\\\\l'\")",
       "Bash(powershell.exe -Command \"echo 'test'\")",
-      "Bash(powershell.exe -Command \"& 'C:\\\\\\\\Program Files\\\\\\\\PostgreSQL\\\\\\\\17\\\\\\\\bin\\\\\\\\psql.exe' -U postgres -tc '\\\\\\\\l'\")"
+      "Bash(powershell.exe -Command \"& 'C:\\\\\\\\Program Files\\\\\\\\PostgreSQL\\\\\\\\17\\\\\\\\bin\\\\\\\\psql.exe' -U postgres -tc '\\\\\\\\l'\")",
+      "Bash(npx tsc:*)"
     ]
   }
 }
