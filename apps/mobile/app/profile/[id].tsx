@@ -189,13 +189,13 @@ export default function ProfileScreen() {
 
         {/* Stats Row */}
         <View style={styles.statsRow}>
-          <View style={styles.statCell}>
+          <Pressable style={styles.statCell} onPress={() => setActiveTab("reviews")}>
             <StarRow
               rating={profile.stats.averageRating}
               count={profile.stats.reviewCount}
             />
             <Text style={styles.statLabel}>Rating</Text>
-          </View>
+          </Pressable>
           <View style={styles.statDivider} />
           <View style={styles.statCell}>
             <Text style={styles.statNumber}>{profile.stats.transactionCount}</Text>

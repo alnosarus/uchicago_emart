@@ -22,6 +22,83 @@ interface PostCard {
   images: { url: string }[];
 }
 
+function PostCardWithSlider({ post }: { post: PostCard }) {
+  const [imgIdx, setImgIdx] = useState(0);
+  const images = post.images;
+
+  const prev = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setImgIdx((i) => (i - 1 + images.length) % images.length);
+  };
+  const next = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setImgIdx((i) => (i + 1) % images.length);
+  };
+
+  const price =
+    post.marketplace?.priceType === "free" || post.storage?.isFree
+      ? "Free"
+      : post.marketplace?.priceAmount
+      ? `$${post.marketplace.priceAmount}`
+      : post.storage?.priceMonthly
+      ? `$${post.storage.priceMonthly}/mo`
+      : post.housing?.monthlyRent
+      ? `$${post.housing.monthlyRent}/mo`
+      : "Contact";
+
+  return (
+    <Link href={`/posts/${post.id}`} className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow group">
+      <div className="relative h-40 bg-gray-100 flex items-center justify-center">
+        {images[imgIdx] ? (
+          <img src={images[imgIdx].url} alt={post.title} className="w-full h-full object-cover" />
+        ) : (
+          <svg className="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+        )}
+        {images.length > 1 && (
+          <>
+            <button
+              onClick={prev}
+              className="absolute left-1.5 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              aria-label="Previous image"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+            </button>
+            <button
+              onClick={next}
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              aria-label="Next image"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+            </button>
+            <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 flex gap-1">
+              {images.map((_, i) => (
+                <span key={i} className={`w-1.5 h-1.5 rounded-full ${i === imgIdx ? "bg-white" : "bg-white/40"}`} />
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+      <div className="p-3">
+        <p className="font-semibold text-gray-900 text-sm truncate">{post.title}</p>
+        <Link
+          href={`/profile/${post.author.id}`}
+          onClick={(e) => e.stopPropagation()}
+          className="text-xs text-gray-500 mt-1 hover:text-maroon-600 transition-colors block"
+        >
+          {post.author.name}
+        </Link>
+        <div className="flex items-center justify-between mt-2">
+          <span className="text-sm font-bold text-maroon-700">{price}</span>
+          <span className="text-xs text-gray-400 capitalize">{post.type}</span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
 export default function Home() {
   const { user } = useAuth();
   const router = useRouter();
@@ -92,10 +169,10 @@ export default function Home() {
       <Navbar />
 
       {/* Hero */}
-      <section className="bg-[#800000] px-4 sm:px-8 py-14 sm:py-24 text-center relative overflow-hidden group">
+      <section className="bg-[#800000] px-4 sm:px-8 pt-14 sm:pt-24 pb-5 sm:pb-8 text-center relative overflow-hidden group">
         <img src="/images/phoenix.png" alt="" aria-hidden="true" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-full w-auto pointer-events-none select-none opacity-0 group-hover:opacity-15 transition-opacity duration-700" />
         <div className="mb-6 sm:mb-8 flex justify-center relative z-10">
-          <img src="/logos/logo-white.svg" alt="UChicago E-mart" className="h-24 sm:h-28" />
+          <img src="/logos/logo-white.svg" alt="UChicago E-mart" className="h-28 sm:h-36" />
         </div>
         <form
           onSubmit={(e) => {
@@ -158,39 +235,7 @@ export default function Home() {
           <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {recentPosts.map(post => (
-              <Link key={post.id} href={`/posts/${post.id}`} className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
-                <div className="h-40 bg-gray-100 flex items-center justify-center">
-                  {post.images[0] ? (
-                    <img src={post.images[0].url} alt={post.title} className="w-full h-full object-cover" />
-                  ) : (
-                    <svg className="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                  )}
-                </div>
-                <div className="p-3">
-                  <p className="font-semibold text-gray-900 text-sm truncate">{post.title}</p>
-                  <Link
-                    href={`/profile/${post.author.id}`}
-                    onClick={(e) => e.stopPropagation()}
-                    className="text-xs text-gray-500 mt-1 hover:text-maroon-600 transition-colors block"
-                  >
-                    {post.author.name}
-                  </Link>
-                  <div className="flex items-center justify-between mt-2">
-                    <span className="text-sm font-bold text-maroon-700">
-                      {post.marketplace?.priceType === "free" || post.storage?.isFree
-                        ? "Free"
-                        : post.marketplace?.priceAmount
-                        ? `$${post.marketplace.priceAmount}`
-                        : post.storage?.priceMonthly
-                        ? `$${post.storage.priceMonthly}/mo`
-                        : post.housing?.monthlyRent
-                        ? `$${post.housing.monthlyRent}/mo`
-                        : "Contact"}
-                    </span>
-                    <span className="text-xs text-gray-400 capitalize">{post.type}</span>
-                  </div>
-                </div>
-              </Link>
+              <PostCardWithSlider key={post.id} post={post} />
             ))}
           </div>
           {/* Sentinel for infinite scroll */}

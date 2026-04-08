@@ -158,7 +158,18 @@ function StarDisplay({ rating, size = "sm" }: { rating: number; size?: "sm" | "m
 
 function PostCard({ post }: { post: Post }) {
   const price = formatPrice(post);
-  const imageUrl = post.images.length > 0 ? post.images[0].url : null;
+  const [imgIdx, setImgIdx] = useState(0);
+  const images = post.images;
+  const imageUrl = images[imgIdx]?.url ?? null;
+
+  const prevImg = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setImgIdx((i) => (i - 1 + images.length) % images.length);
+  };
+  const nextImg = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setImgIdx((i) => (i + 1) % images.length);
+  };
 
   return (
     <Link
@@ -183,6 +194,29 @@ function PostCard({ post }: { post: Post }) {
               />
             </svg>
           </div>
+        )}
+        {images.length > 1 && (
+          <>
+            <button
+              onClick={prevImg}
+              className="absolute left-1.5 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
+              aria-label="Previous image"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+            </button>
+            <button
+              onClick={nextImg}
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
+              aria-label="Next image"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+            </button>
+            <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 flex gap-1 z-10">
+              {images.map((_, i) => (
+                <span key={i} className={`w-1.5 h-1.5 rounded-full ${i === imgIdx ? "bg-white" : "bg-white/40"}`} />
+              ))}
+            </div>
+          </>
         )}
         <span
           className={`absolute top-2 left-2 text-xs font-semibold px-2 py-0.5 rounded-full ${
@@ -402,39 +436,55 @@ export default function ProfilePage() {
               {/* Stats row */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-6 border-t border-gray-100">
                 {/* Rating */}
-                <div className="flex flex-col items-center gap-1">
+                <button
+                  onClick={() => setActiveTab("reviews")}
+                  className="flex flex-col items-center gap-1 group cursor-pointer"
+                >
                   {profile.stats.averageRating != null ? (
                     <>
                       <div className="flex items-center gap-1.5">
                         <StarDisplay rating={profile.stats.averageRating} size="md" />
                       </div>
-                      <p className="text-lg font-bold text-gray-900">
+                      <p className="text-lg font-bold text-gray-900 group-hover:text-maroon-700 transition-colors">
                         {profile.stats.averageRating.toFixed(1)}
                       </p>
                     </>
                   ) : (
                     <p className="text-lg font-bold text-gray-400">—</p>
                   )}
-                  <p className="text-xs text-gray-400">Avg Rating</p>
-                </div>
+                  <p className="text-xs text-gray-400 group-hover:text-maroon-600 transition-colors">Avg Rating</p>
+                </button>
 
                 {/* Review count */}
-                <div className="flex flex-col items-center gap-1">
-                  <p className="text-lg font-bold text-gray-900">{profile.stats.reviewCount}</p>
-                  <p className="text-xs text-gray-400">Reviews</p>
-                </div>
+                <button
+                  onClick={() => setActiveTab("reviews")}
+                  className="flex flex-col items-center gap-1 group cursor-pointer"
+                >
+                  <p className="text-lg font-bold text-gray-900 group-hover:text-maroon-700 transition-colors">{profile.stats.reviewCount}</p>
+                  <p className="text-xs text-gray-400 group-hover:text-maroon-600 transition-colors">Reviews</p>
+                </button>
 
                 {/* Transactions */}
-                <div className="flex flex-col items-center gap-1">
-                  <p className="text-lg font-bold text-gray-900">{profile.stats.transactionCount}</p>
-                  <p className="text-xs text-gray-400">Transactions</p>
-                </div>
+                {isOwnProfile ? (
+                  <Link href="/history" className="flex flex-col items-center gap-1 group cursor-pointer">
+                    <p className="text-lg font-bold text-gray-900 group-hover:text-maroon-700 transition-colors">{profile.stats.transactionCount}</p>
+                    <p className="text-xs text-gray-400 group-hover:text-maroon-600 transition-colors">Transactions</p>
+                  </Link>
+                ) : (
+                  <Link href={`/history?with=${id}`} className="flex flex-col items-center gap-1 group cursor-pointer">
+                    <p className="text-lg font-bold text-gray-900 group-hover:text-maroon-700 transition-colors">{profile.stats.transactionCount}</p>
+                    <p className="text-xs text-gray-400 group-hover:text-maroon-600 transition-colors">Transactions</p>
+                  </Link>
+                )}
 
                 {/* Active listings */}
-                <div className="flex flex-col items-center gap-1">
-                  <p className="text-lg font-bold text-gray-900">{profile.stats.activeListingCount}</p>
-                  <p className="text-xs text-gray-400">Active Listings</p>
-                </div>
+                <button
+                  onClick={() => setActiveTab("listings")}
+                  className="flex flex-col items-center gap-1 group cursor-pointer"
+                >
+                  <p className="text-lg font-bold text-gray-900 group-hover:text-maroon-700 transition-colors">{profile.stats.activeListingCount}</p>
+                  <p className="text-xs text-gray-400 group-hover:text-maroon-600 transition-colors">Active Listings</p>
+                </button>
               </div>
             </div>
 

@@ -5,16 +5,35 @@ import "./globals.css";
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.uchicagoemart.com"),
   title: {
-    default: "UChicago E-mart — Buy, Sell & Find Housing with Fellow Maroons",
+    default: "UChicago E-mart",
     template: "%s | UChicago E-mart",
   },
   description:
-    "The marketplace for UChicago students. Buy and sell textbooks, electronics, furniture, find storage, and housing — all within the Maroon community.",
+    "A student marketplace for buying/selling items, finding storage, and discovering housing.",
+  keywords: [
+    "UChicago E-mart",
+    "UChicago buy and sell",
+    "UChicago classifieds",
+    "UChicago electronics",
+    "UChicago furniture",
+    "UChicago housing",
+    "UChicago student housing",
+    "UChicago storage",
+    "UChicago student marketplace",
+    "UChicago sublets",
+    "buy textbooks UChicago",
+    "sell textbooks UChicago"
+  ],
   openGraph: {
     type: "website",
     siteName: "UChicago E-mart",
     locale: "en_US",
     images: [{ url: "/opengraph.png", width: 1200, height: 630, alt: "UChicago E-mart" }],
+  },
+  icons: {
+    icon: "/logos/logover3-favicon.svg",
+    shortcut: "/logos/logover3-favicon.svg",
+    apple: "/logos/logover3-favicon.svg",
   },
   twitter: {
     card: "summary_large_image",

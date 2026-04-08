@@ -69,12 +69,20 @@ export async function getUserTransactions(
   userId: string,
   page: number = 1,
   limit: number = 20,
+  withUserId?: string,
 ) {
   const skip = (page - 1) * limit;
 
-  const where = {
-    OR: [{ sellerId: userId }, { buyerId: userId }],
-  };
+  const where = withUserId
+    ? {
+        OR: [
+          { sellerId: userId, buyerId: withUserId },
+          { sellerId: withUserId, buyerId: userId },
+        ],
+      }
+    : {
+        OR: [{ sellerId: userId }, { buyerId: userId }],
+      };
 
   const [transactions, total] = await Promise.all([
     prisma.transaction.findMany({
@@ -99,11 +107,24 @@ export async function getUserTransactions(
     prisma.transaction.count({ where }),
   ]);
 
+  // Check review status for each transaction
+  const postIds = transactions.map((t) => t.postId);
+  const existingReviews = postIds.length > 0
+    ? await prisma.review.findMany({
+        where: { postId: { in: postIds }, reviewerId: userId },
+        select: { postId: true, rating: true },
+      })
+    : [];
+  const reviewedMap = new Map(existingReviews.map((r) => [r.postId, r.rating]));
+
   return {
     data: transactions.map((t) => ({
       ...t,
       role: t.sellerId === userId ? "seller" : "buyer",
       counterparty: t.sellerId === userId ? t.buyer : t.seller,
+      hasReviewed: reviewedMap.has(t.postId),
+      myRating: reviewedMap.get(t.postId) ?? null,
+      revieweeId: t.sellerId === userId ? t.buyerId : t.sellerId,
     })),
     total,
   };

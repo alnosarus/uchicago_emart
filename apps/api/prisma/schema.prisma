@@ -222,7 +222,7 @@ model Review {
   postId     String   @map("post_id")
   reviewerId String   @map("reviewer_id")
   revieweeId String   @map("reviewee_id")
-  rating     Int
+  rating     Float
   text       String?
   createdAt  DateTime @default(now()) @map("created_at")
 
