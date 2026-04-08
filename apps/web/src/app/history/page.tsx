@@ -51,6 +51,47 @@ function typeBadgeColor(type: string): string {
 
 // ── Star rating picker ────────────────────────────
 
+const STAR_PATH = "M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z";
+
+// Renders a single star: full, half, or empty.
+function Star({ fill, size = "w-5 h-5", dimmed = false }: { fill: "full" | "half" | "empty"; size?: string; dimmed?: boolean }) {
+  const id = `half-${Math.random().toString(36).slice(2)}`;
+  if (fill === "full") {
+    return (
+      <svg className={`${size} text-amber-400`} fill="currentColor" viewBox="0 0 20 20">
+        <path d={STAR_PATH} />
+      </svg>
+    );
+  }
+  if (fill === "empty") {
+    return (
+      <svg className={`${size} ${dimmed ? "text-gray-400" : "text-gray-200"}`} fill="currentColor" viewBox="0 0 20 20">
+        <path d={STAR_PATH} />
+      </svg>
+    );
+  }
+  // Half star: left half amber, right half gray via SVG clipPath
+  return (
+    <svg className={size} viewBox="0 0 20 20" fill="none">
+      <defs>
+        <clipPath id={id}>
+          <rect x="0" y="0" width="10" height="20" />
+        </clipPath>
+      </defs>
+      {/* Gray base */}
+      <path d={STAR_PATH} fill={dimmed ? "#9ca3af" : "#e5e7eb"} />
+      {/* Amber left half */}
+      <path d={STAR_PATH} fill="#fbbf24" clipPath={`url(#${id})`} />
+    </svg>
+  );
+}
+
+function starFill(pos: number, active: number): "full" | "half" | "empty" {
+  if (active >= pos) return "full";
+  if (active >= pos - 0.5) return "half";
+  return "empty";
+}
+
 function StarPicker({
   value,
   onChange,
@@ -61,6 +102,16 @@ function StarPicker({
   readOnly?: boolean;
 }) {
   const [hover, setHover] = useState(0);
+  const active = hover || value;
+  const isHovering = hover > 0;
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>, pos: number) => {
+    if (readOnly) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    setHover(x < rect.width / 2 ? pos - 0.5 : pos);
+  };
+
   return (
     <span className="flex items-center gap-0.5">
       {[1, 2, 3, 4, 5].map((s) => (
@@ -68,21 +119,16 @@ function StarPicker({
           key={s}
           type="button"
           disabled={readOnly}
-          onClick={() => !readOnly && onChange?.(s)}
-          onMouseEnter={() => !readOnly && setHover(s)}
+          onClick={() => !readOnly && onChange?.(hover || s)}
+          onMouseMove={(e) => handleMouseMove(e, s)}
           onMouseLeave={() => !readOnly && setHover(0)}
           className={readOnly ? "cursor-default" : "cursor-pointer"}
-          aria-label={`${s} star${s > 1 ? "s" : ""}`}
+          aria-label={`${hover || s} stars`}
         >
-          <svg
-            className={`w-5 h-5 transition-colors ${
-              s <= (hover || value) ? "text-amber-400" : "text-gray-200"
-            }`}
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-          </svg>
+          <Star
+            fill={starFill(s, active)}
+            dimmed={isHovering && s > active}
+          />
         </button>
       ))}
     </span>
@@ -170,7 +216,16 @@ function RatingModal({
             <StarPicker value={rating} onChange={setRating} />
             {rating > 0 && (
               <p className="text-xs text-gray-400">
-                {["", "Poor", "Fair", "Good", "Very Good", "Excellent"][rating]}
+                {rating === 0.5 ? "0.5 – Poor" :
+                 rating === 1 ? "1 – Poor" :
+                 rating === 1.5 ? "1.5 – Poor" :
+                 rating === 2 ? "2 – Fair" :
+                 rating === 2.5 ? "2.5 – Fair" :
+                 rating === 3 ? "3 – Good" :
+                 rating === 3.5 ? "3.5 – Good" :
+                 rating === 4 ? "4 – Very Good" :
+                 rating === 4.5 ? "4.5 – Very Good" :
+                 "5 – Excellent"}
               </p>
             )}
           </div>
