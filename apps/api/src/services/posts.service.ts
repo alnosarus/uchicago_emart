@@ -367,14 +367,50 @@ interface UpdatePostInput {
     moveOutDate?: string | null;
     leaseStartDate?: string | null;
     leaseDurationMonths?: number | null;
+    placeId?: string;
   };
 }
 
 export async function updatePost(postId: string, userId: string, input: UpdatePostInput) {
-  const post = await prisma.post.findUnique({ where: { id: postId } });
-  if (!post) throw new HttpError(404, "Post not found");
-  if (post.authorId !== userId) throw new HttpError(403, "Not authorized to edit this post");
-  if (post.status === "deleted") throw new HttpError(404, "Post not found");
+  const existing = await prisma.post.findUnique({
+    where: { id: postId },
+    include: { housing: true },
+  });
+  if (!existing) throw new HttpError(404, "Post not found");
+  if (existing.authorId !== userId) throw new HttpError(403, "Not authorized to edit this post");
+  if (existing.status === "deleted") throw new HttpError(404, "Post not found");
+
+  // Housing address verification rules on update:
+  //   1. If the existing post is housing AND has no placeId (legacy post):
+  //      input.housing.placeId is REQUIRED.
+  //   2. If input.housing.placeId is provided AND differs from existing: re-verify.
+  //   3. If input.housing.placeId is provided AND matches existing: skip re-verify.
+  //   4. If input.housing.placeId is omitted on a post that already has one: no change.
+  let verifiedHousing: Awaited<ReturnType<typeof verifyPlaceId>> | null = null;
+  const isHousingPost = existing.type === "housing";
+
+  if (isHousingPost) {
+    const legacyMissingAddress = !existing.housing?.placeId;
+    const incomingPlaceId = input.housing?.placeId;
+
+    if (legacyMissingAddress && !incomingPlaceId) {
+      throw new HttpError(
+        400,
+        "This listing needs a verified address. Please select an address from the dropdown before saving.",
+      );
+    }
+
+    if (incomingPlaceId && incomingPlaceId !== existing.housing?.placeId) {
+      try {
+        verifiedHousing = await verifyPlaceId(incomingPlaceId);
+      } catch (err) {
+        if (err instanceof PlaceVerificationError) {
+          throw new HttpError(400, err.message);
+        }
+        throw err;
+      }
+    }
+  }
 
   return prisma.post.update({
     where: { id: postId },
@@ -423,6 +459,13 @@ export async function updatePost(postId: string, userId: string, input: UpdatePo
             ...(input.housing.moveOutDate && { moveOutDate: new Date(input.housing.moveOutDate) }),
             ...(input.housing.leaseStartDate && { leaseStartDate: new Date(input.housing.leaseStartDate) }),
             ...(input.housing.leaseDurationMonths !== undefined && { leaseDurationMonths: input.housing.leaseDurationMonths }),
+            // Only write address fields when we re-verified
+            ...(verifiedHousing && {
+              address: verifiedHousing.address,
+              latitude: verifiedHousing.latitude,
+              longitude: verifiedHousing.longitude,
+              placeId: verifiedHousing.placeId,
+            }),
           } as any,
         },
       }),

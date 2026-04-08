@@ -36,7 +36,7 @@ vi.mock("../config/database", () => ({
 }));
 
 // Import AFTER mocks are set up
-import { createPost } from "./posts.service";
+import { createPost, updatePost } from "./posts.service";
 import { HttpError } from "../utils/errors";
 
 const baseHousingInput = {
@@ -143,5 +143,111 @@ describe("createPost — housing address verification", () => {
     });
 
     expect(verifyPlaceIdMock).not.toHaveBeenCalled();
+  });
+});
+
+describe("updatePost — housing address verification", () => {
+  const existingHousing = {
+    id: "post-1",
+    authorId: "user-1",
+    type: "housing" as const,
+    status: "active",
+    housing: {
+      postId: "post-1",
+      placeId: "ChIJEXISTING",
+      address: "123 Old St, Chicago, IL",
+      latitude: 41.79,
+      longitude: -87.59,
+    },
+  };
+
+  beforeEach(() => {
+    verifyPlaceIdMock.mockReset();
+    postFindUniqueMock.mockReset();
+    postUpdateMock.mockReset();
+    postUpdateMock.mockResolvedValue({ id: "post-1" });
+  });
+
+  it("skips verifyPlaceId when placeId is unchanged", async () => {
+    postFindUniqueMock.mockResolvedValue(existingHousing);
+
+    await updatePost("post-1", "user-1", {
+      housing: { placeId: "ChIJEXISTING", monthlyRent: 1400 },
+    });
+
+    expect(verifyPlaceIdMock).not.toHaveBeenCalled();
+    const updateArg = postUpdateMock.mock.calls[0][0];
+    // Address fields should NOT be in the update payload
+    expect(updateArg.data.housing.update.address).toBeUndefined();
+    expect(updateArg.data.housing.update.latitude).toBeUndefined();
+  });
+
+  it("re-verifies when placeId changes", async () => {
+    postFindUniqueMock.mockResolvedValue(existingHousing);
+    verifyPlaceIdMock.mockResolvedValue({
+      address: "456 New St, Chicago, IL",
+      latitude: 41.80,
+      longitude: -87.60,
+      placeId: "ChIJNEW",
+    });
+
+    await updatePost("post-1", "user-1", {
+      housing: { placeId: "ChIJNEW" },
+    });
+
+    expect(verifyPlaceIdMock).toHaveBeenCalledWith("ChIJNEW");
+    const updateArg = postUpdateMock.mock.calls[0][0];
+    expect(updateArg.data.housing.update.address).toBe("456 New St, Chicago, IL");
+    expect(updateArg.data.housing.update.placeId).toBe("ChIJNEW");
+  });
+
+  it("requires placeId when editing a legacy post (no existing placeId)", async () => {
+    postFindUniqueMock.mockResolvedValue({
+      ...existingHousing,
+      housing: { ...existingHousing.housing, placeId: null, address: null, latitude: null, longitude: null },
+    });
+
+    await expect(
+      updatePost("post-1", "user-1", { housing: { monthlyRent: 1400 } }),
+    ).rejects.toMatchObject({ status: 400, message: /verified address/ });
+    expect(verifyPlaceIdMock).not.toHaveBeenCalled();
+    expect(postUpdateMock).not.toHaveBeenCalled();
+  });
+
+  it("allows editing a legacy post when placeId is now provided", async () => {
+    postFindUniqueMock.mockResolvedValue({
+      ...existingHousing,
+      housing: { ...existingHousing.housing, placeId: null, address: null, latitude: null, longitude: null },
+    });
+    verifyPlaceIdMock.mockResolvedValue({
+      address: "789 Legacy St, Chicago, IL",
+      latitude: 41.79,
+      longitude: -87.59,
+      placeId: "ChIJFIRSTTIME",
+    });
+
+    await updatePost("post-1", "user-1", {
+      housing: { placeId: "ChIJFIRSTTIME", monthlyRent: 1500 },
+    });
+
+    expect(verifyPlaceIdMock).toHaveBeenCalledWith("ChIJFIRSTTIME");
+    const updateArg = postUpdateMock.mock.calls[0][0];
+    expect(updateArg.data.housing.update.address).toBe("789 Legacy St, Chicago, IL");
+  });
+
+  it("throws 400 when new placeId is invalid", async () => {
+    const { PlaceVerificationError } = await import("./geocoding.service");
+    postFindUniqueMock.mockResolvedValue(existingHousing);
+    verifyPlaceIdMock.mockRejectedValue(
+      new PlaceVerificationError("out_of_bounds", "Address must be in the Chicago area"),
+    );
+
+    await expect(
+      updatePost("post-1", "user-1", { housing: { placeId: "ChIJNYC" } }),
+    ).rejects.toMatchObject({
+      status: 400,
+      message: "Address must be in the Chicago area",
+    });
+    expect(postUpdateMock).not.toHaveBeenCalled();
   });
 });
