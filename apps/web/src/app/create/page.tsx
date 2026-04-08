@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ImageUploadGrid, type ImageItem } from "@/components/ImageUploadGrid";
+import { AddressAutocomplete, type SelectedPlace } from "@/components/housing/AddressAutocomplete";
+import { PropertyMap } from "@/components/housing/PropertyMap";
+import { useGoogleMaps } from "@/components/housing/GoogleMapsLoader";
 import {
   HOUSING_AMENITIES,
   BEDROOM_OPTIONS,
@@ -76,6 +79,9 @@ interface HousingFields {
   amenities: string[];
   roommates: "solo" | "shared";
   roommateCount: string;
+  placeId: string;
+  addressLabel: string;
+  addressError: string | null;
 }
 
 export default function CreatePostPage() {
@@ -124,7 +130,49 @@ export default function CreatePostPage() {
     amenities: [],
     roommates: "solo",
     roommateCount: "",
+    placeId: "",
+    addressLabel: "",
+    addressError: null,
   });
+  const [previewCoords, setPreviewCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const { isLoaded: isMapsLoaded } = useGoogleMaps();
+
+  function handleAddressSelect(place: SelectedPlace | null) {
+    if (!place) {
+      setHousing((prev) => ({ ...prev, placeId: "", addressLabel: "", addressError: null }));
+      setPreviewCoords(null);
+      return;
+    }
+
+    setHousing((prev) => ({
+      ...prev,
+      placeId: place.placeId,
+      addressLabel: place.formattedAddress,
+      addressError: null,
+    }));
+
+    // Fetch client-side preview coords for the map pin.
+    // If this fails, the preview simply doesn't show; server re-verifies on submit.
+    if (!isMapsLoaded) return;
+    try {
+      const svc = new google.maps.places.PlacesService(document.createElement("div"));
+      svc.getDetails(
+        { placeId: place.placeId, fields: ["geometry"] },
+        (details, status) => {
+          if (status === google.maps.places.PlacesServiceStatus.OK && details?.geometry?.location) {
+            setPreviewCoords({
+              lat: details.geometry.location.lat(),
+              lng: details.geometry.location.lng(),
+            });
+          } else {
+            setPreviewCoords(null);
+          }
+        },
+      );
+    } catch {
+      setPreviewCoords(null);
+    }
+  }
 
   // Redirect to auth if not logged in
   useEffect(() => {
@@ -202,6 +250,7 @@ export default function CreatePostPage() {
     }
     if (postType === "housing") {
       if (!housing.side || !housing.monthlyRent || !housing.bedrooms || !housing.bathrooms || !housing.roommates) return false;
+      if (!housing.placeId) return false;
       if (housing.subtype === "sublet" && (!housing.moveInDate || !housing.moveOutDate)) return false;
       if (housing.subtype === "passdown" && (!housing.leaseStartDate || !housing.leaseDurationMonths)) return false;
       return true;
@@ -260,6 +309,7 @@ export default function CreatePostPage() {
             housing.subtype === "passdown"
               ? parseInt(housing.leaseDurationMonths, 10) || null
               : null,
+          placeId: housing.placeId,
         },
       };
     }
@@ -327,7 +377,12 @@ export default function CreatePostPage() {
 
       router.push(`/posts/${post.id}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      const message = err instanceof Error ? err.message : "Something went wrong";
+      // Surface address-verification errors on the address field itself
+      if (postType === "housing" && /address|street|place|chicago/i.test(message)) {
+        setHousing((prev) => ({ ...prev, addressError: message }));
+      }
+      setError(message);
     } finally {
       setSubmitting(false);
     }
@@ -958,6 +1013,31 @@ export default function CreatePostPage() {
               </div>
             </div>
           )}
+
+          {/* Verified Address */}
+          <div>
+            <label className={labelClass}>
+              Address <span className="text-maroon-500">*</span>
+            </label>
+            <p className="text-xs text-gray-500 mb-2">
+              Select a specific street address. This is shown on your listing and verified against Google to prevent fake listings.
+            </p>
+            <AddressAutocomplete
+              onSelect={handleAddressSelect}
+              error={housing.addressError}
+            />
+            {previewCoords && housing.placeId && (
+              <div className="mt-3">
+                <p className="mb-1 text-xs text-gray-500">Preview — is this the right building?</p>
+                <PropertyMap
+                  latitude={previewCoords.lat}
+                  longitude={previewCoords.lng}
+                  address={housing.addressLabel}
+                  height={220}
+                />
+              </div>
+            )}
+          </div>
 
           {/* Neighborhood */}
           <div>

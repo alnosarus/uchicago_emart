@@ -7,6 +7,7 @@ import { createPostSchema, updatePostSchema, postQuerySchema } from "@uchicago-m
 import {
   createPost,
   listPosts,
+  listHousingMapPosts,
   getPostById,
   updatePost,
   deletePost,
@@ -35,6 +36,15 @@ router.post("/", requireAuth, requireVerified, validate(createPostSchema), async
 router.get("/", optionalAuth, validate(postQuerySchema, "query"), async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const result = await listPosts({ ...req.query as any, userId: req.userId });
+    res.json(result);
+  } catch (err) { next(err); }
+});
+
+// GET /api/posts/housing/map — Lightweight projection of housing posts with coordinates
+// Must be registered BEFORE /:id so it isn't swallowed by the dynamic segment
+router.get("/housing/map", optionalAuth, async (_req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const result = await listHousingMapPosts();
     res.json(result);
   } catch (err) { next(err); }
 });

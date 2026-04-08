@@ -23,6 +23,7 @@ interface PostCard {
 }
 
 function PostCardWithSlider({ post }: { post: PostCard }) {
+  const router = useRouter();
   const [imgIdx, setImgIdx] = useState(0);
   const images = post.images;
 
@@ -83,13 +84,25 @@ function PostCardWithSlider({ post }: { post: PostCard }) {
       </div>
       <div className="p-3">
         <p className="font-semibold text-gray-900 text-sm truncate">{post.title}</p>
-        <Link
-          href={`/profile/${post.author.id}`}
-          onClick={(e) => e.stopPropagation()}
-          className="text-xs text-gray-500 mt-1 hover:text-maroon-600 transition-colors block"
+        <span
+          role="link"
+          tabIndex={0}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            router.push(`/profile/${post.author.id}`);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              e.stopPropagation();
+              router.push(`/profile/${post.author.id}`);
+            }
+          }}
+          className="text-xs text-gray-500 mt-1 hover:text-maroon-600 transition-colors block cursor-pointer"
         >
           {post.author.name}
-        </Link>
+        </span>
         <div className="flex items-center justify-between mt-2">
           <span className="text-sm font-bold text-maroon-700">{price}</span>
           <span className="text-xs text-gray-400 capitalize">{post.type}</span>

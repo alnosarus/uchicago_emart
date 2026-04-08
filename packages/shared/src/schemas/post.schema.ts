@@ -49,6 +49,9 @@ export const housingDetailsSchema = z.object({
   moveOutDate: z.string().nullable().optional(),
   leaseStartDate: z.string().nullable().optional(),
   leaseDurationMonths: z.number().int().min(1).nullable().optional(),
+
+  // Address verification — client sends placeId, server resolves to canonical address/coords
+  placeId: z.string().min(1, "Please select an address from the dropdown"),
 });
 
 export const createPostSchema = z.discriminatedUnion("type", [

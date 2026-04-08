@@ -7,6 +7,7 @@ import { Blurhash } from "react-blurhash";
 import { useAuth } from "@/lib/auth-context";
 import { Navbar } from "@/components/Navbar";
 import { SearchAutocomplete } from "@/components/SearchAutocomplete";
+import { HousingMapView, type HousingMapPost } from "@/components/housing/HousingMapView";
 
 // ── Constants ────────────────────────────────────
 
@@ -743,6 +744,8 @@ function BrowseContent() {
   const activePriceMax = searchParams.get("priceMax") || "";
   const activeSort = searchParams.get("sort") || "recent";
   const activeQ = searchParams.get("q") || "";
+  const activeView = searchParams.get("view") === "map" ? "map" : "list";
+  const isHousingType = activeType === "housing";
 
   const [posts, setPosts] = useState<Post[]>([]);
   const [pagination, setPagination] = useState<Pagination | null>(null);
@@ -753,6 +756,10 @@ function BrowseContent() {
   const [priceMaxInput, setPriceMaxInput] = useState(activePriceMax);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
+  // Housing map view state
+  const [mapPosts, setMapPosts] = useState<HousingMapPost[]>([]);
+  const [mapLoading, setMapLoading] = useState(false);
+  const [mapError, setMapError] = useState<string | null>(null);
 
   // Infinite scroll state
   const [page, setPage] = useState(1);
@@ -773,6 +780,25 @@ function BrowseContent() {
       setHasMore(true);
     }
   }, [paramsString]);
+
+  // Fetch housing map data when in map view
+  useEffect(() => {
+    if (activeView !== "map" || !isHousingType) return;
+    setMapLoading(true);
+    setMapError(null);
+    fetch(`${API_URL}/api/posts/housing/map`)
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then((data: { posts: HousingMapPost[] }) => {
+        setMapPosts(data.posts);
+      })
+      .catch((err) => {
+        setMapError(err instanceof Error ? err.message : "Failed to load map");
+      })
+      .finally(() => setMapLoading(false));
+  }, [activeView, isHousingType]);
 
   // Build URL with updated params
   const buildUrl = useCallback(
@@ -1228,49 +1254,97 @@ function BrowseContent() {
               </div>
             )}
 
-            {/* Results count */}
-            {!isLoading && pagination && (
-              <p className="text-sm text-gray-500 mb-4">
-                {pagination.total === 0
-                  ? "No results"
-                  : `${pagination.total} ${pagination.total === 1 ? "result" : "results"}`}
-              </p>
-            )}
+            {/* Results count + view toggle (housing only) */}
+            <div className="flex items-center justify-between mb-4">
+              {!isLoading && pagination && (
+                <p className="text-sm text-gray-500">
+                  {pagination.total === 0
+                    ? "No results"
+                    : `${pagination.total} ${pagination.total === 1 ? "result" : "results"}`}
+                </p>
+              )}
+              {isHousingType && (
+                <div className="inline-flex rounded-md border border-gray-300 bg-white p-1 ml-auto">
+                  <button
+                    type="button"
+                    onClick={() => setFilter("view", "")}
+                    className={`rounded px-4 py-1.5 text-sm font-medium transition ${
+                      activeView === "list" ? "bg-maroon-600 text-white" : "text-gray-700 hover:bg-gray-100"
+                    }`}
+                  >
+                    List
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFilter("view", "map")}
+                    className={`rounded px-4 py-1.5 text-sm font-medium transition ${
+                      activeView === "map" ? "bg-maroon-600 text-white" : "text-gray-700 hover:bg-gray-100"
+                    }`}
+                  >
+                    Map
+                  </button>
+                </div>
+              )}
+            </div>
 
-            {/* Error state */}
-            {error && (
-              <div className="text-center py-12">
-                <p className="text-red-600 font-medium mb-2">Something went wrong</p>
-                <p className="text-gray-500 text-sm mb-4">{error}</p>
-                <button onClick={() => router.refresh()} className="text-sm font-medium text-maroon-600 hover:text-maroon-700 underline">
-                  Try again
-                </button>
-              </div>
-            )}
+            {/* Map view (housing only) */}
+            {activeView === "map" && isHousingType ? (
+              <>
+                {mapLoading && (
+                  <div className="flex h-[600px] items-center justify-center rounded-md border border-gray-200 bg-gray-50">
+                    <div className="w-6 h-6 border-2 border-maroon-600 border-t-transparent rounded-full animate-spin" />
+                  </div>
+                )}
+                {mapError && (
+                  <div className="rounded-md border border-red-300 bg-red-50 p-4 text-sm text-red-700">
+                    Failed to load map: {mapError}
+                  </div>
+                )}
+                {!mapLoading && !mapError && (
+                  <HousingMapView
+                    posts={mapPosts}
+                    onPinClick={(postId) => router.push(`/posts/${postId}`)}
+                  />
+                )}
+              </>
+            ) : (
+              <>
+                {/* Error state */}
+                {error && (
+                  <div className="text-center py-12">
+                    <p className="text-red-600 font-medium mb-2">Something went wrong</p>
+                    <p className="text-gray-500 text-sm mb-4">{error}</p>
+                    <button onClick={() => router.refresh()} className="text-sm font-medium text-maroon-600 hover:text-maroon-700 underline">
+                      Try again
+                    </button>
+                  </div>
+                )}
 
-            {/* Loading state */}
-            {isLoading && !error && <LoadingSkeleton />}
+                {/* Loading state */}
+                {isLoading && !error && <LoadingSkeleton />}
 
-            {/* Posts grid */}
-            {!isLoading && !error && posts.length > 0 && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {posts.map((post) => (
-                  <PostCard key={post.id} post={post} />
-                ))}
-              </div>
-            )}
+                {/* Posts grid */}
+                {!isLoading && !error && posts.length > 0 && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {posts.map((post) => (
+                      <PostCard key={post.id} post={post} />
+                    ))}
+                  </div>
+                )}
 
-            {/* Empty state */}
-            {!isLoading && !error && posts.length === 0 && (
-              <EmptyState hasFilters={hasFilters} />
-            )}
+                {/* Empty state */}
+                {!isLoading && !error && posts.length === 0 && (
+                  <EmptyState hasFilters={hasFilters} />
+                )}
 
-            {/* Infinite scroll sentinel */}
-            <div ref={sentinelRef} className="h-1" />
-            {loadingMore && (
-              <div className="flex justify-center py-6">
-                <div className="w-6 h-6 border-2 border-maroon-600 border-t-transparent rounded-full animate-spin" />
-              </div>
+                {/* Infinite scroll sentinel */}
+                <div ref={sentinelRef} className="h-1" />
+                {loadingMore && (
+                  <div className="flex justify-center py-6">
+                    <div className="w-6 h-6 border-2 border-maroon-600 border-t-transparent rounded-full animate-spin" />
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
