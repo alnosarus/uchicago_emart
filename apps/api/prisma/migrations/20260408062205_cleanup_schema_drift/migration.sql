@@ -1,3 +1,10 @@
+-- This migration cleans up drift left behind when rideshare was
+-- removed from the project on 2026-03-31 via a schema edit without a
+-- generated migration. On prod this migration is effectively a no-op:
+-- Railway's database never had the drift, so every DROP is guarded by
+-- IF EXISTS. The enum rename blocks are functionally idempotent
+-- (always produce the same end state).
+
 -- AlterEnum
 BEGIN;
 CREATE TYPE "PostSide_new" AS ENUM ('sell', 'buy', 'has_space', 'need_storage', 'offering', 'looking');
@@ -16,17 +23,14 @@ ALTER TYPE "PostType_new" RENAME TO "PostType";
 DROP TYPE "public"."PostType_old";
 COMMIT;
 
--- DropForeignKey
-ALTER TABLE "rideshare_details" DROP CONSTRAINT "rideshare_details_post_id_fkey";
-
--- AlterTable
+-- AlterTable (idempotent — DROP DEFAULT is a no-op if no default exists)
 ALTER TABLE "conversations" ALTER COLUMN "updated_at" DROP DEFAULT;
 
--- DropTable
-DROP TABLE "rideshare_details";
+-- DropTable (also drops the rideshare_details_post_id_fkey constraint as a cascade effect)
+DROP TABLE IF EXISTS "rideshare_details";
 
 -- DropEnum
-DROP TYPE "Airport";
+DROP TYPE IF EXISTS "Airport";
 
 -- DropEnum
-DROP TYPE "Direction";
+DROP TYPE IF EXISTS "Direction";
