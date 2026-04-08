@@ -144,7 +144,7 @@ export default function CreatePostPage() {
   if (!user) return null;
 
   // --- Verification gate --- (disabled locally for testing)
-  if (false && !user.isVerified) {
+  if (false && !user?.isVerified) {
     return (
       <div className="min-h-screen flex flex-col bg-gray-50">
         <nav className="bg-white border-b border-gray-200 px-4 sm:px-8 h-14 sm:h-16 flex items-center justify-between sticky top-0 z-50 shadow-sm">
