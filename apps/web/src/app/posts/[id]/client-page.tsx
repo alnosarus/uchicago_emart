@@ -822,7 +822,7 @@ export default function PostDetailPage() {
       router.push("/auth");
       return;
     }
-    if (!user.isVerified) {
+    if (!user.isVerified && process.env.NODE_ENV !== "development") {
       router.push("/auth/verify");
       return;
     }
@@ -1149,7 +1149,9 @@ export default function PostDetailPage() {
                     onClick={handleMarkSoldOpen}
                     className="w-full bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2.5 rounded-lg transition-colors"
                   >
-                    {post.type === "marketplace" ? "Mark as Sold" : "Mark as Completed"}
+                    {post.type === "marketplace"
+                    ? post.side === "buy" ? "Mark as Found" : "Mark as Sold"
+                    : "Mark as Completed"}
                   </button>
                 )}
                 <div className="flex gap-3">
@@ -1244,10 +1246,14 @@ export default function PostDetailPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-lg font-bold text-gray-900">
-              {post.type === "marketplace" ? "Mark as Sold" : "Mark as Completed"}
+              {post.type === "marketplace"
+                ? post.side === "buy" ? "Mark as Found" : "Mark as Sold"
+                : "Mark as Completed"}
             </h3>
             <p className="text-sm text-gray-500">
-              Search for the person you transacted with.
+              {post.side === "buy"
+                ? "Search for the person you bought from."
+                : "Search for the person you transacted with."}
             </p>
 
             {/* User search */}

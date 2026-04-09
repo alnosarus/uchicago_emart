@@ -84,7 +84,16 @@ function PostCardWithSlider({ post }: { post: PostCard }) {
         )}
       </div>
       <div className="p-3">
-        <p className="font-semibold text-gray-900 text-sm truncate">{post.title}</p>
+        <div className="flex items-center gap-1.5 mb-1">
+          <p className="font-semibold text-gray-900 text-sm truncate">{post.title}</p>
+          {post.type === "marketplace" && (
+            <span className={`shrink-0 text-xs font-semibold px-1.5 py-0.5 rounded-full ${
+              post.side === "buy" ? "bg-blue-100 text-blue-700" : "bg-green-100 text-green-700"
+            }`}>
+              {post.side === "buy" ? "Buying" : "Selling"}
+            </span>
+          )}
+        </div>
         <span
           role="link"
           tabIndex={0}
@@ -124,6 +133,7 @@ export default function Home() {
   const [mapLoading, setMapLoading] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
 
+  const [marketplaceSide, setMarketplaceSide] = useState<"" | "sell" | "buy">("");
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -131,12 +141,12 @@ export default function Home() {
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const showHousingMap = activeTab === "housing" && housingView === "map";
 
-  // Reset when tab changes
+  // Reset when tab or side changes
   useEffect(() => {
     setRecentPosts([]);
     setPage(1);
     setHasMore(true);
-  }, [activeTab]);
+  }, [activeTab, marketplaceSide]);
 
   // Fetch posts
   useEffect(() => {
@@ -145,7 +155,8 @@ export default function Home() {
     if (isFirstPage) setLoadingMore(false);
     else setLoadingMore(true);
 
-    fetch(`${API_URL}/api/posts?type=${activeTab}&limit=12&page=${page}`)
+    const sideParam = activeTab === "marketplace" && marketplaceSide ? `&side=${marketplaceSide}` : "";
+    fetch(`${API_URL}/api/posts?type=${activeTab}&limit=12&page=${page}${sideParam}`)
       .then(r => r.ok ? r.json() : { posts: [], pagination: { page: 1, totalPages: 1 } })
       .then(data => {
         if (cancelled) return;
@@ -160,7 +171,7 @@ export default function Home() {
       .catch(() => { if (!cancelled) setLoadingMore(false); });
 
     return () => { cancelled = true; };
-  }, [activeTab, page]);
+  }, [activeTab, marketplaceSide, page]);
 
   // Fetch housing map data when viewing map
   useEffect(() => {
@@ -274,6 +285,22 @@ export default function Home() {
               {activeTab === "marketplace" ? "Buy and sell items with fellow Maroons" : activeTab === "storage" ? "Find or offer storage space" : "Sublets and passdowns for Maroons"}
             </p>
           </div>
+          {activeTab === "marketplace" && (
+            <div className="inline-flex rounded-md border border-gray-300 bg-white p-1">
+              {(["", "sell", "buy"] as const).map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setMarketplaceSide(s)}
+                  className={`rounded px-4 py-1.5 text-sm font-medium transition ${
+                    marketplaceSide === s ? "bg-maroon-600 text-white" : "text-gray-700 hover:bg-gray-100"
+                  }`}
+                >
+                  {s === "" ? "All" : s === "sell" ? "Selling" : "Buying"}
+                </button>
+              ))}
+            </div>
+          )}
           {activeTab === "housing" && (
             <div className="inline-flex rounded-md border border-gray-300 bg-white p-1">
               <button

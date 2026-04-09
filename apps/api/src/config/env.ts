@@ -18,7 +18,7 @@ const envSchema = z.object({
   ALLOWED_EMAIL_DOMAIN: z.string().default("uchicago.edu"),
 
   // Google Places address verification (added 2026-04-08)
-  GOOGLE_PLACES_SERVER_KEY: z.string().min(1),
+  GOOGLE_PLACES_SERVER_KEY: z.string().optional().default(""),
   // Chicago bounding box: minLat,minLng,maxLat,maxLng
   GEOCODING_CHICAGO_BBOX: z.string().default("41.6,-87.9,42.1,-87.5"),
 });

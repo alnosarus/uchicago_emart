@@ -191,8 +191,8 @@ export default function CreatePostPage() {
 
   if (!user) return null;
 
-  // --- Verification gate ---
-  if (!user?.isVerified) {
+  // --- Verification gate (skipped in local dev) ---
+  if (!user?.isVerified && process.env.NODE_ENV !== "development") {
     return (
       <div className="min-h-screen flex flex-col bg-gray-50">
         <nav className="bg-white border-b border-gray-200 px-4 sm:px-8 h-14 sm:h-16 flex items-center justify-between sticky top-0 z-50 shadow-sm">
@@ -240,7 +240,8 @@ export default function CreatePostPage() {
 
   function canProceedToStep4() {
     if (postType === "marketplace") {
-      if (!marketplace.condition || !marketplace.category) return false;
+      if (!marketplace.category) return false;
+      if (marketplace.side === "sell" && !marketplace.condition) return false;
       if (marketplace.priceType === "fixed" && !marketplace.priceAmount) return false;
       return true;
     }
@@ -592,7 +593,11 @@ export default function CreatePostPage() {
           {/* Condition */}
           <div>
             <label htmlFor="condition" className={labelClass}>
-              Condition <span className="text-maroon-500">*</span>
+              {marketplace.side === "buy" ? (
+                <>Preferred Condition <span className="text-gray-400 font-normal">(optional)</span></>
+              ) : (
+                <>Condition <span className="text-maroon-500">*</span></>
+              )}
             </label>
             <select
               id="condition"
@@ -600,7 +605,7 @@ export default function CreatePostPage() {
               onChange={(e) => setMarketplace((p) => ({ ...p, condition: e.target.value }))}
               className={selectClass}
             >
-              <option value="">Select condition</option>
+              <option value="">{marketplace.side === "buy" ? "Any condition" : "Select condition"}</option>
               {CONDITIONS.map((c) => (
                 <option key={c.value} value={c.value}>
                   {c.label}
@@ -611,7 +616,7 @@ export default function CreatePostPage() {
 
           {/* Price type */}
           <div>
-            <label className={labelClass}>Pricing</label>
+            <label className={labelClass}>{marketplace.side === "buy" ? "Budget" : "Pricing"}</label>
             <div className="grid grid-cols-3 gap-2 sm:gap-3">
               {(["fixed", "free", "trade"] as const).map((pt) => (
                 <button

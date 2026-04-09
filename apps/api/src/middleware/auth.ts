@@ -54,6 +54,12 @@ export function requireVerified(req: AuthRequest, res: Response, next: NextFunct
     return;
   }
 
+  // Skip phone verification in local development
+  if (process.env.NODE_ENV === "development") {
+    next();
+    return;
+  }
+
   prisma.user
     .findUnique({ where: { id: req.userId }, select: { isVerified: true } })
     .then((user) => {

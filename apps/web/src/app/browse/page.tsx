@@ -254,17 +254,30 @@ function PostCard({ post }: { post: Post }) {
         )}
 
         {/* Type badge */}
-        <span
-          className={`absolute top-2 left-2 text-xs font-semibold px-2 py-0.5 rounded-full ${
-            post.type === "storage"
-              ? "bg-amber-100 text-amber-700"
-              : post.type === "housing"
-                ? "bg-indigo-100 text-indigo-700"
-                : "bg-maroon-100 text-maroon-700"
-          }`}
-        >
-          {post.type === "storage" ? "Storage" : post.type === "housing" ? "Housing" : "Marketplace"}
-        </span>
+        <div className="absolute top-2 left-2 flex flex-col gap-1">
+          <span
+            className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+              post.type === "storage"
+                ? "bg-amber-100 text-amber-700"
+                : post.type === "housing"
+                  ? "bg-indigo-100 text-indigo-700"
+                  : "bg-maroon-100 text-maroon-700"
+            }`}
+          >
+            {post.type === "storage" ? "Storage" : post.type === "housing" ? "Housing" : "Marketplace"}
+          </span>
+          {post.type === "marketplace" && (
+            <span
+              className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                post.side === "buy"
+                  ? "bg-blue-100 text-blue-700"
+                  : "bg-green-100 text-green-700"
+              }`}
+            >
+              {post.side === "buy" ? "Buying" : "Selling"}
+            </span>
+          )}
+        </div>
 
         {/* Save count */}
         {post._count.savedBy > 0 && (
@@ -746,6 +759,8 @@ function BrowseContent() {
   const activeQ = searchParams.get("q") || "";
   const activeView = searchParams.get("view") === "list" ? "list" : "map";
   const isHousingType = activeType === "housing";
+  const isMarketplaceType = activeType === "marketplace";
+  const activeSide = searchParams.get("side") || "";
 
   const [posts, setPosts] = useState<Post[]>([]);
   const [pagination, setPagination] = useState<Pagination | null>(null);
@@ -857,6 +872,7 @@ function BrowseContent() {
 
       const params = new URLSearchParams();
       if (activeType) params.set("type", activeType);
+      if (activeSide) params.set("side", activeSide);
       if (activeCategories.length) params.set("category", activeCategories.join(","));
       if (activeConditions.length) params.set("condition", activeConditions.join(","));
       if (activeSubtypes.length) params.set("subtype", activeSubtypes.join(","));
@@ -1259,7 +1275,7 @@ function BrowseContent() {
               </div>
             )}
 
-            {/* Results count + view toggle (housing only) */}
+            {/* Results count + view toggle (housing only) + sell/buy toggle (marketplace only) */}
             <div className="flex items-center justify-between mb-4">
               {!isLoading && pagination && (
                 <p className="text-sm text-gray-500">
@@ -1267,6 +1283,37 @@ function BrowseContent() {
                     ? "No results"
                     : `${pagination.total} ${pagination.total === 1 ? "result" : "results"}`}
                 </p>
+              )}
+              {isMarketplaceType && (
+                <div className="inline-flex rounded-md border border-gray-300 bg-white p-1 ml-auto">
+                  <button
+                    type="button"
+                    onClick={() => setFilter("side", "")}
+                    className={`rounded px-4 py-1.5 text-sm font-medium transition ${
+                      activeSide === "" ? "bg-maroon-600 text-white" : "text-gray-700 hover:bg-gray-100"
+                    }`}
+                  >
+                    All
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFilter("side", "sell")}
+                    className={`rounded px-4 py-1.5 text-sm font-medium transition ${
+                      activeSide === "sell" ? "bg-maroon-600 text-white" : "text-gray-700 hover:bg-gray-100"
+                    }`}
+                  >
+                    Selling
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFilter("side", "buy")}
+                    className={`rounded px-4 py-1.5 text-sm font-medium transition ${
+                      activeSide === "buy" ? "bg-maroon-600 text-white" : "text-gray-700 hover:bg-gray-100"
+                    }`}
+                  >
+                    Buying
+                  </button>
+                </div>
               )}
               {isHousingType && (
                 <div className="inline-flex rounded-md border border-gray-300 bg-white p-1 ml-auto">
