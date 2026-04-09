@@ -3,6 +3,7 @@ import { encode } from "blurhash";
 import { getStorage } from "firebase-admin/storage";
 import { randomUUID } from "crypto";
 import { HttpError } from "../utils/errors";
+import heicConvert from "heic-convert";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"];
 const MAX_SIZE = 10 * 1024 * 1024; // 10MB
@@ -38,8 +39,16 @@ export async function uploadImage(
   const bucket = getStorage().bucket(BUCKET_NAME);
   const uuid = randomUUID();
 
+  // Convert HEIC/HEIF to JPEG before sharp processes it (sharp needs libheif otherwise)
+  const isHeic = resolvedMimeType === "image/heic" || resolvedMimeType === "image/heif";
+  let processBuffer = fileBuffer;
+  if (isHeic) {
+    const jpegBuffer = await heicConvert({ buffer: fileBuffer, format: "JPEG", quality: 0.9 });
+    processBuffer = Buffer.from(jpegBuffer);
+  }
+
   // Strip EXIF, auto-rotate
-  const rotatedBuffer = await sharp(fileBuffer).rotate().toBuffer();
+  const rotatedBuffer = await sharp(processBuffer).rotate().toBuffer();
 
   // Detect animated images (GIF) — skip processing
   const metadata = await sharp(rotatedBuffer).metadata();
