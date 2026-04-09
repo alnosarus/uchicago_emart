@@ -20,7 +20,6 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import imageCompression from "browser-image-compression";
 import { APP_CONFIG } from "@uchicago-marketplace/shared";
-import heic2any from "heic2any";
 
 // --- Types ---
 
@@ -48,6 +47,7 @@ async function normalizeFile(file: File): Promise<File> {
   const isHeic = file.type === "image/heic" || file.type === "image/heif" || /\.(heic|heif)$/i.test(file.name);
   if (isHeic) {
     try {
+      const { default: heic2any } = await import("heic2any");
       const converted = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.9 });
       const blob = Array.isArray(converted) ? converted[0] : converted;
       return new File([blob], file.name.replace(/\.(heic|heif)$/i, ".jpg"), { type: "image/jpeg" });
