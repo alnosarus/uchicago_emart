@@ -20,6 +20,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import imageCompression from "browser-image-compression";
 import { APP_CONFIG } from "@uchicago-marketplace/shared";
+import heic2any from "heic2any";
 
 // --- Types ---
 
@@ -42,11 +43,30 @@ const COMPRESSION_OPTIONS = {
   fileType: "image/webp" as const,
 };
 
+async function normalizeFile(file: File): Promise<File> {
+  // Convert HEIC/HEIF to JPEG first so the browser can preview and compress it
+  const isHeic = file.type === "image/heic" || file.type === "image/heif" || /\.(heic|heif)$/i.test(file.name);
+  if (isHeic) {
+    try {
+      const converted = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.9 });
+      const blob = Array.isArray(converted) ? converted[0] : converted;
+      return new File([blob], file.name.replace(/\.(heic|heif)$/i, ".jpg"), { type: "image/jpeg" });
+    } catch {
+      // If conversion fails, pass through and let the server handle it
+      return file;
+    }
+  }
+  try {
+    return await imageCompression(file, COMPRESSION_OPTIONS);
+  } catch {
+    return file;
+  }
+}
+
 async function compressFile(file: File): Promise<File> {
   try {
     return await imageCompression(file, COMPRESSION_OPTIONS);
   } catch {
-    // If compression fails (e.g. unsupported format), return original
     return file;
   }
 }
@@ -137,7 +157,11 @@ export function ImageUploadGrid({
 
       setCompressing(true);
       try {
-        const compressed = await Promise.all(sizedFiles.map(compressFile));
+        // normalizeFile converts HEIC→JPEG then compresses; non-HEIC files go straight to compression
+        const normalized = await Promise.all(sizedFiles.map(normalizeFile));
+        const compressed = await Promise.all(
+          normalized.map((f) => (f.type === "image/jpeg" || f.type === "image/png" || f.type === "image/webp" ? compressFile(f) : Promise.resolve(f)))
+        );
         const newItems: ImageItem[] = compressed.map((file) => ({
           type: "local",
           id: `local-${Date.now()}-${Math.random().toString(36).slice(2)}`,
