@@ -42,28 +42,12 @@ const COMPRESSION_OPTIONS = {
   fileType: "image/webp" as const,
 };
 
-async function normalizeFile(file: File): Promise<File> {
-  // Convert HEIC/HEIF to JPEG first so the browser can preview and compress it
-  const isHeic = file.type === "image/heic" || file.type === "image/heif" || /\.(heic|heif)$/i.test(file.name);
-  if (isHeic) {
-    try {
-      const { default: heic2any } = await import("heic2any");
-      const converted = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.9 });
-      const blob = Array.isArray(converted) ? converted[0] : converted;
-      return new File([blob], file.name.replace(/\.(heic|heif)$/i, ".jpg"), { type: "image/jpeg" });
-    } catch {
-      // If conversion fails, pass through and let the server handle it
-      return file;
-    }
-  }
-  try {
-    return await imageCompression(file, COMPRESSION_OPTIONS);
-  } catch {
-    return file;
-  }
+function isHeicFile(file: File): boolean {
+  return file.type === "image/heic" || file.type === "image/heif" || /\.(heic|heif)$/i.test(file.name);
 }
 
 async function compressFile(file: File): Promise<File> {
+  if (isHeicFile(file)) return file; // server handles HEIC conversion
   try {
     return await imageCompression(file, COMPRESSION_OPTIONS);
   } catch {
@@ -102,7 +86,16 @@ function SortableImage({
       {...attributes}
       {...listeners}
     >
-      <img src={src} alt={`Image ${index + 1}`} className="w-full h-full object-cover" />
+      {src ? (
+        <img src={src} alt={`Image ${index + 1}`} className="w-full h-full object-cover" />
+      ) : (
+        <div className="w-full h-full bg-gray-100 flex flex-col items-center justify-center text-gray-400 gap-1">
+          <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
+          </svg>
+          <span className="text-[9px] font-medium">HEIC</span>
+        </div>
+      )}
       {index === 0 && (
         <span className="absolute top-1.5 left-1.5 bg-maroon-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
           Cover
@@ -157,16 +150,13 @@ export function ImageUploadGrid({
 
       setCompressing(true);
       try {
-        // normalizeFile converts HEIC→JPEG then compresses; non-HEIC files go straight to compression
-        const normalized = await Promise.all(sizedFiles.map(normalizeFile));
-        const compressed = await Promise.all(
-          normalized.map((f) => (f.type === "image/jpeg" || f.type === "image/png" || f.type === "image/webp" ? compressFile(f) : Promise.resolve(f)))
-        );
+        const compressed = await Promise.all(sizedFiles.map(compressFile));
         const newItems: ImageItem[] = compressed.map((file) => ({
           type: "local",
           id: `local-${Date.now()}-${Math.random().toString(36).slice(2)}`,
           file,
-          previewUrl: URL.createObjectURL(file),
+          // HEIC files can't be previewed in the browser — server converts them on upload
+          previewUrl: isHeicFile(file) ? "" : URL.createObjectURL(file),
         }));
         onImagesChange([...images, ...newItems].slice(0, maxImages));
       } finally {
