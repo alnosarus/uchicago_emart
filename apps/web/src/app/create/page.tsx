@@ -274,7 +274,7 @@ export default function CreatePostPage() {
             marketplace.priceType === "fixed"
               ? parseFloat(marketplace.priceAmount) || 0
               : null,
-          condition: marketplace.condition,
+          condition: marketplace.side === "sell" ? marketplace.condition : undefined,
           category: marketplace.category,
           tradeDescription: null,
           tags: marketplace.tags
@@ -590,29 +590,27 @@ export default function CreatePostPage() {
             </select>
           </div>
 
-          {/* Condition */}
-          <div>
-            <label htmlFor="condition" className={labelClass}>
-              {marketplace.side === "buy" ? (
-                <>Preferred Condition <span className="text-gray-400 font-normal">(optional)</span></>
-              ) : (
-                <>Condition <span className="text-maroon-500">*</span></>
-              )}
-            </label>
-            <select
-              id="condition"
-              value={marketplace.condition}
-              onChange={(e) => setMarketplace((p) => ({ ...p, condition: e.target.value }))}
-              className={selectClass}
-            >
-              <option value="">{marketplace.side === "buy" ? "Any condition" : "Select condition"}</option>
-              {CONDITIONS.map((c) => (
-                <option key={c.value} value={c.value}>
-                  {c.label}
-                </option>
-              ))}
-            </select>
-          </div>
+          {/* Condition — only relevant when selling */}
+          {marketplace.side === "sell" && (
+            <div>
+              <label htmlFor="condition" className={labelClass}>
+                Condition <span className="text-maroon-500">*</span>
+              </label>
+              <select
+                id="condition"
+                value={marketplace.condition}
+                onChange={(e) => setMarketplace((p) => ({ ...p, condition: e.target.value }))}
+                className={selectClass}
+              >
+                <option value="">Select condition</option>
+                {CONDITIONS.map((c) => (
+                  <option key={c.value} value={c.value}>
+                    {c.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {/* Price type */}
           <div>
@@ -1175,10 +1173,12 @@ export default function CreatePostPage() {
             {postType === "marketplace" && payload.type === "marketplace" && (
               <>
                 <DetailRow label="Category" value={payload.marketplace.category} />
-                <DetailRow
-                  label="Condition"
-                  value={CONDITIONS.find((c) => c.value === payload.marketplace.condition)?.label || payload.marketplace.condition}
-                />
+                {payload.marketplace.condition && (
+                  <DetailRow
+                    label="Condition"
+                    value={CONDITIONS.find((c) => c.value === payload.marketplace.condition)?.label || payload.marketplace.condition}
+                  />
+                )}
                 <DetailRow
                   label="Price"
                   value={

@@ -151,7 +151,7 @@ export function useCreatePost() {
           priceType: state.priceType,
           priceAmount:
             state.priceType === "fixed" ? parseFloat(state.priceAmount) || 0 : null,
-          condition: state.condition as "new" | "like_new" | "good" | "fair" | "for_parts" | "unknown",
+          condition: state.side === "sell" ? (state.condition as "new" | "like_new" | "good" | "fair" | "for_parts" | "unknown") : undefined,
           category: state.category,
           tradeDescription:
             state.priceType === "trade" ? state.tradeDescription || null : null,
@@ -286,7 +286,7 @@ export function useCreatePost() {
 function validateTypeDetails(s: CreatePostState): boolean {
   if (s.type === "marketplace") {
     if (!s.category) return false;
-    if (!s.condition) return false;
+    if (s.side === "sell" && !s.condition) return false;
     if (s.priceType === "fixed" && !s.priceAmount) return false;
     if (s.priceType === "trade" && !s.tradeDescription.trim()) return false;
     return true;

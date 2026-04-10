@@ -12,7 +12,7 @@ const locationTypeEnum = z.enum(["on_campus", "off_campus"]);
 export const marketplaceDetailsSchema = z.object({
   priceType: priceTypeEnum,
   priceAmount: z.number().min(0).nullable(),
-  condition: conditionEnum,
+  condition: conditionEnum.optional().default("unknown"),
   category: z.string().min(1, "Category is required"),
   tradeDescription: z.string().nullable().optional(),
   tags: z.array(z.string()).default([]),

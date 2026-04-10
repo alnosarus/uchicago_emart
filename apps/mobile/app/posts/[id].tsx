@@ -63,14 +63,16 @@ function getDetailBadges(post: PostWithDetails): Badge[] {
   const badges: Badge[] = [];
 
   if (post.type === "marketplace" && post.marketplace) {
-    const conditionLabel =
-      CONDITIONS.find((c) => c.value === post.marketplace!.condition)?.label ??
-      post.marketplace.condition;
-    badges.push({
-      label: conditionLabel,
-      bg: colors.badge.condition.bg,
-      text: colors.badge.condition.text,
-    });
+    if (post.marketplace.condition && post.marketplace.condition !== "unknown") {
+      const conditionLabel =
+        CONDITIONS.find((c) => c.value === post.marketplace!.condition)?.label ??
+        post.marketplace.condition;
+      badges.push({
+        label: conditionLabel,
+        bg: colors.badge.condition.bg,
+        text: colors.badge.condition.text,
+      });
+    }
     badges.push({
       label: post.marketplace.category,
       bg: colors.badge.category.bg,
