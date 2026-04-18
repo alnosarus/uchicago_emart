@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/Navbar";
 import { SearchAutocomplete } from "@/components/SearchAutocomplete";
 import { HousingMapView, type HousingMapPost } from "@/components/housing/HousingMapView";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
@@ -128,7 +128,7 @@ export default function Home() {
   const [recentPosts, setRecentPosts] = useState<PostCard[]>([]);
   const [activeTab, setActiveTab] = useState("marketplace");
   const [searchQuery, setSearchQuery] = useState("");
-  const [housingView, setHousingView] = useState<"map" | "list">("map");
+  const [housingView, setHousingView] = useState<"map" | "list">("list");
   const [mapPosts, setMapPosts] = useState<HousingMapPost[]>([]);
   const [mapLoading, setMapLoading] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
@@ -137,8 +137,6 @@ export default function Home() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  const observerRef = useRef<IntersectionObserver | null>(null);
-  const sentinelRef = useRef<HTMLDivElement | null>(null);
   const showHousingMap = activeTab === "housing" && housingView === "map";
 
   // Reset when tab or side changes
@@ -198,25 +196,6 @@ export default function Home() {
     return () => { cancelled = true; };
   }, [showHousingMap]);
 
-  // IntersectionObserver
-  useEffect(() => {
-    if (observerRef.current) observerRef.current.disconnect();
-
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasMore && !loadingMore) {
-          setPage(prev => prev + 1);
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    if (sentinelRef.current) {
-      observerRef.current.observe(sentinelRef.current);
-    }
-
-    return () => observerRef.current?.disconnect();
-  }, [hasMore, loadingMore]);
 
   return (
     <>
@@ -350,11 +329,20 @@ export default function Home() {
               <PostCardWithSlider key={post.id} post={post} />
             ))}
           </div>
-          {/* Sentinel for infinite scroll */}
-          <div ref={sentinelRef} className="h-1" />
-          {loadingMore && (
+          {hasMore && (
             <div className="flex justify-center py-6">
-              <div className="w-6 h-6 border-2 border-maroon-600 border-t-transparent rounded-full animate-spin" />
+              <button
+                onClick={() => setPage(prev => prev + 1)}
+                disabled={loadingMore}
+                className="px-6 py-2 rounded-full bg-maroon-600 text-white text-sm font-medium hover:bg-maroon-700 disabled:opacity-50 transition"
+              >
+                {loadingMore ? (
+                  <span className="flex items-center gap-2">
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Loading...
+                  </span>
+                ) : "See more"}
+              </button>
             </div>
           )}
           </>

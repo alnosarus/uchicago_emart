@@ -17,9 +17,8 @@ export const metadata: Metadata = {
     "UChicago electronics",
     "UChicago furniture",
     "UChicago housing",
-    "UChicago student housing",
     "UChicago storage",
-    "UChicago student marketplace",
+    "UChicago marketplace",
     "UChicago sublets",
     "buy textbooks UChicago",
     "sell textbooks UChicago"
