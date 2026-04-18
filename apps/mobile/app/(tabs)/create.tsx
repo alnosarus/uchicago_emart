@@ -324,13 +324,17 @@ function MarketplaceFields({
         accentColor={accent}
       />
 
-      <SectionLabel text="Condition" required />
-      <ChipPicker
-        options={CONDITIONS}
-        selected={state.condition}
-        onSelect={(condition) => update({ condition })}
-        accentColor={accent}
-      />
+      {state.side === "sell" && (
+        <>
+          <SectionLabel text="Condition" required />
+          <ChipPicker
+            options={CONDITIONS}
+            selected={state.condition}
+            onSelect={(condition) => update({ condition })}
+            accentColor={accent}
+          />
+        </>
+      )}
 
       <SectionLabel text="Price Type" required />
       <ToggleRow
@@ -732,7 +736,9 @@ function StepReview({ state }: { state: CreatePostState }) {
         <>
           <ReviewRow label="Side" value={state.side === "sell" ? "Selling" : "Buying"} />
           <ReviewRow label="Category" value={state.category} />
-          <ReviewRow label="Condition" value={conditionLabel} />
+          {state.side === "sell" && (
+            <ReviewRow label="Condition" value={conditionLabel} />
+          )}
           <ReviewRow label="Price Type" value={state.priceType} />
           {state.priceType === "fixed" && (
             <ReviewRow label="Price" value={`$${state.priceAmount}`} />

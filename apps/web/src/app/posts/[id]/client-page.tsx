@@ -390,7 +390,7 @@ function MarketplaceDetailsSection({ details }: { details: MarketplaceDetails })
             <dd className="mt-1 text-sm text-gray-900">{details.category}</dd>
           </div>
         )}
-        {details.condition && (
+        {details.condition && details.condition !== "unknown" && (
           <div>
             <dt className="text-xs font-medium text-gray-500 uppercase tracking-wide">
               Condition
@@ -950,7 +950,7 @@ export default function PostDetailPage() {
                 <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full">
                   {sideLabel(post.side)}
                 </span>
-                {post.marketplace?.condition && (
+                {post.marketplace?.condition && post.marketplace.condition !== "unknown" && (
                   <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full">
                     {conditionLabel(post.marketplace.condition)}
                   </span>
