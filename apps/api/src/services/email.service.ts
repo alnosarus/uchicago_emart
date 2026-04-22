@@ -191,10 +191,12 @@ export async function sendNotificationEmail(
       return;
   }
 
-  await client.emails.send({
+  console.log(`[Email] Sending to ${user.email} subject="${template.subject}"`);
+  const result = await client.emails.send({
     from: FROM,
     to: user.email,
     subject: template.subject,
     html: template.html,
   });
+  console.log(`[Email] Resend response:`, JSON.stringify(result));
 }
