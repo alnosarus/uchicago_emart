@@ -15,6 +15,7 @@ export async function createNotification(
   });
 
   // Fire email asynchronously — never block or throw
+  console.log(`[Email] Dispatching for type=${type} userId=${userId}`);
   sendNotificationEmail(userId, type, title, body, link).catch((err) => {
     console.error("[Email] Failed to send:", err?.message ?? err);
   });

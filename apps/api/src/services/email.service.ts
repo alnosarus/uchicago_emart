@@ -142,7 +142,9 @@ export async function sendNotificationEmail(
   notifBody: string,
   link: string | null | undefined
 ) {
-  if (type === "save") return; // no email for saves
+  console.log(`[Email] sendNotificationEmail called: type=${type} userId=${userId}`);
+
+  if (type === "save") return;
 
   const client = getResend();
   if (!client) {
