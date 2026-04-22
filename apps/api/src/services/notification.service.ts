@@ -2,6 +2,7 @@ import { prisma } from "../config/database";
 import { HttpError } from "../utils/errors";
 import { APP_CONFIG } from "@uchicago-marketplace/shared";
 import { sendNotificationEmail } from "./email.service";
+console.log("[Email] email.service imported successfully");
 
 export async function createNotification(
   userId: string,
