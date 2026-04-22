@@ -21,6 +21,9 @@ const envSchema = z.object({
   GOOGLE_PLACES_SERVER_KEY: z.string().optional().default(""),
   // Chicago bounding box: minLat,minLng,maxLat,maxLng
   GEOCODING_CHICAGO_BBOX: z.string().default("41.6,-87.9,42.1,-87.5"),
+
+  // Resend email (optional — email sending is skipped if not set)
+  RESEND_API_KEY: z.string().optional().default(""),
 });
 
 const parsed = envSchema.safeParse(process.env);

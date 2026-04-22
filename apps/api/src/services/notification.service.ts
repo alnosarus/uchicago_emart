@@ -1,6 +1,7 @@
 import { prisma } from "../config/database";
 import { HttpError } from "../utils/errors";
 import { APP_CONFIG } from "@uchicago-marketplace/shared";
+import { sendNotificationEmail } from "./email.service";
 
 export async function createNotification(
   userId: string,
@@ -9,9 +10,14 @@ export async function createNotification(
   body: string,
   link?: string | null
 ) {
-  return prisma.notification.create({
+  const notification = await prisma.notification.create({
     data: { userId, type, title, body, link: link ?? null },
   });
+
+  // Fire email asynchronously — never block or throw
+  sendNotificationEmail(userId, type, title, body, link).catch(() => {});
+
+  return notification;
 }
 
 export async function getUserNotifications(userId: string, page: number = 1, limit: number = 20) {
