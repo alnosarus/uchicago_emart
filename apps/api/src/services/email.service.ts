@@ -151,21 +151,21 @@ export async function sendNotificationEmail(
     console.warn("[Email] Skipped — RESEND_API_KEY not set");
     return;
   }
+  console.log("[Email] Resend client ready");
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { email: true },
   });
+  console.log(`[Email] User email: ${user?.email ?? "not found"}`);
   if (!user?.email) return;
 
-  // For messages: only email on the first unread message per conversation.
-  // The notification was already written to DB before this runs, so count >= 1.
-  // If count > 1, there was already a prior unread — skip to avoid spamming.
   if (type === "message" && link) {
     const unreadCount = await prisma.notification.count({
       where: { userId, type: "message", link, isRead: false },
     });
-    if (unreadCount > 1) return;
+    console.log(`[Email] Unread message count for conversation: ${unreadCount}`);
+    if (unreadCount > 1) { console.log("[Email] Skipped — prior unread exists"); return; }
   }
 
   const dest = link ?? "/";
