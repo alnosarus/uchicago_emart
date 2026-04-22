@@ -142,36 +142,27 @@ export async function sendNotificationEmail(
   notifBody: string,
   link: string | null | undefined
 ) {
-  console.log(`[Email] sendNotificationEmail called: type=${type} userId=${userId}`);
-
   if (type === "save") return;
 
   const client = getResend();
-  if (!client) {
-    console.warn("[Email] Skipped — RESEND_API_KEY not set");
-    return;
-  }
-  console.log("[Email] Resend client ready");
+  if (!client) return;
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { email: true },
   });
-  console.log(`[Email] User email: ${user?.email ?? "not found"}`);
   if (!user?.email) return;
 
   if (type === "message" && link) {
     const unreadCount = await prisma.notification.count({
       where: { userId, type: "message", link, isRead: false },
     });
-    console.log(`[Email] Unread message count for conversation: ${unreadCount}`);
-    if (unreadCount > 1) { console.log("[Email] Skipped — prior unread exists"); return; }
+    if (unreadCount > 1) return;
   }
 
   const dest = link ?? "/";
   let template: { subject: string; html: string };
 
-  console.log(`[Email] type check: "${type}" === "message": ${type === "message"}`);
   switch (type) {
     case "message":
       template = messageTemplate(notifBody, dest);
@@ -192,12 +183,14 @@ export async function sendNotificationEmail(
       return;
   }
 
-  console.log(`[Email] Sending to ${user.email} subject="${template.subject}"`);
-  const result = await client.emails.send({
+  console.log(`[Email] Sending type=${type} to=${user.email} subject="${template.subject}"`);
+  const { data, error } = await client.emails.send({
     from: FROM,
     to: user.email,
     subject: template.subject,
     html: template.html,
+    text: notifBody,
   });
-  console.log(`[Email] Resend response:`, JSON.stringify(result));
+  console.log(`[Email] Resend response id=${data?.id} error=${error?.message ?? "none"}`);
+  if (error) throw new Error(error.message);
 }

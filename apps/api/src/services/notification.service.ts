@@ -2,7 +2,6 @@ import { prisma } from "../config/database";
 import { HttpError } from "../utils/errors";
 import { APP_CONFIG } from "@uchicago-marketplace/shared";
 import { sendNotificationEmail } from "./email.service";
-console.log("[Email] email.service imported successfully");
 
 export async function createNotification(
   userId: string,
@@ -16,7 +15,6 @@ export async function createNotification(
   });
 
   // Fire email asynchronously — never block or throw
-  console.log(`[Email] Dispatching for type=${type} userId=${userId}`);
   sendNotificationEmail(userId, type, title, body, link).catch((err) => {
     console.error("[Email] Failed to send:", err?.message ?? err);
   });
