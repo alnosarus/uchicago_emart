@@ -50,8 +50,7 @@ function layout(content: string): string {
         <tr>
           <td style="padding:20px 32px;border-top:1px solid #f0f0f0;">
             <p style="margin:0;font-size:12px;color:#999;line-height:1.5;">
-              This is an automated message from UChicago E-mart. Please do not reply to this email.<br/>
-              <a href="${APP_URL}" style="color:#800000;text-decoration:none;">Visit UChicago E-mart</a>
+              <a href="${APP_URL}" style="color:#800000;text-decoration:none;">UChicago E-mart</a>
             </p>
           </td>
         </tr>
@@ -146,7 +145,7 @@ export async function sendNotificationEmail(
 
   const client = getResend();
   if (!client) {
-    console.log("[Email] No Resend client — RESEND_API_KEY missing or empty");
+    console.log("[Email] SKIP: no RESEND_API_KEY");
     return;
   }
 
@@ -155,7 +154,7 @@ export async function sendNotificationEmail(
     select: { email: true },
   });
   if (!user?.email) {
-    console.log(`[Email] No email for userId=${userId}`);
+    console.log(`[Email] SKIP: no email for userId=${userId}`);
     return;
   }
 
@@ -163,8 +162,10 @@ export async function sendNotificationEmail(
     const unreadCount = await prisma.notification.count({
       where: { userId, type: "message", link, isRead: false },
     });
-    console.log(`[Email] message unreadCount=${unreadCount} link=${link}`);
-    if (unreadCount > 1) return;
+    if (unreadCount > 1) {
+      console.log(`[Email] SKIP: duplicate message unread count=${unreadCount}`);
+      return;
+    }
   }
 
   const dest = link ?? "/";
@@ -190,7 +191,6 @@ export async function sendNotificationEmail(
       return;
   }
 
-  console.log(`[Email] Sending type=${type} to=${user.email} subject="${template.subject}"`);
   const { data, error } = await client.emails.send({
     from: FROM,
     to: user.email,
@@ -198,6 +198,6 @@ export async function sendNotificationEmail(
     html: template.html,
     text: notifBody,
   });
-  console.log(`[Email] Resend response id=${data?.id} error=${error?.message ?? "none"}`);
+  console.log(`[Email] type=${type} to=${user.email} id=${data?.id ?? "none"} error=${error?.message ?? "none"}`);
   if (error) throw new Error(error.message);
 }
