@@ -59,10 +59,17 @@ enum PostSide {
 
 enum PostStatus {
   active
+  pending
   sold
   completed
   expired
   deleted
+}
+
+enum TransactionStatus {
+  pending
+  completed
+  expired
 }
 
 enum ImageStatus {
@@ -325,11 +332,16 @@ model Notification {
 // ── Transactions ──────────────────────────────
 
 model Transaction {
-  id          String   @id @default(uuid())
-  postId      String   @map("post_id")
-  sellerId    String   @map("seller_id")
-  buyerId     String   @map("buyer_id")
-  completedAt DateTime @default(now()) @map("completed_at")
+  id              String            @id @default(uuid())
+  postId          String            @map("post_id")
+  sellerId        String            @map("seller_id")
+  buyerId         String            @map("buyer_id")
+  sellerConfirmed Boolean           @default(false) @map("seller_confirmed")
+  buyerConfirmed  Boolean           @default(false) @map("buyer_confirmed")
+  status          TransactionStatus @default(pending)
+  expiresAt       DateTime?         @map("expires_at")
+  confirmedAt     DateTime?         @map("confirmed_at")
+  initiatedAt     DateTime          @default(now()) @map("initiated_at")
 
   post   Post @relation(fields: [postId], references: [id])
   seller User @relation("TransactionsSold", fields: [sellerId], references: [id])
@@ -338,6 +350,7 @@ model Transaction {
   @@unique([postId])
   @@index([sellerId])
   @@index([buyerId])
+  @@index([status])
   @@map("transactions")
 }
 

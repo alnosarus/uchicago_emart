@@ -1,9 +1,16 @@
+export type TransactionStatus = "pending" | "completed" | "expired";
+
 export interface Transaction {
   id: string;
   postId: string;
   sellerId: string;
   buyerId: string;
-  completedAt: Date;
+  sellerConfirmed: boolean;
+  buyerConfirmed: boolean;
+  status: TransactionStatus;
+  expiresAt: Date | null;
+  confirmedAt: Date | null;
+  initiatedAt: Date;
 }
 
 export interface TransactionWithDetails extends Transaction {

@@ -85,7 +85,7 @@ export async function isEligibleToReview(
     },
   });
 
-  if (!transaction) {
+  if (!transaction || transaction.status !== "completed") {
     return { eligible: false, alreadyReviewed: false };
   }
 

@@ -107,6 +107,21 @@ interface ReviewEligibility {
   alreadyReviewed: boolean;
 }
 
+interface PostTransaction {
+  id: string;
+  postId: string;
+  sellerId: string;
+  buyerId: string;
+  sellerConfirmed: boolean;
+  buyerConfirmed: boolean;
+  status: "pending" | "completed" | "expired";
+  expiresAt: string | null;
+  confirmedAt: string | null;
+  initiatedAt: string;
+  seller: { id: string; name: string };
+  buyer: { id: string; name: string };
+}
+
 // ---------- Helpers ----------
 
 function formatDate(dateStr: string): string {
@@ -683,6 +698,12 @@ export default function PostDetailPage() {
   const [selectedBuyer, setSelectedBuyer] = useState<{ id: string; name: string; cnetId: string } | null>(null);
   const [isSubmittingTransaction, setIsSubmittingTransaction] = useState(false);
 
+  // Transaction confirmation
+  const [postTransaction, setPostTransaction] = useState<PostTransaction | null>(null);
+  const [isConfirmingTransaction, setIsConfirmingTransaction] = useState(false);
+  const [isSubmittingBuyerTransaction, setIsSubmittingBuyerTransaction] = useState(false);
+  const [buyerTransactionError, setBuyerTransactionError] = useState("");
+
   // Review
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewRating, setReviewRating] = useState(0);
@@ -749,11 +770,32 @@ export default function PostDetailPage() {
     return () => clearTimeout(timer);
   }, [searchQuery, showMarkSold, accessToken]);
 
+  // Fetch transaction when user is authenticated (to detect pending confirmations)
+  useEffect(() => {
+    if (!post || !accessToken || !user) return;
+    const fetchTransaction = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/transactions/${post.id}`, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setPostTransaction(data);
+        } else {
+          setPostTransaction(null);
+        }
+      } catch {
+        setPostTransaction(null);
+      }
+    };
+    fetchTransaction();
+  }, [post, accessToken, user]);
+
   // Fetch review eligibility when post is sold/completed
   useEffect(() => {
     if (!post || !accessToken || !user) return;
     if (post.status !== "sold" && post.status !== "completed") return;
-    if (post.author.id === user.id) return; // owner doesn't review themselves
+    if (post.author.id === user.id) return;
     const fetchEligibility = async () => {
       try {
         const res = await fetch(
@@ -874,6 +916,60 @@ export default function PostDetailPage() {
     }
   };
 
+  const handleConfirmTransaction = async () => {
+    if (!accessToken) return;
+    setIsConfirmingTransaction(true);
+    try {
+      const res = await fetch(`${API_URL}/api/transactions/${postId}/confirm`, {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setPostTransaction(data);
+        fetchPost();
+      }
+    } catch {
+      // ignore
+    } finally {
+      setIsConfirmingTransaction(false);
+    }
+  };
+
+  const handleMarkAsBought = async () => {
+    if (!accessToken) return;
+    setBuyerTransactionError("");
+    setIsSubmittingBuyerTransaction(true);
+    try {
+      const res = await fetch(`${API_URL}/api/transactions/buyer`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ postId }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setPostTransaction(data);
+      } else {
+        const err = await res.json().catch(() => ({}));
+        if (res.status === 403) {
+          setBuyerTransactionError("You need to message the seller first before marking as bought.");
+        } else if (res.status === 409) {
+          setBuyerTransactionError("A transaction already exists for this post.");
+          fetchPost();
+        } else {
+          setBuyerTransactionError(err.message || "Something went wrong.");
+        }
+      }
+    } catch {
+      setBuyerTransactionError("Something went wrong. Please try again.");
+    } finally {
+      setIsSubmittingBuyerTransaction(false);
+    }
+  };
+
   const handleSubmitReview = async () => {
     if (!reviewEligibility?.revieweeId || reviewRating === 0 || !accessToken) return;
     setIsSubmittingReview(true);
@@ -958,6 +1054,11 @@ export default function PostDetailPage() {
                 {post.housing && (
                   <span className="text-xs font-medium text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">
                     {post.housing.subtype === "sublet" ? "Sublet" : "Passdown"}
+                  </span>
+                )}
+                {post.status === "pending" && (
+                  <span className="text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wide bg-amber-100 text-amber-700">
+                    Pending Confirmation
                   </span>
                 )}
                 {(post.status === "sold" || post.status === "completed") && (
@@ -1126,7 +1227,7 @@ export default function PostDetailPage() {
                   Message Seller
                 </button>
               )}
-              {!isOwner && (
+              {!isOwner && (post.status === "active" || post.status === "pending") && (
                 <button
                   onClick={handleToggleSave}
                   disabled={isSaving}
@@ -1141,10 +1242,73 @@ export default function PostDetailPage() {
               )}
             </div>
 
+            {/* Non-owner transaction actions */}
+            {!isOwner && user && post.status === "active" && (
+              <div className="flex flex-col gap-2">
+                {/* Buyer-initiated: awaiting seller confirmation */}
+                {postTransaction?.status === "pending" && postTransaction.buyerId === user.id && !postTransaction.sellerConfirmed ? (
+                  <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5">
+                    Waiting for the seller to confirm the transaction.
+                  </p>
+                ) : !postTransaction ? (
+                  <>
+                    <button
+                      onClick={handleMarkAsBought}
+                      disabled={isSubmittingBuyerTransaction}
+                      className="w-full border border-green-500 text-green-700 bg-green-50 hover:bg-green-100 text-sm font-semibold py-2.5 rounded-lg transition-colors disabled:opacity-50"
+                    >
+                      {isSubmittingBuyerTransaction ? "Submitting..." : post.type === "marketplace" && post.side === "sell" ? "Mark as Bought" : "Mark as Completed"}
+                    </button>
+                    {buyerTransactionError && (
+                      <p className="text-xs text-red-600">{buyerTransactionError}</p>
+                    )}
+                  </>
+                ) : null}
+              </div>
+            )}
+
+            {/* Pending post: confirm or awaiting message */}
+            {user && post.status === "pending" && postTransaction && (
+              <div className="flex flex-col gap-2">
+                {/* Buyer needs to confirm seller-initiated transaction */}
+                {postTransaction.buyerId === user.id && !postTransaction.buyerConfirmed && (
+                  <button
+                    onClick={handleConfirmTransaction}
+                    disabled={isConfirmingTransaction}
+                    className="w-full bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2.5 rounded-lg transition-colors disabled:opacity-50"
+                  >
+                    {isConfirmingTransaction ? "Confirming..." : "Confirm Transaction"}
+                  </button>
+                )}
+                {/* Seller waiting for buyer */}
+                {postTransaction.sellerId === user.id && !postTransaction.buyerConfirmed && (
+                  <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5">
+                    Waiting for {postTransaction.buyer.name} to confirm the transaction.
+                    {postTransaction.expiresAt && (
+                      <span className="block text-xs mt-1 text-amber-600">
+                        Expires {new Date(postTransaction.expiresAt).toLocaleDateString()}
+                      </span>
+                    )}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Seller needs to confirm buyer-initiated transaction (post still active) */}
+            {user && post.status === "active" && postTransaction?.status === "pending" && postTransaction.sellerId === user.id && !postTransaction.sellerConfirmed && (
+              <button
+                onClick={handleConfirmTransaction}
+                disabled={isConfirmingTransaction}
+                className="w-full bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2.5 rounded-lg transition-colors disabled:opacity-50"
+              >
+                {isConfirmingTransaction ? "Confirming..." : `Confirm Transaction with ${postTransaction.buyer.name}`}
+              </button>
+            )}
+
             {/* Owner actions */}
             {isOwner && (
               <div className="flex flex-col gap-3 pt-2">
-                {post.status === "active" && (
+                {post.status === "active" && !postTransaction && (
                   <button
                     onClick={handleMarkSoldOpen}
                     className="w-full bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2.5 rounded-lg transition-colors"

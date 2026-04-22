@@ -12,7 +12,14 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 interface TransactionItem {
   id: string;
   postId: string;
-  completedAt: string;
+  sellerId: string;
+  buyerId: string;
+  sellerConfirmed: boolean;
+  buyerConfirmed: boolean;
+  status: "pending" | "completed" | "expired";
+  expiresAt: string | null;
+  confirmedAt: string | null;
+  initiatedAt: string;
   role: "seller" | "buyer";
   hasReviewed: boolean;
   myRating: number | null;
@@ -281,77 +288,154 @@ function RatingModal({
 
 function TransactionRow({
   txn,
+  userId,
   accessToken,
   onReviewed,
+  onConfirmed,
 }: {
   txn: TransactionItem;
+  userId: string;
   accessToken: string;
   onReviewed: (postId: string, rating: number) => void;
+  onConfirmed: (postId: string) => void;
 }) {
   const [showModal, setShowModal] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false);
+
+  const needsMyConfirmation =
+    txn.status === "pending" &&
+    ((txn.role === "buyer" && !txn.buyerConfirmed) ||
+      (txn.role === "seller" && !txn.sellerConfirmed));
+
+  const awaitingOther =
+    txn.status === "pending" &&
+    ((txn.role === "buyer" && txn.buyerConfirmed) ||
+      (txn.role === "seller" && txn.sellerConfirmed));
+
+  const handleConfirm = async () => {
+    setIsConfirming(true);
+    try {
+      const res = await fetch(`${API_URL}/api/transactions/${txn.postId}/confirm`, {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (res.ok) onConfirmed(txn.postId);
+    } catch {
+      // ignore
+    } finally {
+      setIsConfirming(false);
+    }
+  };
 
   return (
     <>
-      <div className="group flex items-center gap-4 bg-white rounded-xl shadow-sm border border-gray-100 p-4 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
-        {/* Thumbnail — links to post */}
-        <Link href={`/posts/${txn.post.id}`} className="w-16 h-16 rounded-lg bg-gray-100 overflow-hidden shrink-0 block">
-          {txn.post.images?.[0] ? (
-            <img
-              src={txn.post.images[0].url}
-              alt={txn.post.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-300">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
-              </svg>
-            </div>
-          )}
-        </Link>
-
-        {/* Info */}
-        <div className="flex-1 min-w-0">
-          <Link href={`/posts/${txn.post.id}`} className="font-semibold text-gray-900 text-sm truncate block hover:text-maroon-700 transition-colors">
-            {txn.post.title}
+      <div className="group bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+        <div className="flex items-center gap-4 p-4">
+          {/* Thumbnail */}
+          <Link href={`/posts/${txn.post.id}`} className="w-16 h-16 rounded-lg bg-gray-100 overflow-hidden shrink-0 block">
+            {txn.post.images?.[0] ? (
+              <img
+                src={txn.post.images[0].url}
+                alt={txn.post.title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-gray-300">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
+                </svg>
+              </div>
+            )}
           </Link>
-          <p className="text-xs text-gray-500 mt-1">
-            with{" "}
-            <Link href={`/profile/${txn.counterparty.id}`} className="font-medium text-gray-700 hover:text-maroon-600 transition-colors">
-              {txn.counterparty.name}
-            </Link>{" "}
-            <span className="text-gray-400">@{txn.counterparty.cnetId}</span>
-          </p>
-          <p className="text-xs text-gray-400 mt-0.5">
-            {new Date(txn.completedAt).toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            })}
-          </p>
+
+          {/* Info */}
+          <div className="flex-1 min-w-0">
+            <Link href={`/posts/${txn.post.id}`} className="font-semibold text-gray-900 text-sm truncate block hover:text-maroon-700 transition-colors">
+              {txn.post.title}
+            </Link>
+            <p className="text-xs text-gray-500 mt-1">
+              with{" "}
+              <Link href={`/profile/${txn.counterparty.id}`} className="font-medium text-gray-700 hover:text-maroon-600 transition-colors">
+                {txn.counterparty.name}
+              </Link>{" "}
+              <span className="text-gray-400">@{txn.counterparty.cnetId}</span>
+            </p>
+            <p className="text-xs text-gray-400 mt-0.5">
+              {new Date(txn.initiatedAt).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })}
+            </p>
+          </div>
+
+          {/* Right side: badges + stars */}
+          <div className="flex flex-col items-end gap-1.5 shrink-0">
+            {txn.status === "pending" && (
+              <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-700">
+                Pending
+              </span>
+            )}
+            {txn.status === "expired" && (
+              <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-red-100 text-red-600">
+                Expired
+              </span>
+            )}
+            <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${roleBadgeColor(txn.role)}`}>
+              {roleLabel(txn.role, txn.post.type)}
+            </span>
+            <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full capitalize ${typeBadgeColor(txn.post.type)}`}>
+              {txn.post.type}
+            </span>
+            {txn.status === "completed" && (
+              txn.hasReviewed ? (
+                <StarPicker value={txn.myRating ?? 0} readOnly />
+              ) : (
+                <button
+                  onClick={() => setShowModal(true)}
+                  className="group/stars flex items-center gap-1"
+                  title="Rate this transaction"
+                >
+                  <StarPicker value={0} readOnly />
+                </button>
+              )
+            )}
+          </div>
         </div>
 
-        {/* Right side: badges + stars */}
-        <div className="flex flex-col items-end gap-1.5 shrink-0">
-          <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${roleBadgeColor(txn.role)}`}>
-            {roleLabel(txn.role, txn.post.type)}
-          </span>
-          <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full capitalize ${typeBadgeColor(txn.post.type)}`}>
-            {txn.post.type}
-          </span>
-          {/* Rating stars */}
-          {txn.hasReviewed ? (
-            <StarPicker value={txn.myRating ?? 0} readOnly />
-          ) : (
-            <button
-              onClick={() => setShowModal(true)}
-              className="group/stars flex items-center gap-1"
-              title="Rate this transaction"
-            >
-              <StarPicker value={0} readOnly />
-            </button>
-          )}
-        </div>
+        {/* Pending action bar */}
+        {txn.status === "pending" && (
+          <div className="border-t border-gray-100 px-4 py-3">
+            {needsMyConfirmation ? (
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-xs text-amber-700">
+                  {txn.counterparty.name} initiated this transaction — confirm to unlock reviews.
+                  {txn.expiresAt && (
+                    <span className="block text-gray-400 mt-0.5">
+                      Expires {new Date(txn.expiresAt).toLocaleDateString()}
+                    </span>
+                  )}
+                </p>
+                <button
+                  onClick={handleConfirm}
+                  disabled={isConfirming}
+                  className="shrink-0 px-3 py-1.5 text-xs font-semibold text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors disabled:opacity-50"
+                >
+                  {isConfirming ? "Confirming..." : "Confirm"}
+                </button>
+              </div>
+            ) : awaitingOther ? (
+              <p className="text-xs text-gray-500">
+                Waiting for {txn.counterparty.name} to confirm.
+                {txn.expiresAt && (
+                  <span className="text-gray-400 ml-1">
+                    Expires {new Date(txn.expiresAt).toLocaleDateString()}.
+                  </span>
+                )}
+              </p>
+            ) : null}
+          </div>
+        )}
       </div>
 
       {showModal && (
@@ -435,6 +519,22 @@ function HistoryPageInner() {
     );
   };
 
+  const handleConfirmed = (postId: string) => {
+    setTransactions((prev) =>
+      prev.map((t) =>
+        t.postId === postId
+          ? {
+              ...t,
+              status: "completed",
+              sellerConfirmed: true,
+              buyerConfirmed: true,
+              confirmedAt: new Date().toISOString(),
+            }
+          : t
+      )
+    );
+  };
+
   const totalPages = Math.ceil(total / 20);
 
   if (authLoading || (!user && !authLoading)) {
@@ -499,8 +599,10 @@ function HistoryPageInner() {
                 <TransactionRow
                   key={txn.id}
                   txn={txn}
+                  userId={user!.id}
                   accessToken={accessToken!}
                   onReviewed={handleReviewed}
+                  onConfirmed={handleConfirmed}
                 />
               ))}
             </div>
