@@ -171,6 +171,7 @@ export async function sendNotificationEmail(
   const dest = link ?? "/";
   let template: { subject: string; html: string };
 
+  console.log(`[Email] type check: "${type}" === "message": ${type === "message"}`);
   switch (type) {
     case "message":
       template = messageTemplate(notifBody, dest);
