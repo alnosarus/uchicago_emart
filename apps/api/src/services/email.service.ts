@@ -1,4 +1,3 @@
-import { Resend } from "resend";
 import { env } from "../config/env";
 import { prisma } from "../config/database";
 
@@ -14,11 +13,23 @@ function escapeHtml(str: string): string {
     .replace(/'/g, "&#x27;");
 }
 
-let resend: Resend | null = null;
-function getResend(): Resend | null {
-  if (!env.RESEND_API_KEY) return null;
-  if (!resend) resend = new Resend(env.RESEND_API_KEY);
-  return resend;
+async function sendViaResend(payload: {
+  to: string;
+  subject: string;
+  html: string;
+  text: string;
+}): Promise<string> {
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${env.RESEND_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ from: FROM, ...payload }),
+  });
+  const data = (await res.json()) as { id?: string; message?: string };
+  if (!res.ok) throw new Error(data.message ?? `Resend error ${res.status}`);
+  return data.id ?? "unknown";
 }
 
 // ── Shared layout ──────────────────────────────────────────────────────────
@@ -143,8 +154,7 @@ export async function sendNotificationEmail(
 ) {
   if (type === "save") return;
 
-  const client = getResend();
-  if (!client) {
+  if (!env.RESEND_API_KEY) {
     console.log("[Email] SKIP: no RESEND_API_KEY");
     return;
   }
@@ -191,14 +201,11 @@ export async function sendNotificationEmail(
       return;
   }
 
-  const { data, error } = await client.emails.send({
-    from: FROM,
+  const id = await sendViaResend({
     to: user.email,
-    cc: "junn223@gmail.com",
     subject: template.subject,
     html: template.html,
     text: notifBody,
   });
-  console.log(`[Email] type=${type} to=${user.email} id=${data?.id ?? "none"} error=${error?.message ?? "none"}`);
-  if (error) throw new Error(error.message);
+  console.log(`[Email] type=${type} to=${user.email} id=${id}`);
 }
