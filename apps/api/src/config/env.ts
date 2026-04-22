@@ -24,8 +24,6 @@ const envSchema = z.object({
 
   // Resend email (optional — email sending is skipped if not set)
   RESEND_API_KEY: z.string().optional().default(""),
-  // BCC address on all notification emails (workaround for UChicago Workspace filtering)
-  EMAIL_BCC: z.string().optional().default(""),
 });
 
 const parsed = envSchema.safeParse(process.env);
