@@ -2,7 +2,7 @@ import { Resend } from "resend";
 import { env } from "../config/env";
 import { prisma } from "../config/database";
 
-const FROM = "UChicago E-mart <noreply@uchicagoemart.com>";
+const FROM = "UChicago E-mart <notifications@uchicagoemart.com>";
 const APP_URL = "https://uchicagoemart.com";
 
 function escapeHtml(str: string): string {
