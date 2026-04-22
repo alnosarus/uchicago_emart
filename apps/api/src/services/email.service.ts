@@ -145,7 +145,10 @@ export async function sendNotificationEmail(
   if (type === "save") return; // no email for saves
 
   const client = getResend();
-  if (!client) return; // email disabled
+  if (!client) {
+    console.warn("[Email] Skipped — RESEND_API_KEY not set");
+    return;
+  }
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
