@@ -145,18 +145,25 @@ export async function sendNotificationEmail(
   if (type === "save") return;
 
   const client = getResend();
-  if (!client) return;
+  if (!client) {
+    console.log("[Email] No Resend client — RESEND_API_KEY missing or empty");
+    return;
+  }
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { email: true },
   });
-  if (!user?.email) return;
+  if (!user?.email) {
+    console.log(`[Email] No email for userId=${userId}`);
+    return;
+  }
 
   if (type === "message" && link) {
     const unreadCount = await prisma.notification.count({
       where: { userId, type: "message", link, isRead: false },
     });
+    console.log(`[Email] message unreadCount=${unreadCount} link=${link}`);
     if (unreadCount > 1) return;
   }
 
