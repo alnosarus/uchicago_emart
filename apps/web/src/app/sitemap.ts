@@ -4,9 +4,19 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 const SITE_URL = "https://www.uchicagoemart.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const categorySlugs = [
+    "textbooks", "electronics", "furniture", "clothing",
+    "housing", "storage", "sports", "music",
+  ];
+
   const staticPages: MetadataRoute.Sitemap = [
     { url: SITE_URL, changeFrequency: "weekly", priority: 1.0 },
     { url: `${SITE_URL}/browse`, changeFrequency: "daily", priority: 0.9 },
+    ...categorySlugs.map((slug) => ({
+      url: `${SITE_URL}/browse/${slug}`,
+      changeFrequency: "daily" as const,
+      priority: 0.85,
+    })),
   ];
 
   try {

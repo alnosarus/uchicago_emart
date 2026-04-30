@@ -9,19 +9,29 @@ export const metadata: Metadata = {
     template: "%s | UChicago E-mart",
   },
   description:
-    "A student marketplace for buying/selling items, finding storage, and discovering housing.",
+    "UChicago E-mart is the student-only marketplace for the University of Chicago. Buy and sell textbooks, furniture, and electronics. Find sublets, housing, and student storage near Hyde Park — verified UChicago email required.",
   keywords: [
     "UChicago E-mart",
+    "UChicago marketplace",
     "UChicago buy and sell",
     "UChicago classifieds",
+    "university of chicago marketplace",
+    "university of chicago buy and sell",
+    "UChicago student marketplace",
+    "hyde park marketplace",
+    "UChicago sublet",
+    "UChicago student housing",
+    "UChicago sublets",
+    "hyde park sublet",
+    "UChicago storage",
+    "hyde park student storage",
+    "buy textbooks UChicago",
+    "sell textbooks UChicago",
+    "UChicago textbook exchange",
     "UChicago electronics",
     "UChicago furniture",
-    "UChicago housing",
-    "UChicago storage",
-    "UChicago marketplace",
-    "UChicago sublets",
-    "buy textbooks UChicago",
-    "sell textbooks UChicago"
+    "UChicago used furniture",
+    "60637 sublet",
   ],
   openGraph: {
     type: "website",
@@ -48,7 +58,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const jsonLd = {
+  const websiteJsonLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: "UChicago E-mart",
@@ -60,12 +70,30 @@ export default function RootLayout({
     },
   };
 
+  const organizationJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "UChicago E-mart",
+    url: "https://www.uchicagoemart.com",
+    logo: "https://www.uchicagoemart.com/logos/logover3-favicon.svg",
+    description: "Student-only marketplace for the University of Chicago community in Hyde Park, Chicago.",
+    areaServed: {
+      "@type": "City",
+      name: "Chicago",
+      containsPlace: { "@type": "Neighborhood", name: "Hyde Park" },
+    },
+  };
+
   return (
     <html lang="en" className="h-full antialiased">
       <body className="min-h-full flex flex-col">
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
         />
         <Providers>{children}</Providers>
       </body>
